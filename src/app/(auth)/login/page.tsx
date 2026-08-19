@@ -6,6 +6,7 @@ import { login, type AuthActionState } from "@/lib/auth-actions";
 import { Button } from "@/components/ui/Button";
 import { LogoIcon } from "@/components/ui/icons";
 import { useT } from "@/components/i18n/LocaleProvider";
+import { LanguageToggle } from "@/components/i18n/LanguageToggle";
 
 const initialState: AuthActionState = {};
 
@@ -16,6 +17,11 @@ export default function LoginPage() {
 
   return (
     <>
+      {!showForm && (
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 18 }}>
+          <LanguageToggle />
+        </div>
+      )}
       <div style={{ width: 96, height: 96, color: "var(--accent)", margin: "0 auto 22px" }}>
         <LogoIcon />
       </div>

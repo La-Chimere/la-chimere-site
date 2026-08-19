@@ -95,6 +95,34 @@ export function CommunitiesIcon() {
   );
 }
 
+export function EyeIcon({ crossed }: { crossed?: boolean }) {
+  if (crossed) {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path
+          d="M3 3L21 21M10.6 10.7A2 2 0 0 0 13.3 13.4M9.4 5.5C10.2 5.2 11.1 5 12 5C17 5 20.3 9.3 21.4 11.2C21.6 11.5 21.6 11.9 21.4 12.2C21 12.9 20.1 14.2 18.8 15.6M6.5 6.9C4.7 8.2 3.4 10 2.6 11.2C2.4 11.5 2.4 11.9 2.6 12.2C3.7 14.1 7 18.4 12 18.4C13.6 18.4 15 18 16.1 17.4"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    );
+  }
+  return (
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M2.6 12.2C2.4 11.9 2.4 11.5 2.6 11.2C3.7 9.3 7 5 12 5C17 5 20.3 9.3 21.4 11.2C21.6 11.5 21.6 11.9 21.4 12.2C20.3 14.1 17 18.4 12 18.4C7 18.4 3.7 14.1 2.6 12.2Z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle cx="12" cy="11.7" r="2.6" stroke="currentColor" strokeWidth="1.6" />
+    </svg>
+  );
+}
+
 export function AdminIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

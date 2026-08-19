@@ -140,6 +140,7 @@ const en: Record<string, string> = {
   "auth.error.missingCredentials": "Nickname and password are required.",
   "auth.error.invalidCredentials": "Incorrect credentials.",
   "auth.error.invalidNickname": "Invalid nickname.",
+  "auth.error.nicknameTaken": "This nickname is already taken.",
   "auth.error.createAccountFailed": "Could not create the account:",
   "auth.error.createAccountRetry": "Could not create the account, please try again.",
   "auth.error.createProfileFailed": "Could not create the profile:",

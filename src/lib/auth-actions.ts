@@ -84,6 +84,15 @@ export async function completeSignup(input: SignupInput): Promise<AuthActionStat
     return { error: await serverT("auth.error.invalidNickname") };
   }
 
+  const { data: existingProfile } = await admin
+    .from("profiles")
+    .select("id")
+    .ilike("display_name", displayName)
+    .maybeSingle();
+  if (existingProfile) {
+    return { error: await serverT("auth.error.nicknameTaken") };
+  }
+
   let finalSlug = baseSlug;
   let userId: string | null = null;
 

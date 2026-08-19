@@ -9,6 +9,7 @@ import {
   updateCommunityLabel,
 } from "@/lib/admin-actions";
 import { useT } from "@/components/i18n/LocaleProvider";
+import { EyeIcon } from "@/components/ui/icons";
 import type { AdminCommunity } from "@/lib/admin-types";
 
 interface AdminCommunitiesBlockProps {
@@ -78,7 +79,7 @@ export function AdminCommunitiesBlock({ communities }: AdminCommunitiesBlockProp
                 title={c.hidden ? t("admin.communities.hidden") : t("admin.communities.visible")}
                 onClick={() => startTransition(() => setCommunityHidden(c.id, !c.hidden))}
               >
-                {c.hidden ? "🙈" : "👁"}
+                <EyeIcon crossed={c.hidden} />
               </button>
               <button type="button" className="join-btn gray small" onClick={() => openEdit(c)}>
                 {t("common.edit")}

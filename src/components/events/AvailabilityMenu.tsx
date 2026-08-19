@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { deleteMyAvailabilities } from "@/lib/events-actions";
 import { useT } from "@/components/i18n/LocaleProvider";
+import { EyeIcon } from "@/components/ui/icons";
 
 interface AvailabilityMenuProps {
   showAvailabilities: boolean;
@@ -34,7 +35,9 @@ export function AvailabilityMenu({ showAvailabilities, onToggleShow, onIndicate 
         className={`avail-btn ${showAvailabilities ? "active" : ""}`}
         onClick={() => setOpen((v) => !v)}
       >
-        <span className="avail-eye">{showAvailabilities ? "👁" : "🙈"}</span>
+        <span className="avail-eye">
+          <EyeIcon crossed={!showAvailabilities} />
+        </span>
         {t("availability.menuButton")}
       </button>
       <div className={`dropdown avail-dropdown ${open ? "open" : ""}`}>

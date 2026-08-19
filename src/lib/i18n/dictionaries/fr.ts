@@ -140,6 +140,7 @@ const fr: Record<string, string> = {
   "auth.error.missingCredentials": "Pseudo et mot de passe requis.",
   "auth.error.invalidCredentials": "Identifiants incorrects.",
   "auth.error.invalidNickname": "Pseudo invalide.",
+  "auth.error.nicknameTaken": "Ce pseudo est déjà pris.",
   "auth.error.createAccountFailed": "Impossible de créer le compte :",
   "auth.error.createAccountRetry": "Impossible de créer le compte, réessaie.",
   "auth.error.createProfileFailed": "Impossible de créer le profil :",
