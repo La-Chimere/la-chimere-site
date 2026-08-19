@@ -9,7 +9,7 @@ import {
   updateCommunityLabel,
 } from "@/lib/admin-actions";
 import { useT } from "@/components/i18n/LocaleProvider";
-import { EyeIcon } from "@/components/ui/icons";
+import { EyeIcon, LeaderboardIcon } from "@/components/ui/icons";
 import type { AdminCommunity } from "@/lib/admin-types";
 
 interface AdminCommunitiesBlockProps {
@@ -71,7 +71,7 @@ export function AdminCommunitiesBlock({ communities }: AdminCommunitiesBlockProp
                   startTransition(() => setCommunityCompetitive(c.id, !c.competitive))
                 }
               >
-                🏆
+                <LeaderboardIcon />
               </button>
               <button
                 type="button"
