@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { daysOfWeek, isoDate } from "@/lib/dates";
+import { daysOfWeek, isoDate, monthGridDays } from "@/lib/dates";
 import { ProgrammeClient } from "@/components/events/ProgrammeClient";
 import type { CommunityOption, EventItem } from "@/lib/events-types";
 
@@ -17,8 +17,11 @@ export default async function ProgrammePage(props: PageProps<"/programme">) {
   const weekParam = typeof searchParams.week === "string" ? searchParams.week : null;
   const reference = weekParam ? new Date(weekParam) : new Date();
   const week = daysOfWeek(reference);
-  const rangeStart = isoDate(week[0]);
-  const rangeEnd = isoDate(week[week.length - 1]);
+  // Sert à la fois la liste (semaine) et le calendrier mensuel : la grille du
+  // mois est un sur-ensemble qui couvre toujours la semaine affichée.
+  const grid = monthGridDays(reference);
+  const rangeStart = isoDate(grid[0]);
+  const rangeEnd = isoDate(grid[grid.length - 1]);
 
   const supabase = await createClient();
   const {

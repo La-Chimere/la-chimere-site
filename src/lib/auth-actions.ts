@@ -12,7 +12,7 @@ export async function signOut() {
 }
 
 export interface AuthActionState {
-  error?: string;
+  error?: string | null;
 }
 
 // Connexion par pseudo (CDC 4.1) : Supabase Auth n'acceptant qu'un email, on
@@ -54,23 +54,27 @@ export async function login(
   redirect("/programme");
 }
 
-// Inscription (CDC 4.1/13) : version simple pour cette première itération —
-// le parcours complet en 3 étapes (13.2-13.5) suivra. Crée le compte Auth
-// (email synthétique) + la ligne profiles en statut "pending" (validation
-// admin requise, cf. CDC 3).
-export async function signup(
-  _prevState: AuthActionState,
-  formData: FormData,
-): Promise<AuthActionState> {
-  const displayName = String(formData.get("displayName") ?? "").trim();
-  const password = String(formData.get("password") ?? "");
-  const passwordConfirm = String(formData.get("passwordConfirm") ?? "");
+export interface SignupInput {
+  displayName: string;
+  password: string;
+  email: string;
+  emailVisible: boolean;
+  phone: string;
+  phoneVisible: boolean;
+  location: string;
+  locationVisible: boolean;
+  joinedYear: number | null;
+  bio: string;
+  communityIds: string[];
+}
 
-  if (!displayName || !password) {
+// Inscription complète (CDC 4.1/13.2-13.5) : crée le compte Auth (email
+// synthétique) + la ligne profiles en statut "pending" (validation admin
+// requise, cf. CDC 3) + les communautés choisies à l'étape 2.
+export async function completeSignup(input: SignupInput): Promise<AuthActionState> {
+  const displayName = input.displayName.trim();
+  if (!displayName || !input.password) {
     return { error: "Pseudo et mot de passe requis." };
-  }
-  if (password !== passwordConfirm) {
-    return { error: "Les mots de passe ne correspondent pas." };
   }
 
   const admin = createAdminClient();
@@ -86,7 +90,7 @@ export async function signup(
     const candidate = attempt === 0 ? baseSlug : `${baseSlug}${attempt + 1}`;
     const { data, error } = await admin.auth.admin.createUser({
       email: loginEmailFromSlug(candidate),
-      password,
+      password: input.password,
       email_confirm: true,
     });
     if (!error && data.user) {
@@ -108,6 +112,14 @@ export async function signup(
     display_name: displayName,
     login_slug: finalSlug,
     status: "pending",
+    email: input.email || null,
+    email_visible: input.emailVisible,
+    phone: input.phone || null,
+    phone_visible: input.phoneVisible,
+    location: input.location || null,
+    location_visible: input.locationVisible,
+    joined_year: input.joinedYear,
+    bio: input.bio || null,
   });
 
   if (profileError) {
@@ -115,15 +127,17 @@ export async function signup(
     return { error: "Impossible de créer le profil : " + profileError.message };
   }
 
-  const supabase = await createClient();
-  const { error: signInError } = await supabase.auth.signInWithPassword({
-    email: loginEmailFromSlug(finalSlug),
-    password,
-  });
-
-  if (signInError) {
-    redirect("/login");
+  if (input.communityIds.length > 0) {
+    await admin
+      .from("profile_communities")
+      .insert(input.communityIds.map((community_id) => ({ profile_id: userId, community_id })));
   }
 
-  redirect("/programme");
+  const supabase = await createClient();
+  await supabase.auth.signInWithPassword({
+    email: loginEmailFromSlug(finalSlug),
+    password: input.password,
+  });
+
+  return { error: null };
 }

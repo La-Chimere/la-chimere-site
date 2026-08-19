@@ -16,12 +16,22 @@ interface EventFormProps {
   members: PickableMember[];
   currentUser: PickableMember;
   defaultDate: Date;
+  isAvailability?: boolean;
 }
 
-// Formulaire de création d'une partie spontanée (CDC 4.2/12.3) — le plus
-// simple possible : date + heure, étiquettes, titre (facultatif si une
-// étiquette est choisie), participants, description facultative.
-export function EventForm({ open, onClose, communities, members, currentUser, defaultDate }: EventFormProps) {
+// Formulaire de création d'une partie spontanée, ou d'une disponibilité en
+// mode isAvailability (CDC 4.2/12.3/12.12) — le plus simple possible : date +
+// heure, étiquettes, titre (facultatif si une étiquette est choisie),
+// participants (masqué en mode disponibilité), description facultative.
+export function EventForm({
+  open,
+  onClose,
+  communities,
+  members,
+  currentUser,
+  defaultDate,
+  isAvailability = false,
+}: EventFormProps) {
   const [pending, startTransition] = useTransition();
   const [date, setDate] = useState(isoDate(defaultDate));
   const [time, setTime] = useState("19:00");
@@ -29,6 +39,7 @@ export function EventForm({ open, onClose, communities, members, currentUser, de
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [participants, setParticipants] = useState<PickableMember[]>([currentUser]);
+  const [repeatsWeekly, setRepeatsWeekly] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   function toggleTag(id: string) {
@@ -36,7 +47,9 @@ export function EventForm({ open, onClose, communities, members, currentUser, de
   }
 
   const hasTag = tagIds.length > 0;
-  const valid = date && time && (title.trim() || hasTag) && participants.length >= 1;
+  const valid = isAvailability
+    ? date && time && (title.trim() || hasTag)
+    : date && time && (title.trim() || hasTag) && participants.length >= 1;
 
   function reset() {
     setDate(isoDate(defaultDate));
@@ -45,6 +58,7 @@ export function EventForm({ open, onClose, communities, members, currentUser, de
     setTitle("");
     setDescription("");
     setParticipants([currentUser]);
+    setRepeatsWeekly(false);
     setError(null);
   }
 
@@ -56,7 +70,11 @@ export function EventForm({ open, onClose, communities, members, currentUser, de
         title: title.trim(),
         description: description.trim(),
         communityIds: tagIds,
-        participantIds: participants.filter((p) => p.id !== currentUser.id).map((p) => p.id),
+        participantIds: isAvailability
+          ? []
+          : participants.filter((p) => p.id !== currentUser.id).map((p) => p.id),
+        isAvailability,
+        repeatsWeekly,
       });
       if (result.error) {
         setError(result.error);
@@ -75,7 +93,7 @@ export function EventForm({ open, onClose, communities, members, currentUser, de
         onClose();
       }}
     >
-      <h3>Nouvelle partie</h3>
+      <h3>{isAvailability ? "Indiquer ma disponibilité" : "Nouvelle partie"}</h3>
       <div className="form-row-2">
         <div className="form-field">
           <label className="form-label" htmlFor="ev-date">
@@ -103,6 +121,17 @@ export function EventForm({ open, onClose, communities, members, currentUser, de
         </div>
       </div>
 
+      {isAvailability && (
+        <label className="ce-repeat-row">
+          <input
+            type="checkbox"
+            checked={repeatsWeekly}
+            onChange={(e) => setRepeatsWeekly(e.target.checked)}
+          />
+          Se répète toutes les semaines
+        </label>
+      )}
+
       <div className="form-field">
         <label className="form-label">Étiquette</label>
         <div className="filters h-scroll">
@@ -127,17 +156,19 @@ export function EventForm({ open, onClose, communities, members, currentUser, de
         />
       </div>
 
-      <div className="form-field">
-        <label className="form-label">
-          Participants <span className="required-star">*</span>
-        </label>
-        <MemberPicker
-          members={members}
-          selected={participants}
-          onChange={setParticipants}
-          disallowRemovingLast
-        />
-      </div>
+      {!isAvailability && (
+        <div className="form-field">
+          <label className="form-label">
+            Participants <span className="required-star">*</span>
+          </label>
+          <MemberPicker
+            members={members}
+            selected={participants}
+            onChange={setParticipants}
+            disallowRemovingLast
+          />
+        </div>
+      )}
 
       <div className="form-field">
         <label className="form-label" htmlFor="ev-desc">

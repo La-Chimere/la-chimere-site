@@ -73,6 +73,25 @@ export function dayLabel(date: Date): string {
   return label.charAt(0).toUpperCase() + label.slice(1);
 }
 
+// Format compact "Mer. 19 août" pour les listes d'évènements condensées
+// (CDC 12.8 : liste des évènements à venir par communauté).
+export function shortDayLabel(date: Date): string {
+  const label = format(date, "EEE d MMM", { locale: fr }).replace(/\./g, "");
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
 export function isoDate(date: Date): string {
   return format(date, "yyyy-MM-dd");
+}
+
+// "Dernière partie aujourd'hui / hier / il y a X jours" (CDC 12.8/12.11).
+export function relativeActivityLabel(isoDateString: string | null): string {
+  if (!isoDateString) return "Aucune activité récente";
+  const days = Math.round(
+    (new Date(isoDate(new Date())).getTime() - new Date(isoDateString).getTime()) /
+      86_400_000,
+  );
+  if (days <= 0) return "Dernière partie aujourd'hui";
+  if (days === 1) return "Dernière partie hier";
+  return `Dernière partie il y a ${days} jours`;
 }

@@ -2,9 +2,16 @@
 
 import { useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { EventItem } from "@/lib/events-types";
 import { Modal } from "@/components/ui/Modal";
-import { deleteEvent, joinEvent, leaveEvent, setEventResult } from "@/lib/events-actions";
+import {
+  deleteEvent,
+  joinEvent,
+  leaveEvent,
+  setEventResult,
+  transformToEvent,
+} from "@/lib/events-actions";
 import { dayLabel } from "@/lib/dates";
 
 interface EventModalProps {
@@ -18,14 +25,17 @@ const RESULT_LABELS = { victoire: "v", egalite: "e", defaite: "d" } as const;
 
 export function EventModal({ event, currentUserId, isAdmin, onClose }: EventModalProps) {
   const [pending, startTransition] = useTransition();
+  const router = useRouter();
 
   if (!event) return null;
 
+  const isAvailability = event.type === "dispo";
   const isParticipant = event.participants.some((p) => p.profileId === currentUserId);
   const soleParticipant = isParticipant && event.participants.length === 1;
   const canManage = event.createdBy === currentUserId || isAdmin;
   const competitive =
     event.communities.length === 0 || event.communities.some((c) => c.competitive);
+  const creator = event.participants.find((p) => p.profileId === event.createdBy);
 
   function toggleJoin() {
     startTransition(() => {
@@ -52,6 +62,18 @@ export function EventModal({ event, currentUserId, isAdmin, onClose }: EventModa
     });
   }
 
+  function onTransform() {
+    startTransition(() => {
+      transformToEvent(event!.id);
+      onClose();
+    });
+  }
+
+  function onContact() {
+    onClose();
+    router.push(`/members/${event!.createdBy}`);
+  }
+
   const title = event.title || event.communities.map((c) => c.label).join(", ") || "Partie";
 
   return (
@@ -71,48 +93,70 @@ export function EventModal({ event, currentUserId, isAdmin, onClose }: EventModa
 
       {event.description && <p className="field-note">{event.description}</p>}
 
-      <div className="modal-section-label">Participants</div>
-      <ul className="modal-participants">
-        {event.participants.map((p) => (
-          <li key={p.profileId}>
-            <Link href={`/members/${p.profileId}`} className="mp-name" data-member>
-              {p.displayName}
-              {p.hasKey ? " 🔑" : ""}
-            </Link>
-            {competitive && (
-              <span className="ved-group">
-                {(Object.keys(RESULT_LABELS) as Array<keyof typeof RESULT_LABELS>).map((key) => (
-                  <button
-                    key={key}
-                    type="button"
-                    className={`ved-btn ${RESULT_LABELS[key]} ${p.result === key ? "active" : ""}`}
-                    onClick={() => onResultClick(p.profileId, p.result, key)}
-                    disabled={pending || (p.profileId !== currentUserId && !isAdmin)}
-                  >
-                    {RESULT_LABELS[key].toUpperCase()}
-                  </button>
-                ))}
-              </span>
-            )}
-          </li>
-        ))}
-      </ul>
+      {isAvailability ? (
+        <>
+          <div className="modal-section-label">Indiqué par</div>
+          <Link href={`/members/${event.createdBy}`} className="mp-name" data-member onClick={onClose}>
+            {creator?.displayName ?? "Membre"}
+          </Link>
+        </>
+      ) : (
+        <>
+          <div className="modal-section-label">Participants</div>
+          <ul className="modal-participants">
+            {event.participants.map((p) => (
+              <li key={p.profileId}>
+                <Link href={`/members/${p.profileId}`} className="mp-name" data-member onClick={onClose}>
+                  {p.displayName}
+                  {p.hasKey ? " 🔑" : ""}
+                </Link>
+                {competitive && (
+                  <span className="ved-group">
+                    {(Object.keys(RESULT_LABELS) as Array<keyof typeof RESULT_LABELS>).map((key) => (
+                      <button
+                        key={key}
+                        type="button"
+                        className={`ved-btn ${RESULT_LABELS[key]} ${p.result === key ? "active" : ""}`}
+                        onClick={() => onResultClick(p.profileId, p.result, key)}
+                        disabled={pending || (p.profileId !== currentUserId && !isAdmin)}
+                      >
+                        {RESULT_LABELS[key].toUpperCase()}
+                      </button>
+                    ))}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
 
       <div className="modal-btn-row">
-        <button
-          type="button"
-          className={`modal-btn ${isParticipant ? "gray" : "primary"}`}
-          onClick={toggleJoin}
-          disabled={pending || soleParticipant}
-        >
-          {isParticipant ? "Se désinscrire" : "Rejoindre"}
-        </button>
+        {isAvailability ? (
+          <button type="button" className="modal-btn gray" onClick={onContact}>
+            Contacter
+          </button>
+        ) : (
+          <button
+            type="button"
+            className={`modal-btn ${isParticipant ? "gray" : "primary"}`}
+            onClick={toggleJoin}
+            disabled={pending || soleParticipant}
+          >
+            {isParticipant ? "Se désinscrire" : "Rejoindre"}
+          </button>
+        )}
         {canManage && (
           <button type="button" className="modal-btn danger" onClick={onDelete} disabled={pending}>
             Supprimer
           </button>
         )}
       </div>
+      {isAvailability && canManage && (
+        <button type="button" className="modal-btn outline modal-btn-full" onClick={onTransform} disabled={pending}>
+          Transformer en évènement
+        </button>
+      )}
     </Modal>
   );
 }

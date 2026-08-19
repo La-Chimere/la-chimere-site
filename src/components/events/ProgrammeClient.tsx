@@ -7,14 +7,25 @@ import { Fab } from "@/components/ui/Fab";
 import { EventCard } from "@/components/events/EventCard";
 import { EventModal } from "@/components/events/EventModal";
 import { EventForm } from "@/components/events/EventForm";
+import { MonthGrid } from "@/components/events/MonthGrid";
+import { AvailabilityMenu } from "@/components/events/AvailabilityMenu";
 import type { PickableMember } from "@/components/ui/MemberPicker";
 import type { CommunityOption, EventItem } from "@/lib/events-types";
-import { dayLabel, isoDate, weekRangeLabel } from "@/lib/dates";
+import {
+  dayLabel,
+  isoDate,
+  monthLabel,
+  nextMonth,
+  nextWeek,
+  previousMonth,
+  previousWeek,
+  weekRangeLabel,
+} from "@/lib/dates";
 
 interface ProgrammeClientProps {
-  reference: string; // ISO date of the reference day for the displayed week
-  days: string[]; // ISO dates of the 7 days of the week
-  events: EventItem[];
+  reference: string; // ISO date de référence (semaine ou mois affiché)
+  days: string[]; // ISO dates des 7 jours de la semaine affichée
+  events: EventItem[]; // couvre toujours au moins la grille du mois de référence
   communities: CommunityOption[];
   members: PickableMember[];
   currentUser: PickableMember;
@@ -34,44 +45,76 @@ export function ProgrammeClient({
   const [selectedCommunity, setSelectedCommunity] = useState<string | null>(null);
   const [openEventId, setOpenEventId] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
+  const [availFormOpen, setAvailFormOpen] = useState(false);
+  const [calView, setCalView] = useState(false);
+  const [showAvailabilities, setShowAvailabilities] = useState(false);
 
-  const filteredEvents = useMemo(() => {
-    if (!selectedCommunity) return events;
-    return events.filter((e) => e.communities.some((c) => c.id === selectedCommunity));
-  }, [events, selectedCommunity]);
+  const referenceDate = new Date(reference);
+
+  const realEvents = useMemo(() => events.filter((e) => e.type !== "dispo"), [events]);
+  const availabilities = useMemo(() => events.filter((e) => e.type === "dispo"), [events]);
+
+  const communityFiltered = useMemo(() => {
+    if (!selectedCommunity) return realEvents;
+    return realEvents.filter((e) => e.communities.some((c) => c.id === selectedCommunity));
+  }, [realEvents, selectedCommunity]);
+
+  const listEvents = useMemo(() => {
+    if (!showAvailabilities) return communityFiltered;
+    const filteredAvail = selectedCommunity
+      ? availabilities.filter((e) => e.communities.some((c) => c.id === selectedCommunity))
+      : availabilities;
+    return [...communityFiltered, ...filteredAvail].sort((a, b) =>
+      a.startTime.localeCompare(b.startTime),
+    );
+  }, [communityFiltered, availabilities, showAvailabilities, selectedCommunity]);
 
   const eventsByDay = useMemo(() => {
     const map = new Map<string, EventItem[]>();
     for (const day of days) map.set(day, []);
-    for (const event of filteredEvents) {
+    for (const event of listEvents) {
       map.get(event.eventDate)?.push(event);
     }
     return map;
-  }, [filteredEvents, days]);
+  }, [listEvents, days]);
 
-  function navigate(deltaWeeks: number) {
-    const d = new Date(reference);
-    d.setDate(d.getDate() + deltaWeeks * 7);
+  function navigate(delta: number) {
+    const d = calView ? (delta > 0 ? nextMonth(referenceDate) : previousMonth(referenceDate)) : (delta > 0 ? nextWeek(referenceDate) : previousWeek(referenceDate));
     router.push(`/programme?week=${isoDate(d)}`);
   }
 
-  const openEvent = filteredEvents.find((e) => e.id === openEventId) ?? null;
-  const referenceDate = new Date(reference);
+  const allFilteredForModal = [...realEvents, ...availabilities];
+  const openEvent = allFilteredForModal.find((e) => e.id === openEventId) ?? null;
 
   return (
     <div className="page no-scroll">
       <div className="events-fixed-top">
         <div className="cal-toolbar">
           <div className="toolbar-left">
-            <div className="datenav">
-              <button type="button" onClick={() => navigate(-1)} aria-label="Semaine précédente">
-                ‹
-              </button>
-              <span id="navLabel">{weekRangeLabel(referenceDate)}</span>
-              <button type="button" onClick={() => navigate(1)} aria-label="Semaine suivante">
-                ›
+            <div className="datenav-group">
+              <div className="datenav">
+                <button type="button" onClick={() => navigate(-1)} aria-label="Précédent">
+                  ‹
+                </button>
+                <span id="navLabel">{calView ? monthLabel(referenceDate) : weekRangeLabel(referenceDate)}</span>
+                <button type="button" onClick={() => navigate(1)} aria-label="Suivant">
+                  ›
+                </button>
+              </div>
+              <button
+                type="button"
+                className={`view-toggle ${calView ? "active" : ""}`}
+                onClick={() => setCalView((v) => !v)}
+                aria-label="Vue calendrier"
+              >
+                📆
               </button>
             </div>
+            <AvailabilityMenu
+              showAvailabilities={showAvailabilities}
+              onToggleShow={() => setShowAvailabilities((v) => !v)}
+              onIndicate={() => setAvailFormOpen(true)}
+            />
           </div>
         </div>
         <div className="filters h-scroll">
@@ -91,32 +134,40 @@ export function ProgrammeClient({
         </div>
       </div>
 
-      <div className="events-list-scroll">
-        {days.map((day) => {
-          const dayEvents = eventsByDay.get(day) ?? [];
-          const isToday = day === isoDate(new Date());
-          return (
-            <div className={`day-unit ${isToday ? "today" : ""}`} key={day}>
-              <div className="day-head">
-                <div className="day-head-left">
-                  <span className="d1">{dayLabel(new Date(day))}</span>
+      <div className={`events-list-scroll ${calView ? "cal-mode" : ""}`}>
+        {calView ? (
+          <MonthGrid
+            reference={referenceDate}
+            events={communityFiltered}
+            onOpenEvent={setOpenEventId}
+          />
+        ) : (
+          days.map((day) => {
+            const dayEvents = eventsByDay.get(day) ?? [];
+            const isToday = day === isoDate(new Date());
+            return (
+              <div className={`day-unit ${isToday ? "today" : ""}`} key={day}>
+                <div className="day-head">
+                  <div className="day-head-left">
+                    <span className="d1">{dayLabel(new Date(day))}</span>
+                  </div>
                 </div>
+                {dayEvents.length === 0 ? (
+                  <div className="agenda-empty">Rien de prévu.</div>
+                ) : (
+                  dayEvents.map((event) => (
+                    <EventCard
+                      key={event.id}
+                      event={event}
+                      currentUserId={currentUser.id}
+                      onOpen={() => setOpenEventId(event.id)}
+                    />
+                  ))
+                )}
               </div>
-              {dayEvents.length === 0 ? (
-                <div className="agenda-empty">Rien de prévu.</div>
-              ) : (
-                dayEvents.map((event) => (
-                  <EventCard
-                    key={event.id}
-                    event={event}
-                    currentUserId={currentUser.id}
-                    onOpen={() => setOpenEventId(event.id)}
-                  />
-                ))
-              )}
-            </div>
-          );
-        })}
+            );
+          })
+        )}
       </div>
 
       <Fab onClick={() => setFormOpen(true)} />
@@ -133,6 +184,15 @@ export function ProgrammeClient({
         members={members}
         currentUser={currentUser}
         defaultDate={referenceDate}
+      />
+      <EventForm
+        open={availFormOpen}
+        onClose={() => setAvailFormOpen(false)}
+        communities={communities}
+        members={members}
+        currentUser={currentUser}
+        defaultDate={referenceDate}
+        isAvailability
       />
     </div>
   );

@@ -1,0 +1,118 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import { Fab } from "@/components/ui/Fab";
+import { DangerConfirmButton } from "@/components/ui/DangerConfirmButton";
+import { AnnouncementCard } from "@/components/announcements/AnnouncementCard";
+import { NotificationCard } from "@/components/announcements/NotificationCard";
+import { AnnouncementForm } from "@/components/announcements/AnnouncementForm";
+import {
+  deleteAllNotifications,
+  markAllAnnouncementsSeen,
+  markAllNotificationsRead,
+} from "@/lib/announcements-actions";
+import type { Announcement, NotificationItem } from "@/lib/announcements-types";
+import type { CommunityOption } from "@/lib/events-types";
+
+interface AnnouncementsClientProps {
+  announcements: Announcement[];
+  notifications: NotificationItem[];
+  communities: CommunityOption[];
+  isAdmin: boolean;
+  currentUserId: string;
+}
+
+export function AnnouncementsClient({
+  announcements,
+  notifications,
+  communities,
+  isAdmin,
+}: AnnouncementsClientProps) {
+  const [, startTransition] = useTransition();
+  const [formOpen, setFormOpen] = useState(false);
+  const [editing, setEditing] = useState<Announcement | null>(null);
+
+  const hasUnreadNotifications = notifications.some((n) => !n.read);
+
+  return (
+    <div className="page">
+      <div className="an-section-head">
+        <h1 className="page-title">Annonces</h1>
+        <div className="an-section-actions">
+          <button
+            type="button"
+            className="icon-btn"
+            disabled={announcements.every((a) => a.seen)}
+            onClick={() =>
+              startTransition(() => markAllAnnouncementsSeen(announcements.map((a) => a.id)))
+            }
+            aria-label="Tout marquer comme vu"
+          >
+            ✓
+          </button>
+        </div>
+      </div>
+
+      {announcements.length === 0 ? (
+        <p className="empty-hint">Aucune annonce pour l&apos;instant.</p>
+      ) : (
+        announcements.map((a) => (
+          <AnnouncementCard
+            key={a.id}
+            announcement={a}
+            isAdmin={isAdmin}
+            onEdit={() => {
+              setEditing(a);
+              setFormOpen(true);
+            }}
+          />
+        ))
+      )}
+
+      <div className="an-section-head">
+        <h1 className="page-title">Notifications</h1>
+        <div className="an-section-actions">
+          <button
+            type="button"
+            className="icon-btn"
+            disabled={!hasUnreadNotifications}
+            onClick={() => startTransition(() => markAllNotificationsRead())}
+            aria-label="Tout marquer comme lu"
+          >
+            ✓
+          </button>
+          <DangerConfirmButton
+            className="icon-btn danger"
+            disabled={notifications.length === 0}
+            onConfirm={() => startTransition(() => deleteAllNotifications())}
+          >
+            🗑
+          </DangerConfirmButton>
+        </div>
+      </div>
+
+      {notifications.length === 0 ? (
+        <p className="empty-hint">Aucune notification.</p>
+      ) : (
+        notifications.map((n) => <NotificationCard key={n.id} notification={n} />)
+      )}
+
+      {isAdmin && (
+        <Fab
+          id="annFabBtn"
+          onClick={() => {
+            setEditing(null);
+            setFormOpen(true);
+          }}
+        />
+      )}
+
+      <AnnouncementForm
+        open={formOpen}
+        onClose={() => setFormOpen(false)}
+        communities={communities}
+        editing={editing}
+      />
+    </div>
+  );
+}

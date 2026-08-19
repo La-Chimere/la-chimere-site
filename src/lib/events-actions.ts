@@ -67,10 +67,13 @@ export interface CreateEventInput {
   description: string;
   communityIds: string[];
   participantIds: string[];
+  isAvailability?: boolean;
+  repeatsWeekly?: boolean;
 }
 
-// Création d'une partie spontanée (CDC 4.2/12.3). Les événements "officiels"
-// sont réservés aux admins et seront ajoutés avec la page Admin.
+// Création d'une partie spontanée, ou d'une disponibilité (CDC 4.2/12.3/12.12).
+// Les événements "officiels" sont réservés aux admins et seront ajoutés avec
+// la page Admin.
 export async function createEvent(input: CreateEventInput) {
   const { supabase, userId } = await requireUserId();
 
@@ -81,12 +84,13 @@ export async function createEvent(input: CreateEventInput) {
   const { data: event, error } = await supabase
     .from("events")
     .insert({
-      type: "spontane",
+      type: input.isAvailability ? "dispo" : "spontane",
       title: input.title || null,
       description: input.description || null,
       event_date: input.date,
       start_time: input.startTime,
       end_time: endTime,
+      repeats_weekly: input.isAvailability ? !!input.repeatsWeekly : false,
       created_by: userId,
     })
     .select("id")
@@ -102,11 +106,60 @@ export async function createEvent(input: CreateEventInput) {
     );
   }
 
-  const participantIds = new Set([userId, ...input.participantIds]);
+  const participantIds = input.isAvailability
+    ? new Set([userId])
+    : new Set([userId, ...input.participantIds]);
   await supabase.from("event_participants").insert(
     Array.from(participantIds).map((profile_id) => ({ event_id: event.id, profile_id })),
   );
 
   revalidatePath("/programme");
   return { error: null };
+}
+
+// Supprime toutes les disponibilités du membre courant (CDC 12.12).
+export async function deleteMyAvailabilities() {
+  const { supabase, userId } = await requireUserId();
+  await supabase.from("events").delete().eq("type", "dispo").eq("created_by", userId);
+  revalidatePath("/programme");
+}
+
+// Transforme une disponibilité en évènement réel (CDC 12.12) : nouvelle
+// entrée distincte reprenant les mêmes infos, l'originale est supprimée.
+export async function transformToEvent(availabilityId: string) {
+  const { supabase, userId } = await requireUserId();
+
+  const { data: availability } = await supabase
+    .from("events")
+    .select("title, description, event_date, start_time, end_time, created_by, event_communities(community_id)")
+    .eq("id", availabilityId)
+    .single();
+  if (!availability) return;
+
+  const { data: newEvent, error } = await supabase
+    .from("events")
+    .insert({
+      type: "spontane",
+      title: availability.title,
+      description: availability.description,
+      event_date: availability.event_date,
+      start_time: availability.start_time,
+      end_time: availability.end_time,
+      created_by: availability.created_by,
+    })
+    .select("id")
+    .single();
+  if (error || !newEvent) return;
+
+  const communityIds = (availability.event_communities ?? []).map((ec) => ec.community_id);
+  if (communityIds.length > 0) {
+    await supabase
+      .from("event_communities")
+      .insert(communityIds.map((community_id) => ({ event_id: newEvent.id, community_id })));
+  }
+
+  await supabase.from("event_participants").insert({ event_id: newEvent.id, profile_id: userId });
+  await supabase.from("events").delete().eq("id", availabilityId);
+
+  revalidatePath("/programme");
 }
