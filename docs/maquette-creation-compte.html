@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>La Chimère — Parcours d'arrivée &amp; création de compte</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* ==========================================================================
+     Système visuel repris à l'identique de la maquette principale
+     (maquette_la_chimere.html) pour garder une cohérence de marque parfaite
+     entre les deux fichiers : mêmes couleurs, même typo, même "faux téléphone".
+     ========================================================================== */
+  :root{
+    --accent:#3F6EA5; /* Saphir — couleur par défaut, personnalisable par le club */
+    --success:#2F8F5A;
+    --danger:#D5473F;
+    --radius:14px; --radius-sm:9px;
+  }
+  [data-theme="light"]{
+    --bg: color-mix(in srgb, var(--accent) 10%, #F1ECE3 90%);
+    --surface: color-mix(in srgb, var(--accent) 2%, #FFFFFF 98%);
+    --surface-2: color-mix(in srgb, var(--accent) 5%, #FFFFFF 95%);
+    --border: color-mix(in srgb, var(--accent) 12%, #DDD6CB 88%);
+    --text:#2B2620; --text-muted: color-mix(in srgb, var(--accent) 8%, #8F8172 92%);
+    --shadow:0 1px 2px rgba(45,35,25,.05), 0 1px 3px rgba(45,35,25,.06);
+    --shadow-lg:0 8px 24px rgba(45,35,25,.12);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  button{font-family:inherit;}
+
+  body{ min-height:100vh; background:#DADDE2; display:flex; align-items:flex-start; justify-content:center; padding:26px 14px 50px; font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif; }
+  .phone-frame{ width:412px; max-width:95vw; height:876px; max-height:92vh; flex:none; border-radius:42px; border:10px solid #14161B; box-shadow:0 26px 64px rgba(16,24,40,.32); overflow:hidden; position:relative; transform:translateZ(0); background:#000; }
+  .phone-screen{ position:absolute; inset:0; overflow:hidden; background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased; }
+
+  /* ==================== Composants réutilisés (mêmes conventions que la maquette principale) ==================== */
+  .form-field{ margin-bottom:16px; }
+  .form-label{ display:block; font-size:12.5px; font-weight:800; color:var(--text-muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:.03em; }
+  .form-input{ width:100%; box-sizing:border-box; border:1px solid var(--border); background:var(--surface-2); border-radius:10px; padding:11px 12px; font-size:14.5px; color:var(--text); font-family:inherit; }
+  .form-input:focus{ outline:2px solid color-mix(in srgb, var(--accent) 45%, transparent); outline-offset:1px; }
+  .form-input.error{ border-color:var(--danger); }
+  .form-textarea{ resize:vertical; min-height:70px; font-family:inherit; line-height:1.4; }
+  .field-error{ font-size:12px; color:var(--danger); font-weight:700; margin-top:5px; }
+  .field-note{ font-size:12px; color:var(--text-muted); line-height:1.5; margin:7px 0 0; }
+  .field-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:6px; }
+  .field-head .form-label{ margin-bottom:0; }
+  .visibility-switch{ display:flex; align-items:center; gap:7px; flex:none; }
+  .visibility-switch .txt{ font-size:11px; font-weight:700; color:var(--text-muted); white-space:nowrap; }
+  .mini-toggle{ width:34px; height:20px; border-radius:99px; position:relative; border:1px solid var(--border); background:var(--surface-2); flex:none; cursor:pointer; }
+  .mini-toggle .k{ position:absolute; top:2px; left:2px; width:14px; height:14px; border-radius:50%; background:var(--text-muted); transition:left .15s ease, background .15s ease; }
+  .mini-toggle.on{ background:color-mix(in srgb, var(--success) 20%, var(--surface) 80%); border-color:var(--success); }
+  .mini-toggle.on .k{ left:16px; background:var(--success); }
+
+  .btn{ border:none; font-weight:800; font-size:15px; padding:13px; border-radius:11px; cursor:pointer; font-family:inherit; width:100%; }
+  .btn.primary{ background:var(--accent); color:#fff; }
+  .btn.primary:hover{ filter:brightness(0.94); }
+  .btn.primary:disabled{ opacity:.45; cursor:default; filter:none; }
+  .btn.ghost{ background:var(--surface); color:var(--text); border:1.5px solid var(--border); }
+  .btn.ghost:hover{ background:var(--surface-2); }
+  .btn.gray{ background:var(--surface-2); color:var(--text-muted); border:1px solid var(--border); }
+
+  /* ==================== Écran d'accueil ==================== */
+  #view-landing{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:36px 30px; text-align:center; gap:0; }
+  .landing-logo{ width:96px; height:96px; color:var(--accent); margin-bottom:22px; }
+  .landing-logo svg{ width:100%; height:100%; display:block; }
+  .landing-title{ font-size:22px; font-weight:800; color:var(--text); margin:0 0 34px; line-height:1.35; }
+  .landing-actions{ display:flex; flex-direction:column; gap:12px; width:100%; }
+  .login-panel{ width:100%; margin-top:18px; text-align:left; display:none; }
+  .login-panel.open{ display:block; }
+  .login-back{ display:inline-flex; align-items:center; gap:5px; background:none; border:none; color:var(--text-muted); font-size:13px; font-weight:700; cursor:pointer; padding:0; margin-bottom:14px; font-family:inherit; }
+  .login-note{ font-size:12px; color:var(--text-muted); text-align:center; margin-top:12px; line-height:1.5; }
+
+  /* ==================== Vue "création de compte" : glisse depuis la droite ==================== */
+  #view-signup{ position:absolute; inset:0; display:flex; flex-direction:column; background:var(--bg); transform:translateX(100%); transition:transform .32s ease; z-index:20; }
+  #view-signup.open{ transform:translateX(0); }
+
+  .signup-progress{ flex:none; padding:20px 20px 4px; text-align:center; font-size:12.5px; font-weight:800; color:var(--text-muted); letter-spacing:.04em; }
+  .signup-progress-track{ height:4px; border-radius:99px; background:var(--border); margin:8px 20px 0; overflow:hidden; }
+  .signup-progress-fill{ height:100%; background:var(--accent); border-radius:99px; transition:width .25s ease; }
+
+  .signup-steps{ position:relative; flex:1; min-height:0; overflow:hidden; }
+  .signup-step{ position:absolute; inset:0; padding:18px 20px 20px; overflow-y:auto; -webkit-overflow-scrolling:touch; transform:translateX(100%); opacity:0; transition:transform .28s ease, opacity .28s ease; pointer-events:none; }
+  .signup-step.current{ transform:translateX(0); opacity:1; pointer-events:auto; }
+  .signup-step.prev{ transform:translateX(-100%); opacity:0; }
+
+  .step-title{ font-size:20px; font-weight:800; margin:2px 0 6px; }
+  .step-subtitle{ font-size:13.5px; color:var(--text-muted); margin:0 0 18px; line-height:1.5; }
+
+  .consent-row{ display:flex; align-items:flex-start; gap:10px; padding:12px; border:1px solid var(--border); border-radius:12px; background:var(--surface); margin-top:6px; cursor:pointer; }
+  .consent-row input{ margin-top:2px; flex:none; width:17px; height:17px; accent-color:var(--accent); cursor:pointer; }
+  .consent-row .txt{ font-size:12.5px; line-height:1.5; color:var(--text); }
+
+  .commu-list{ display:flex; flex-direction:column; gap:8px; margin-top:14px; }
+  .commu-row{ display:flex; align-items:center; gap:11px; padding:11px 13px; border-radius:12px; border:1.5px solid var(--border); background:var(--surface); cursor:pointer; text-align:left; font-family:inherit; }
+  .commu-row.selected{ border-color:var(--accent); background:color-mix(in srgb, var(--accent) 9%, var(--surface) 91%); }
+  .commu-check{ width:20px; height:20px; border-radius:50%; border:1.5px solid var(--border); flex:none; display:flex; align-items:center; justify-content:center; background:var(--surface-2); }
+  .commu-row.selected .commu-check{ background:var(--accent); border-color:var(--accent); color:#fff; }
+  .commu-check svg{ width:12px; height:12px; display:none; }
+  .commu-row.selected .commu-check svg{ display:block; }
+  .commu-name{ flex:1; min-width:0; font-weight:700; font-size:14px; }
+  .commu-count{ flex:none; font-size:12px; font-weight:700; color:var(--text-muted); }
+
+  .avatar-upload-wrap{ display:flex; flex-direction:column; align-items:center; gap:9px; margin:8px 0 22px; }
+  .avatar-upload{ width:88px; height:88px; border-radius:50%; background:var(--surface-2); border:1.5px dashed var(--border); display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text-muted); background-size:cover; background-position:center; flex:none; }
+  .avatar-upload svg{ width:34px; height:34px; }
+  .avatar-upload.has-photo{ border-style:solid; color:transparent; }
+  .avatar-upload-label{ font-size:12.5px; font-weight:700; color:var(--accent); cursor:pointer; }
+
+  .info-box{ border:1px solid var(--border); background:var(--surface); border-radius:12px; padding:14px; margin-bottom:14px; }
+  .info-box-title{ font-size:13.5px; font-weight:800; margin:0 0 7px; display:flex; align-items:center; gap:7px; }
+  .info-box-text{ font-size:13px; color:var(--text-muted); line-height:1.55; margin:0; }
+  .info-box-placeholder{ font-style:italic; }
+
+  .signup-footer{ flex:none; display:flex; gap:10px; padding:14px 20px 20px; border-top:1px solid var(--border); background:var(--surface); }
+  .signup-footer .btn{ flex:1; }
+
+  /* ==================== Écran de bienvenue final ==================== */
+  #view-success{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:36px 30px; text-align:center; background:var(--bg); transform:translateX(100%); transition:transform .32s ease; z-index:30; }
+  #view-success.open{ transform:translateX(0); }
+  .success-icon{ width:74px; height:74px; border-radius:50%; background:color-mix(in srgb, var(--success) 16%, var(--surface) 84%); color:var(--success); display:flex; align-items:center; justify-content:center; margin-bottom:20px; }
+  .success-icon svg{ width:36px; height:36px; }
+  .success-title{ font-size:21px; font-weight:800; margin:0 0 10px; }
+  .success-text{ font-size:14px; color:var(--text-muted); line-height:1.55; margin:0 0 28px; }
+</style>
+</head>
+<body>
+<div class="phone-frame"><div class="phone-screen">
+
+  <!-- ===================== ÉCRAN D'ACCUEIL ===================== -->
+  <div id="view-landing">
+    <div class="landing-logo" aria-hidden="true">
+      <svg viewBox="0 0 900 900" xmlns="http://www.w3.org/2000/svg">
+        <path d="M806.334 505.106C774.041 467.516 738.627 466.158 713.47 466.158C686.052 466.158 658.791 474.726 636.708 490.285L636.131 490.7H499.07L498.531 486.307C498.728 486.263 517.33 481.513 532.233 468.072C498.792 452.426 470.519 395.546 469.294 393.056L467.364 389.131L471.68 389.882C480.977 391.502 495.061 393.873 501.317 394.774C488.186 348.931 464.555 321.227 464.314 320.945L461.306 317.465L492.974 316.094C462.88 253.671 407.339 224.116 406.773 223.812L402.006 221.322L407.144 219.723C407.334 219.659 425.589 213.873 438.334 203.718L438.252 203.665C413.186 189.323 336.927 145.676 276.008 145.676C263.313 145.676 251.853 147.578 241.952 151.331C178.184 175.512 175.95 214.918 175.933 215.311L175.895 216.43L134.789 245.006C130.158 248.225 127.749 253.694 128.502 259.283L130.817 276.659L73.8501 314.086C65.3719 319.654 62.3313 330.721 66.7782 339.823L94.4235 396.446H159.602L106.084 433.972L114.063 473.802L130.064 452.131L173.166 441.377C174.294 441.093 175.488 440.953 176.702 440.953C182.489 440.953 187.272 443.998 188.891 448.706C190.956 454.707 188.864 465.408 167.145 482.261C150.227 495.387 97.461 544.131 125.027 622.931H224.413L216.392 650.81H153.522C100.958 650.81 66.2251 662.261 50.2985 684.834C36.7204 704.07 41.5423 725.904 43.1829 731.699L340.194 731.721C341.495 731.559 342.766 731.395 343.986 731.189C351.647 729.95 357.27 728.057 361.161 725.383C363.531 723.753 365.281 721.925 366.817 719.457C369.017 715.923 370.697 710.856 371.808 704.408C373.306 695.84 373.972 684.128 373.955 666.439V664.21H396.944V666.439C396.933 682.683 396.438 693.535 395.281 702.723C393.831 714.14 391.32 722.753 387.375 729.809C387.009 730.45 386.628 731.082 386.23 731.701H499.98C499.919 730.341 499.877 728.894 499.877 727.362C499.888 715.989 501.728 705.083 505.352 694.928C510.403 680.748 518.831 668.57 530.4 658.741C539.428 651.064 550.392 644.844 562.974 640.276C581.466 633.534 603.975 630.111 629.874 630.111H696.403V601.078H722.041V655.685H629.875C604.391 655.685 583.125 659.252 566.68 666.299C553.684 671.876 543.964 679.347 536.974 689.111C533.295 694.296 530.456 700.114 528.534 706.421C526.028 714.631 525.509 722.34 525.516 727.363C525.509 728.939 525.559 730.397 525.634 731.702H841V654.697C841 632.63 839.813 544.077 806.334 505.106Z" fill="currentColor"/>
+        <path d="M576.513 507.31L498 506.743L498.097 467.176C560.682 375.31 556.667 302.739 540.606 234.706C639.4 151.046 753.287 146.895 859.301 145.676C828.812 180.707 829.913 217.511 850.376 250.767C804.057 265.561 801.42 330.192 820.032 368.323C762.853 352.274 707.161 402.038 741.483 459.163C671.944 400.832 570.176 426.196 576.513 507.31Z" fill="currentColor"/>
+      </svg>
+    </div>
+    <h1 class="landing-title">Bienvenue au Club<br>La Chimère !</h1>
+
+    <div class="landing-actions" id="landingActions">
+      <button type="button" class="btn primary" id="btnCreateAccount">Créer mon compte</button>
+      <button type="button" class="btn ghost" id="btnLogin">Me connecter</button>
+    </div>
+
+    <div class="login-panel" id="loginPanel">
+      <button type="button" class="login-back" id="loginBack">‹ Retour</button>
+      <div class="form-field">
+        <span class="form-label">Pseudo ou e-mail</span>
+        <input type="text" class="form-input" id="loginUser" placeholder="Ton pseudo ou ton e-mail" autocomplete="username">
+      </div>
+      <div class="form-field">
+        <span class="form-label">Mot de passe</span>
+        <input type="password" class="form-input" id="loginPass" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <button type="button" class="btn primary" id="loginSubmit">Se connecter</button>
+      <p class="login-note">Maquette : ce parcours se concentre sur la création de compte, la connexion n'est pas simulée au-delà de ce point.</p>
+    </div>
+  </div>
+
+  <!-- ===================== CRÉATION DE COMPTE (glisse depuis la droite) ===================== -->
+  <div id="view-signup">
+    <div class="signup-progress" id="signupProgress">Étape 1 / 3</div>
+    <div class="signup-progress-track"><div class="signup-progress-fill" id="signupProgressFill" style="width:33.333%;"></div></div>
+
+    <div class="signup-steps">
+
+      <!-- ---------- Étape 1 : Qui es-tu ? ---------- -->
+      <section class="signup-step current" id="step-1">
+        <h2 class="step-title">Qui es-tu ?</h2>
+
+        <div class="form-field">
+          <span class="form-label">Prénom ou pseudo *</span>
+          <input type="text" class="form-input" id="s1Name" placeholder="Ex : Louis-Marie">
+        </div>
+
+        <div class="form-field">
+          <div class="field-head">
+            <span class="form-label">Mail</span>
+            <div class="visibility-switch" data-target="s1EmailVisible">
+              <span class="txt">Afficher aux autres membres</span>
+              <div class="mini-toggle on" id="s1EmailVisible"><div class="k"></div></div>
+            </div>
+          </div>
+          <input type="email" class="form-input" id="s1Email" placeholder="Facultatif">
+        </div>
+
+        <div class="form-field">
+          <div class="field-head">
+            <span class="form-label">Téléphone</span>
+            <div class="visibility-switch" data-target="s1PhoneVisible">
+              <span class="txt">Afficher aux autres membres</span>
+              <div class="mini-toggle on" id="s1PhoneVisible"><div class="k"></div></div>
+            </div>
+          </div>
+          <input type="tel" class="form-input" id="s1Phone" placeholder="Facultatif">
+        </div>
+
+        <div class="form-field">
+          <div class="field-head">
+            <span class="form-label">Localisation</span>
+            <div class="visibility-switch" data-target="s1LocVisible">
+              <span class="txt">Afficher aux autres membres</span>
+              <div class="mini-toggle on" id="s1LocVisible"><div class="k"></div></div>
+            </div>
+          </div>
+          <input type="text" class="form-input" id="s1Loc" placeholder="Facultatif — ex : Plainpalais à 15 min du local">
+          <p class="field-note">Toutes ces données sont visibles uniquement par vous et par l'administrateur technique du site, sauf si vous autorisez le partage. La gestion des données personnelles est décrite plus en détail à l'étape 3.</p>
+        </div>
+
+        <div class="form-field">
+          <span class="form-label">Mot de passe *</span>
+          <input type="password" class="form-input" id="s1Pass" placeholder="••••••••">
+        </div>
+
+        <div class="form-field">
+          <span class="form-label">Confirmer le mot de passe *</span>
+          <input type="password" class="form-input" id="s1PassConfirm" placeholder="••••••••">
+          <div class="field-error" id="s1PassError" style="display:none;">Les mots de passe ne correspondent pas.</div>
+        </div>
+
+        <label class="consent-row" id="s1ConsentRow">
+          <input type="checkbox" id="s1Consent">
+          <span class="txt">L'appartenance au Club La Chimère inclut <strong>une participation financière</strong> mensuelle et d'avoir <strong>rencontré au moins un des membres du comité</strong>. Je confirme en avoir connaissance et m'en être acquitté.</span>
+        </label>
+      </section>
+
+      <!-- ---------- Étape 2 : À quoi tu joues ? ---------- -->
+      <section class="signup-step" id="step-2">
+        <h2 class="step-title">Bienvenue ! À quoi tu joues ?</h2>
+        <p class="step-subtitle">Sélectionne tes communautés ! Tu pourras modifier ça quand tu veux.</p>
+
+        <div class="commu-list" id="commuList"></div>
+
+        <div class="form-field" style="margin-top:22px;">
+          <span class="form-label">Envie de te présenter ?</span>
+
+          <div class="avatar-upload-wrap">
+            <div class="avatar-upload" id="avatarUpload" title="Ajouter une photo de profil">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="8" r="3.6" stroke="currentColor" stroke-width="1.7"/><path d="M4.5 19.5C4.5 16.1863 7.68629 13.5 12 13.5C16.3137 13.5 19.5 16.1863 19.5 19.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+            </div>
+            <input type="file" accept="image/*" id="avatarInput" hidden>
+            <span class="avatar-upload-label" id="avatarUploadLabel">Ajouter une photo de profil</span>
+          </div>
+
+          <div class="form-field" style="margin:14px 0 0;">
+            <span class="form-label">T'es depuis combien de temps au club ?</span>
+            <select class="form-input" id="s2YearJoined">
+              <option value="2026" selected>2026</option>
+              <option value="2025">2025</option>
+              <option value="2024">2024</option>
+              <option value="2023">2023</option>
+              <option value="2022">2022</option>
+              <option value="2021">2021</option>
+              <option value="2020">2020</option>
+              <option value="2019">2019</option>
+              <option value="2018">2018</option>
+              <option value="2017">2017</option>
+              <option value="2016">2016</option>
+              <option value="2015">2015</option>
+            </select>
+          </div>
+
+          <p class="step-subtitle" style="margin:14px 0 10px;">Dis quel jeu tu préfères, quelle armée tu joues… Éclate-toi !</p>
+          <textarea class="form-input form-textarea" id="s2About" rows="4" placeholder="Facultatif"></textarea>
+        </div>
+      </section>
+
+      <!-- ---------- Étape 3 : Bon à savoir ---------- -->
+      <section class="signup-step" id="step-3">
+        <h2 class="step-title">Bon à savoir</h2>
+        <p class="step-subtitle">Deux dernières choses avant de rejoindre le club.</p>
+
+        <div class="info-box">
+          <p class="info-box-title">📋 Règlement du club</p>
+          <p class="info-box-text info-box-placeholder">Contenu à venir — le règlement définitif du club (vie associative, matériel, respect des lieux…) sera ajouté ici avant la mise en production.</p>
+        </div>
+
+        <div class="info-box">
+          <p class="info-box-title">📄 Conditions générales d'utilisation</p>
+          <p class="info-box-text info-box-placeholder">Contenu à venir — le résumé des CGU du site sera ajouté ici avant la mise en production.</p>
+        </div>
+
+        <label class="consent-row" id="s3ConsentRow">
+          <input type="checkbox" id="s3Consent">
+          <span class="txt">J'atteste avoir lu et accepté le règlement du club et les conditions générales d'utilisation.</span>
+        </label>
+      </section>
+
+    </div>
+
+    <div class="signup-footer">
+      <button type="button" class="btn gray" id="signupBack">Retour</button>
+      <button type="button" class="btn primary" id="signupNext" disabled>Suivant</button>
+    </div>
+  </div>
+
+  <!-- ===================== ÉCRAN DE BIENVENUE FINAL ===================== -->
+  <div id="view-success">
+    <div class="success-icon">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 12.5L9.5 18L20 6" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <h1 class="success-title" id="successTitle">Bienvenue au Club !</h1>
+    <button type="button" class="btn primary" id="successRestart">Accéder à l'app</button>
+  </div>
+
+</div></div>
+
+<script>
+  // ================= COMMUNAUTÉS (mêmes libellés que la maquette principale, hors "Tous" qui est implicite) =================
+  const COMMUNITIES = [
+    { key:'warhammer40k', label:'Warhammer 40K', count:18 },
+    { key:'necromunda', label:'Necromunda', count:9 },
+    { key:'bloodbowl', label:'Blood Bowl', count:14 },
+    { key:'plateau', label:'Plateau', count:22 },
+    { key:'peinture', label:'Peinture', count:11 },
+    { key:'chill', label:'Chill', count:15 },
+    { key:'evenement', label:'Evenement', count:27 },
+  ];
+  const selectedCommunities = new Set();
+
+  const commuListEl = document.getElementById('commuList');
+  function renderCommuList(){
+    commuListEl.innerHTML = COMMUNITIES.map(c =>
+      '<button type="button" class="commu-row'+(selectedCommunities.has(c.key) ? ' selected' : '')+'" data-key="'+c.key+'">'
+      + '<span class="commu-check"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 12.5L9.5 17L19 6.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>'
+      + '<span class="commu-name">'+c.label+'</span>'
+      + '<span class="commu-count">'+c.count+' membres</span>'
+      + '</button>'
+    ).join('');
+  }
+  commuListEl.addEventListener('click', (e) => {
+    const btn = e.target.closest('.commu-row');
+    if(!btn) return;
+    const key = btn.dataset.key;
+    if(selectedCommunities.has(key)) selectedCommunities.delete(key);
+    else selectedCommunities.add(key);
+    renderCommuList();
+  });
+  renderCommuList();
+
+  // ================= TOGGLES "Afficher aux autres membres" (activés par défaut) =================
+  document.querySelectorAll('.visibility-switch').forEach(sw => {
+    sw.addEventListener('click', () => {
+      document.getElementById(sw.dataset.target).classList.toggle('on');
+    });
+  });
+
+  // ================= PHOTO DE PROFIL =================
+  const avatarUpload = document.getElementById('avatarUpload');
+  const avatarInput = document.getElementById('avatarInput');
+  const avatarUploadLabel = document.getElementById('avatarUploadLabel');
+  avatarUpload.addEventListener('click', () => avatarInput.click());
+  avatarUploadLabel.addEventListener('click', () => avatarInput.click());
+  avatarInput.addEventListener('change', () => {
+    const file = avatarInput.files && avatarInput.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      avatarUpload.style.backgroundImage = 'url(' + reader.result + ')';
+      avatarUpload.classList.add('has-photo');
+      avatarUploadLabel.textContent = 'Changer la photo';
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // ================= ÉCRAN D'ACCUEIL : bascule Créer un compte / Se connecter =================
+  const viewLanding = document.getElementById('view-landing');
+  const viewSignup = document.getElementById('view-signup');
+  const viewSuccess = document.getElementById('view-success');
+  const landingActions = document.getElementById('landingActions');
+  const loginPanel = document.getElementById('loginPanel');
+
+  document.getElementById('btnLogin').addEventListener('click', () => {
+    landingActions.style.display = 'none';
+    loginPanel.classList.add('open');
+  });
+  document.getElementById('loginBack').addEventListener('click', () => {
+    loginPanel.classList.remove('open');
+    landingActions.style.display = '';
+  });
+  document.getElementById('loginSubmit').addEventListener('click', () => {
+    // Maquette : pas de vraie authentification, ce parcours se concentre sur la création de compte.
+  });
+
+  // ================= NAVIGATION ENTRE LES 3 ÉTAPES DU FORMULAIRE =================
+  const TOTAL_STEPS = 3;
+  let currentStep = 1;
+  const stepEls = { 1: document.getElementById('step-1'), 2: document.getElementById('step-2'), 3: document.getElementById('step-3') };
+  const signupProgress = document.getElementById('signupProgress');
+  const signupProgressFill = document.getElementById('signupProgressFill');
+  const signupBackBtn = document.getElementById('signupBack');
+  const signupNextBtn = document.getElementById('signupNext');
+
+  function validateStep1(){
+    const name = document.getElementById('s1Name').value.trim();
+    const pass = document.getElementById('s1Pass').value;
+    const passConfirm = document.getElementById('s1PassConfirm').value;
+    const consent = document.getElementById('s1Consent').checked;
+    const passErrorEl = document.getElementById('s1PassError');
+    const passConfirmInput = document.getElementById('s1PassConfirm');
+    const mismatch = passConfirm.length > 0 && pass !== passConfirm;
+    passErrorEl.style.display = mismatch ? '' : 'none';
+    passConfirmInput.classList.toggle('error', mismatch);
+    return name.length > 0 && pass.length > 0 && passConfirm.length > 0 && pass === passConfirm && consent;
+  }
+  function validateStep2(){ return true; } // aucun champ obligatoire à cette étape
+  function validateStep3(){ return document.getElementById('s3Consent').checked; }
+
+  function refreshNextButton(){
+    const valid = currentStep === 1 ? validateStep1() : currentStep === 2 ? validateStep2() : validateStep3();
+    signupNextBtn.disabled = !valid;
+    signupNextBtn.textContent = currentStep === TOTAL_STEPS ? 'Rejoindre' : 'Suivant';
+  }
+
+  ['s1Name','s1Pass','s1PassConfirm'].forEach(id => {
+    document.getElementById(id).addEventListener('input', refreshNextButton);
+  });
+  document.getElementById('s1Consent').addEventListener('change', refreshNextButton);
+  document.getElementById('s3Consent').addEventListener('change', refreshNextButton);
+
+  function showStep(n, direction){
+    Object.entries(stepEls).forEach(([num, el]) => {
+      num = Number(num);
+      el.classList.remove('current', 'prev');
+      if(num === n) el.classList.add('current');
+      else if(num < n) el.classList.add('prev');
+    });
+    currentStep = n;
+    signupProgress.textContent = 'Étape ' + n + ' / ' + TOTAL_STEPS;
+    signupProgressFill.style.width = (n / TOTAL_STEPS * 100) + '%';
+    refreshNextButton();
+  }
+
+  signupNextBtn.addEventListener('click', () => {
+    if(signupNextBtn.disabled) return;
+    if(currentStep < TOTAL_STEPS){
+      showStep(currentStep + 1);
+    } else {
+      // Étape 3 -> "Rejoindre" : fin du parcours de création de compte.
+      viewSuccess.classList.add('open');
+    }
+  });
+  signupBackBtn.addEventListener('click', () => {
+    if(currentStep > 1){
+      showStep(currentStep - 1);
+    } else {
+      viewSignup.classList.remove('open');
+    }
+  });
+
+  document.getElementById('btnCreateAccount').addEventListener('click', () => {
+    showStep(1);
+    viewSignup.classList.add('open');
+  });
+
+  document.getElementById('successRestart').addEventListener('click', () => {
+    viewSuccess.classList.remove('open');
+    viewSignup.classList.remove('open');
+    showStep(1);
+    // Réinitialisation complète du formulaire pour repartir d'un état propre.
+    document.getElementById('s1Name').value = '';
+    document.getElementById('s1Email').value = '';
+    document.getElementById('s1Phone').value = '';
+    document.getElementById('s1Loc').value = '';
+    document.getElementById('s1Pass').value = '';
+    document.getElementById('s1PassConfirm').value = '';
+    document.getElementById('s1Consent').checked = false;
+    document.getElementById('s2About').value = '';
+    document.getElementById('s3Consent').checked = false;
+    selectedCommunities.clear();
+    renderCommuList();
+    avatarUpload.style.backgroundImage = '';
+    avatarUpload.classList.remove('has-photo');
+    avatarUploadLabel.textContent = 'Ajouter une photo de profil';
+    landingActions.style.display = '';
+    loginPanel.classList.remove('open');
+    document.getElementById('loginUser').value = '';
+    document.getElementById('loginPass').value = '';
+    refreshNextButton();
+  });
+
+  refreshNextButton();
+</script>
+</body>
+</html>

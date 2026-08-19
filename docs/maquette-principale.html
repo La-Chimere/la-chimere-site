@@ -1,0 +1,3183 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>La Chimère — Maquette</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* --accent : SEULE couleur personnalisable par le club (logo, onglets actifs, "Rejoindre", bouton "+").
+       --success / --danger : fixes, réservées au statut clé / aux alertes — jamais réutilisées comme accent. */
+    --accent:#3F6EA5; /* Saphir — couleur par défaut */
+    --success:#2F8F5A;
+    --danger:#D5473F;
+    --radius:14px; --radius-sm:9px;
+  }
+  [data-theme="light"]{
+    --bg: color-mix(in srgb, var(--accent) 10%, #F1ECE3 90%);
+    --surface: color-mix(in srgb, var(--accent) 2%, #FFFFFF 98%);
+    --surface-2: color-mix(in srgb, var(--accent) 5%, #FFFFFF 95%);
+    --border: color-mix(in srgb, var(--accent) 12%, #DDD6CB 88%);
+    --text:#2B2620; --text-muted: color-mix(in srgb, var(--accent) 8%, #8F8172 92%);
+    --shadow:0 1px 2px rgba(45,35,25,.05), 0 1px 3px rgba(45,35,25,.06);
+    --shadow-lg:0 8px 24px rgba(45,35,25,.12);
+    --overlay:rgba(30,24,18,.5);
+  }
+  [data-theme="dark"]{
+    --bg: color-mix(in srgb, var(--accent) 14%, #14161B 86%);
+    --surface: color-mix(in srgb, var(--accent) 6%, #1C1F24 94%);
+    --surface-2: color-mix(in srgb, var(--accent) 10%, #262930 90%);
+    --border: color-mix(in srgb, var(--accent) 18%, #33363D 82%);
+    --text:#EDEEF2; --text-muted: color-mix(in srgb, var(--accent) 8%, #9BA1AE 92%);
+    --shadow:0 1px 2px rgba(0,0,0,.3); --shadow-lg:0 12px 28px rgba(0,0,0,.5);
+    --overlay:rgba(0,0,0,.65);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  button{font-family:inherit;}
+
+  /* Cadre "faux téléphone" : garantit un rendu à taille mobile réelle, quelle que soit la fenêtre du navigateur. */
+  body{ min-height:100vh; background:#DADDE2; display:flex; align-items:flex-start; justify-content:center; padding:26px 14px 50px; font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif; }
+  .phone-frame{ width:412px; max-width:95vw; height:876px; max-height:92vh; flex:none; border-radius:42px; border:10px solid #14161B; box-shadow:0 26px 64px rgba(16,24,40,.32); overflow:hidden; position:relative; transform:translateZ(0); background:#000; container-type:inline-size; }
+  .phone-screen{ position:absolute; inset:0; display:flex; flex-direction:column; overflow:hidden; background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased; }
+
+  header.topbar{ flex:none; display:flex; align-items:center; gap:10px; padding:14px 16px; background:var(--bg); z-index:50; }
+  .brand{ display:flex; align-items:center; gap:11px; font-weight:800; font-size:22px; flex:1; color:var(--text); min-width:0; cursor:pointer; background:none; border:none; padding:0; font-family:inherit; text-align:left; }
+  .logo-mark{ width:36px; height:36px; display:flex; align-items:center; justify-content:center; flex:none; color:var(--accent); }
+  .logo-mark svg{ width:100%; height:100%; display:block; }
+  .brand .brand-name{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  /* Barre de navigation ancrée en bas de l'écran (remplace l'ancienne nav dans le header) */
+  .bottom-nav{ flex:none; display:flex; align-items:stretch; background:var(--surface); border-top:1px solid var(--border); box-shadow:0 -2px 10px rgba(16,24,40,.05); z-index:50; }
+  .bn-btn{ flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; border:none; background:none; color:var(--text-muted); font-family:inherit; font-size:12px; font-weight:700; letter-spacing:-.1px; padding:11px 0 13px; cursor:pointer; }
+  .bn-btn[hidden]{ display:none; }
+  .bn-btn svg{ width:26px; height:26px; flex:none; }
+  .bn-btn span{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
+  .bn-btn.active{ color:var(--accent); }
+  /* Cloche : accès aux Annonces + Notifications. Même gris que les titres de page inactifs. */
+  .bell-btn{ position:relative; flex:none; width:40px; height:40px; border-radius:50%; background:var(--surface); border:none; box-shadow:var(--shadow); color:var(--text-muted); cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .bell-btn svg{ width:18px; height:18px; }
+  .bell-btn.active{ color:var(--accent); }
+  .bell-dot{ position:absolute; top:8px; right:9px; width:9px; height:9px; border-radius:50%; background:var(--danger); border:2px solid var(--surface); display:none; }
+  .bell-dot.show{ display:block; }
+
+  .account-wrap{ position:relative; flex:none; background:var(--accent); border-radius:50%; padding:4px; box-shadow:var(--shadow); }
+  .avatar-btn{ width:40px; height:40px; border-radius:50%; background:var(--accent); color:#fff; font-weight:800; font-size:14px; border:none; cursor:pointer; display:block; background-size:cover; background-position:center; }
+  .dropdown{ position:absolute; top:50px; right:0; width:230px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow-lg); padding:12px; display:none; z-index:70; }
+  .dropdown.open{ display:block; }
+  .acc-head{ display:flex; gap:10px; align-items:center; padding:4px 6px 12px; }
+  .acc-head .avatar-btn{ cursor:default; display:flex; align-items:center; justify-content:center; }
+  .acc-name{ font-weight:800; font-size:15.5px; }
+  .acc-tag{ font-size:12.5px; color:var(--text-muted); margin-top:1px; }
+  .acc-item{ width:100%; text-align:left; background:none; border:none; font-size:14.5px; font-weight:600; padding:9px 6px; border-radius:8px; cursor:pointer; color:var(--text); display:flex; align-items:center; gap:9px; }
+  .acc-item:hover{ background:var(--surface-2); }
+  .acc-item.danger{ color:var(--danger); }
+  .acc-divider{ height:1px; background:var(--border); margin:6px 0; }
+
+  .announce{ flex:none; display:flex; align-items:center; gap:10px; background:color-mix(in srgb, var(--accent) 14%, var(--surface) 86%); border-bottom:1px solid var(--border); padding:9px 16px; font-size:14px; font-weight:600; }
+  .announce .txt{ flex:1; }
+  .announce button{ border:none; background:none; color:var(--text-muted); font-size:17px; cursor:pointer; padding:2px 6px; }
+
+  /* main ne défile plus lui-même : c'est un pur conteneur de hauteur. Chaque page gère son propre
+     défilement, et la page Events sépare une zone fixe (toolbar + filtres) d'une zone qui défile
+     seule (liste des jours/événements) — jamais de contenu qui "passe derrière" la zone fixe. */
+  main{ flex:1; min-height:0; overflow:hidden; display:flex; flex-direction:column; max-width:1100px; margin:0 auto; width:100%; box-sizing:border-box; }
+  .page{ display:none; }
+  .page.active{ display:flex; flex-direction:column; flex:1; min-height:0; padding:16px 16px 8px; box-sizing:border-box; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+  #page-events.active{ overflow:hidden; }
+
+  .events-fixed-top{ flex:none; }
+  .events-list-scroll{ flex:1; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; padding-bottom:96px; }
+  /* Vue calendaire (mois) : occupe toute la hauteur dispo sans réserver de place pour le FAB, pas de scroll. */
+  .events-list-scroll.cal-mode{ padding-bottom:0; overflow:hidden; }
+  #gridContainer{ height:100%; }
+
+  /* Barres de scroll verticales masquées partout (même esprit que les tags horizontaux),
+     tout en gardant le scroll natif (molette / trackpad / swipe) pleinement fonctionnel. */
+  .page.active, .events-list-scroll{ scrollbar-width:none; -ms-overflow-style:none; }
+  .page.active::-webkit-scrollbar, .events-list-scroll::-webkit-scrollbar{ display:none; }
+
+  .cal-toolbar{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .toolbar-left{ display:flex; align-items:center; gap:10px; flex-wrap:nowrap; width:100%; }
+  .datenav-group{ display:flex; align-items:center; gap:10px; flex:none; }
+  .view-toggle{ width:38px; height:38px; border-radius:9px; border:1px solid var(--border); background:var(--surface); cursor:pointer; font-size:17px; color:var(--text-muted); flex:none; }
+  .avail-wrap{ position:relative; flex:none; margin-left:auto; }
+  .avail-btn{ height:38px; padding:0 12px; border-radius:9px; border:none; background:var(--accent); color:#fff; font-size:13px; font-weight:800; cursor:pointer; white-space:nowrap; display:flex; align-items:center; gap:6px; }
+  .avail-btn.active{ filter:brightness(0.93); }
+  .avail-eye{ display:flex; align-items:center; justify-content:center; }
+  .avail-eye svg{ width:15px; height:15px; display:block; }
+  .avail-dropdown{ top:44px; left:auto; right:0; width:210px; }
+  .view-toggle.active{ background:var(--surface); border-color:var(--accent); color:var(--accent); }
+  .datenav{ display:flex; align-items:center; gap:10px; font-size:17px; font-weight:800; color:var(--text); flex:none; }
+  .datenav button{ width:31px; height:31px; border-radius:8px; border:1px solid var(--border); background:var(--surface); cursor:pointer; color:var(--text); font-size:14px; flex:none; }
+  #navLabel{ display:inline-block; width:116px; text-align:center; white-space:nowrap; overflow:hidden; }
+
+  .h-scroll{ scrollbar-width:none; -ms-overflow-style:none; cursor:grab; user-select:none; -webkit-overflow-scrolling:touch; }
+  .h-scroll::-webkit-scrollbar{ display:none; }
+  .h-scroll.dragging{ cursor:grabbing; }
+  .filters{ display:flex; gap:7px; flex-wrap:nowrap; overflow-x:auto; margin-bottom:16px; padding-bottom:3px; }
+  .chip{ border:1px solid var(--border); background:var(--surface); padding:7px 14px; border-radius:99px; font-size:13px; font-weight:700; color:var(--text-muted); cursor:pointer; flex:none; white-space:nowrap; }
+  .chip.active{ background:var(--accent); border-color:var(--accent); color:#fff; }
+  /* Sélecteurs de communauté (Programme, Leaderboard, Communautés, Mon profil > Mes communautés) :
+     état sélectionné différent des chips ci-dessus pour ne pas se confondre avec un CTA de la page. */
+  #filters .chip.active,
+  #rankingCommunityFilter .chip.active,
+  #communityFilters .chip.active,
+  #profCommuFilters .chip.active{ background:var(--surface); border-color:var(--accent); color:var(--accent); }
+
+  .avatar{ width:31px; height:31px; border-radius:50%; background:var(--surface-2); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex:none; color:var(--text); border:1px solid var(--border); }
+  .tag{ font-size:12px; font-weight:700; padding:3px 8px; border-radius:99px; flex:none; white-space:nowrap; }
+  .tag.ok{ background:color-mix(in srgb, var(--success) 16%, var(--surface) 84%); color:color-mix(in srgb, var(--success) 60%, black 30%); }
+  [data-theme="dark"] .tag.ok{ color:color-mix(in srgb, var(--success) 70%, white 20%); }
+  .tag.warn{ background:color-mix(in srgb, var(--danger) 14%, var(--surface) 86%); color:color-mix(in srgb, var(--danger) 55%, black 25%); }
+  [data-theme="dark"] .tag.warn{ color:color-mix(in srgb, var(--danger) 70%, white 20%); }
+  .cta-mini{ background:var(--danger); color:#fff; border:none; padding:6px 10px; border-radius:8px; font-size:12.5px; font-weight:700; cursor:pointer; white-space:nowrap; }
+  .join-btn{ background:var(--accent); border:none; color:#fff; padding:7px 14px; border-radius:8px; font-size:12.5px; font-weight:800; cursor:pointer; white-space:nowrap; }
+  .join-btn:hover{ filter:brightness(0.93); }
+  .join-btn:disabled{ opacity:.6; cursor:default; filter:none; }
+  .tag.genre{ background:var(--surface-2); color:var(--text-muted); border:1px solid var(--border); }
+
+  .day-unit{ margin-bottom:18px; }
+  .day-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin:0 0 8px 2px; }
+  .day-head-left{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; min-width:0; }
+  .day-head .d1{ font-weight:800; font-size:16px; }
+  .day-head .d2{ font-size:13px; color:var(--text-muted); }
+  .day-unit.today .day-head .d1{ color:color-mix(in srgb, var(--accent) 78%, black 22%); }
+  [data-theme="dark"] .day-unit.today .day-head .d1{ color:color-mix(in srgb, var(--accent) 65%, white 15%); }
+  .agenda-empty{ font-size:13.5px; color:var(--text-muted); padding:9px 13px; border:1px dashed var(--border); border-radius:var(--radius-sm); }
+  .event-card{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); padding:12px 13px; margin-bottom:8px; box-shadow:var(--shadow); cursor:pointer; }
+  .event-card .top{ display:flex; align-items:center; justify-content:space-between; gap:6px; row-gap:5px; flex-wrap:wrap; margin-bottom:4px; }
+  .event-card .top-left{ display:flex; align-items:center; gap:6px; min-width:0; }
+  .event-card .time{ font-size:12.5px; font-weight:700; color:var(--text-muted); }
+  .event-card .title{ font-size:14px; font-weight:700; margin:2px 0 6px; line-height:1.3; }
+  .event-card .bottom{ display:flex; align-items:center; justify-content:space-between; gap:6px; }
+  .event-card .who{ font-size:13px; color:var(--text-muted); }
+  /* Disponibilité : se comporte comme un évènement mais fond grisé pour bien la différencier dans la liste. */
+  .event-card.avail-card{ background:var(--surface-2); box-shadow:none; }
+  .event-card.avail-card .join-btn{ background:var(--text-muted); }
+
+  .grid-wrap{ margin-bottom:10px; }
+  .g-header{ display:grid; gap:6px; padding:0 2px 8px; }
+  .g-header .cell{ text-align:center; }
+  .g-header .cell .wd{ font-size:12px; font-weight:700; color:var(--text-muted); text-transform:uppercase; }
+  .g-header .cell .wn{ font-size:16px; font-weight:800; margin-top:2px; }
+  .g-header .cell.is-today .wn{ color:color-mix(in srgb, var(--accent) 78%, black 20%); }
+  [data-theme="dark"] .g-header .cell.is-today .wn{ color:color-mix(in srgb, var(--accent) 65%, white 15%); }
+  .g-body{ position:relative; display:grid; gap:6px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:8px; box-shadow:var(--shadow); }
+  .timelabel{ grid-column:1; font-size:11.5px; color:var(--text-muted); text-align:right; padding-right:4px; transform:translateY(-6px); }
+  .col-today{ background:color-mix(in srgb, var(--accent) 6%, transparent); border-radius:8px; grid-row:1/-1; }
+  .gcell{ position:relative; }
+  .gevent{ position:absolute; box-sizing:border-box; border-radius:7px; padding:5px 6px; font-size:11.5px; overflow:hidden; border-left:3px solid var(--success); background:color-mix(in srgb, var(--success) 16%, var(--surface) 84%); color:color-mix(in srgb, var(--success) 55%, black 30%); cursor:pointer; }
+  [data-theme="dark"] .gevent{ color:color-mix(in srgb, var(--success) 72%, white 15%); }
+  .gevent.no-key{ border-left-color:var(--danger); background:color-mix(in srgb, var(--danger) 16%, var(--surface) 84%); color:color-mix(in srgb, var(--danger) 55%, black 25%); }
+  [data-theme="dark"] .gevent.no-key{ color:color-mix(in srgb, var(--danger) 72%, white 15%); }
+  .gevent .gt{ font-weight:800; display:block; }
+  .gevent .gh{ opacity:.8; font-size:10px; }
+
+  /* La grille remplit toute la hauteur disponible de la vue calendrier, sans jamais déborder ni nécessiter
+     de scroll : le nombre de lignes est fixé dynamiquement (voir monthGridHtml) et chaque ligne se partage
+     l'espace restant en fractions égales (1fr), quitte à tronquer une étiquette trop longue (ellipsis). */
+  .month-grid{ display:flex; flex-direction:column; height:100%; }
+  .month-grid-header{ flex:none; display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:4px; padding:0 2px 8px; }
+  .mgh-cell{ text-align:center; font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; }
+  .month-grid-body{ flex:1; min-height:0; display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:4px; }
+  .month-cell{ background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:4px; display:flex; flex-direction:column; gap:3px; min-height:0; min-width:0; box-sizing:border-box; overflow:hidden; }
+  .month-cell.is-pad{ background:transparent; border-color:transparent; }
+  .month-cell.is-today{ border-color:color-mix(in srgb, var(--accent) 55%, var(--border) 45%); box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent); }
+  .mc-num{ font-size:12px; font-weight:800; color:var(--text); flex:none; }
+  .month-cell.is-today .mc-num{ color:color-mix(in srgb, var(--accent) 78%, black 20%); }
+  [data-theme="dark"] .month-cell.is-today .mc-num{ color:color-mix(in srgb, var(--accent) 65%, white 15%); }
+  /* Étiquettes en vertical pour laisser le libellé de la communauté se lire au mieux malgré la largeur très
+     réduite d'une case de calendrier mensuel sur mobile (tronqué en ellipsis si la case est trop petite). */
+  .month-evt-row{ display:flex; flex-direction:row; gap:3px; flex:1; min-height:0; overflow:hidden; }
+  .month-evt{ writing-mode:vertical-rl; text-orientation:mixed; font-size:9.5px; font-weight:700; border-radius:4px; padding:4px 2px; border-top:3px solid var(--success); background:color-mix(in srgb, var(--success) 16%, var(--surface) 84%); color:color-mix(in srgb, var(--success) 55%, black 30%); cursor:pointer; overflow:hidden; text-overflow:ellipsis; flex:none; }
+  [data-theme="dark"] .month-evt{ color:color-mix(in srgb, var(--success) 72%, white 15%); }
+  .month-evt.no-key{ border-top-color:var(--danger); background:color-mix(in srgb, var(--danger) 16%, var(--surface) 84%); color:color-mix(in srgb, var(--danger) 55%, black 25%); }
+  [data-theme="dark"] .month-evt.no-key{ color:color-mix(in srgb, var(--danger) 72%, white 15%); }
+  .month-more{ font-size:9.5px; font-weight:700; color:var(--text-muted); padding:1px 2px; flex:none; align-self:flex-end; }
+
+
+  .fab{ position:fixed; right:18px; bottom:90px; z-index:46; width:58px; height:58px; border-radius:50%; background:var(--accent); color:#fff; border:none; font-size:29.5px; box-shadow:var(--shadow-lg); cursor:pointer; }
+  .fab:hover{ transform:scale(1.05); }
+
+  .segmented{ display:flex; gap:4px; background:var(--surface-2); padding:4px; border-radius:10px; margin-bottom:16px; width:fit-content; }
+  .segmented button{ border:none; background:transparent; font-size:14px; font-weight:700; padding:7px 14px; border-radius:8px; color:var(--text-muted); cursor:pointer; }
+  .segmented button.active{ background:var(--surface); color:var(--text); box-shadow:var(--shadow); }
+  .section-card{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px; margin-bottom:14px; box-shadow:var(--shadow); }
+  .lb-row{ display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--border); }
+  .lb-row:last-child{ border-bottom:none; }
+  .lb-rank{ width:22px; text-align:center; font-weight:800; font-size:14px; color:var(--text-muted); flex:none; }
+  .lb-rank.top1{ color:#D4A017; } .lb-rank.top2{ color:#9AA1B2; } .lb-rank.top3{ color:#B5651D; }
+  .lb-info{ flex:1; min-width:0; }
+  .lb-name{ font-weight:700; font-size:14.5px; }
+  .lb-sub{ font-size:12.5px; color:var(--text-muted); }
+  .lb-stats{ flex:none; width:52px; text-align:center; }
+  .lb-stats .n{ font-weight:800; font-size:15.5px; display:block; }
+  .lb-stats .l{ font-size:11.5px; color:var(--text-muted); }
+  #rankingCommunityFilter{ flex:none; }
+  .lb-header{ display:flex; align-items:flex-end; gap:10px; padding-bottom:8px; border-bottom:1px solid var(--border); margin-bottom:2px; }
+  .lb-header-spacer{ flex:1; min-width:0; }
+  .lb-col-label{ flex:none; width:52px; text-align:center; font-size:10px; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:.03em; line-height:1.25; border:none; background:none; padding:0 0 4px; font-family:inherit; cursor:pointer; border-bottom:2px solid transparent; }
+  .lb-col-label.wdl{ width:86px; }
+  .lb-col-label.active{ color:var(--accent); border-bottom-color:var(--accent); }
+  .lb-wdl{ flex:none; width:86px; text-align:center; font-weight:800; font-size:14px; white-space:nowrap; }
+  .lb-wdl .w{ color:var(--success); }
+  .lb-wdl .d{ color:var(--text-muted); }
+  .lb-wdl .lo{ color:var(--danger); }
+  .lb-wdl .sep{ color:var(--text-muted); font-weight:600; margin:0 1px; }
+
+  #communityFilters{ flex:none; }
+  .section-subtitle{ font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing:.03em; color:var(--text-muted); margin:0 0 10px; }
+  .member-card{ display:flex; align-items:center; gap:12px; width:100%; border:none; background:none; padding:9px 0; border-bottom:1px solid var(--border); cursor:pointer; text-align:left; font-family:inherit; }
+  .member-card:last-child{ border-bottom:none; }
+  .member-card:hover{ background:var(--surface-2); }
+  .member-info{ flex:1; min-width:0; }
+  .member-name{ font-weight:700; font-size:14.5px; }
+  .member-key{ margin-left:5px; font-size:12px; }
+  .member-activity{ font-size:12.5px; color:var(--text-muted); }
+  .commu-event-row{ display:flex; align-items:baseline; gap:10px; padding:8px 0; border-bottom:1px solid var(--border); font-size:13.5px; }
+  .commu-event-row:last-child{ border-bottom:none; }
+  .commu-event-day{ flex:none; font-weight:800; color:var(--accent); font-size:12.5px; text-transform:uppercase; }
+  .commu-event-title{ flex:1; min-width:0; font-weight:600; }
+  .audience-badge{ display:inline-block; font-size:10.5px; font-weight:800; text-transform:uppercase; letter-spacing:.02em; color:var(--accent); background:color-mix(in srgb, var(--accent) 14%, var(--surface) 86%); border-radius:6px; padding:2px 7px; margin-left:6px; vertical-align:middle; }
+
+  .page-title{ font-size:21.5px; margin:2px 0 16px; font-weight:800; }
+  .ann-card{ position:relative; display:flex; gap:12px; padding:14px 40px 14px 14px; margin-bottom:10px; }
+  .ann-alert-icon{ margin-right:2px; }
+  .ann-dot{ position:absolute; top:50%; right:12px; transform:translateY(-50%); width:22px; height:22px; border-radius:50%; border:2.5px solid var(--accent); background:#fff; cursor:pointer; padding:0; }
+  .ann-dot.unread{ background:var(--accent); }
+  .ann-date{ flex:none; width:44px; text-align:center; }
+  .ann-date .d{ font-size:18px; font-weight:800; display:block; line-height:1.1; }
+  .ann-date .m{ font-size:10.5px; color:var(--text-muted); text-transform:uppercase; font-weight:700; }
+  .ann-body{ flex:1; min-width:0; }
+  .ann-body .t{ font-weight:700; font-size:14.5px; margin-bottom:3px; }
+  .ann-body .d2{ font-size:13.5px; color:var(--text-muted); line-height:1.4; }
+
+  /* ---- Page Annonces / Notifications ---- */
+  .an-section-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin:2px 0 14px; }
+  .an-section-head:not(:first-child){ margin-top:26px; }
+  .an-section-head .page-title{ margin:0; }
+  .an-section-actions{ display:flex; gap:8px; flex:none; }
+  .icon-btn{ flex:none; width:34px; height:34px; border-radius:9px; border:1px solid var(--border); background:var(--surface); color:var(--text-muted); cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; }
+  .icon-btn svg{ width:16px; height:16px; }
+  .icon-btn:disabled{ opacity:.4; cursor:default; }
+  .icon-btn.danger{ color:var(--danger); border-color:color-mix(in srgb, var(--danger) 35%, var(--border) 65%); }
+  .icon-btn.confirm{ width:auto; padding:0 10px; font-size:11.5px; font-weight:800; color:#fff; background:var(--danger); border-color:var(--danger); }
+  .empty-hint{ font-size:13.5px; color:var(--text-muted); padding:9px 13px; border:1px dashed var(--border); border-radius:var(--radius-sm); }
+
+  .ann-poll{ margin-top:10px; }
+  .poll-options{ display:flex; gap:16px; flex-wrap:wrap; margin-bottom:10px; }
+  .poll-opt{ display:flex; align-items:center; gap:6px; font-size:13.5px; font-weight:600; color:var(--text); cursor:pointer; }
+  .poll-opt input{ accent-color:var(--accent); width:16px; height:16px; cursor:pointer; margin:0; }
+  .poll-actions{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .poll-results-btn{ background:#6b7280; border:none; color:#fff; padding:7px 14px; border-radius:8px; font-size:12.5px; font-weight:800; cursor:pointer; white-space:nowrap; }
+  .poll-results-btn:hover{ filter:brightness(1.1); }
+  .poll-results{ margin-top:8px; font-size:12.5px; color:var(--text); background:var(--surface-2); border:1px solid var(--border); border-radius:8px; padding:9px 11px; line-height:1.7; }
+
+  .notif-card{ position:relative; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); box-shadow:var(--shadow); padding:12px 42px 12px 14px; margin-bottom:8px; font-size:13.5px; line-height:1.45; color:var(--text); }
+  .notif-close{ position:absolute; top:-7px; right:-7px; width:19px; height:19px; border-radius:50%; border:1px solid var(--border); background:var(--surface-2); color:var(--text-muted); font-size:13px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; box-shadow:var(--shadow); }
+  .notif-dot{ position:absolute; top:50%; right:10px; transform:translateY(-50%); width:22px; height:22px; border-radius:50%; border:2.5px solid var(--accent); background:#fff; cursor:pointer; padding:0; }
+  .notif-dot.unread{ background:var(--accent); }
+  .admin-row{ display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--border); }
+  .admin-row:last-child{ border-bottom:none; }
+  .admin-row .name{ font-weight:700; font-size:14.5px; flex:1; }
+  .mini-toggle{ width:34px; height:20px; border-radius:99px; position:relative; border:1px solid var(--border); background:var(--surface-2); flex:none; cursor:pointer; }
+  .mini-toggle .k{ position:absolute; top:2px; left:2px; width:14px; height:14px; border-radius:50%; background:var(--text-muted); transition:left .15s ease, background .15s ease; }
+  .mini-toggle.on{ background:color-mix(in srgb, var(--success) 20%, var(--surface) 80%); border-color:var(--success); }
+  .mini-toggle.on .k{ left:16px; background:var(--success); }
+  .admin-stats{ display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
+  .admin-stat{ flex:1; min-width:110px; text-align:center; padding:14px 10px; }
+  .admin-stat .n{ font-size:22.5px; font-weight:800; display:block; }
+  .admin-stat .l{ font-size:12.5px; color:var(--text-muted); }
+
+  /* Modal */
+  .modal-overlay{ position:fixed; inset:0; background:var(--overlay); display:none; align-items:flex-end; justify-content:center; z-index:100; }
+  .modal-overlay.open{ display:flex; }
+  .modal-box{ background:var(--surface); width:100%; max-width:440px; border-radius:18px 18px 0 0; padding:20px; max-height:85vh; overflow-y:auto; position:relative; }
+  @media (min-width:640px){ .modal-overlay{ align-items:center; } .modal-box{ border-radius:18px; } }
+  .modal-close{ position:absolute; top:14px; right:14px; width:30px; height:30px; border-radius:50%; border:1px solid var(--border); background:var(--surface-2); font-size:17px; cursor:pointer; color:var(--text); }
+  .modal-box h3{ margin:0 0 4px; font-size:19px; padding-right:30px; }
+  .modal-meta{ font-size:14px; color:var(--text-muted); margin-bottom:14px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .modal-section-label{ font-size:12px; text-transform:uppercase; letter-spacing:.04em; font-weight:800; color:var(--text-muted); margin:14px 0 8px; }
+  .modal-participants{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
+  .modal-participants li{ display:flex; align-items:center; gap:9px; font-size:14.5px; font-weight:600; }
+  .mp-name{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .mp-name[data-member]{ cursor:pointer; }
+  /* Boutons V / E / D : chaque participant peut se voir attribuer un résultat (au clic d'un·e participant·e ou d'un·e admin) ; un seul actif par participant, indépendant des autres participants. Ces résultats alimentent le classement. */
+  .ved-group{ display:flex; flex:none; border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+  .ved-btn{ flex:none; border:none; background:var(--surface-2); color:var(--text-muted); font-family:inherit; font-weight:800; font-size:11.5px; padding:6px 9px; cursor:pointer; }
+  .ved-btn + .ved-btn{ border-left:1px solid var(--border); }
+  .ved-btn.v.active{ background:var(--success); color:#fff; }
+  .ved-btn.e.active{ background:#8F8172; color:#fff; }
+  .ved-btn.d.active{ background:var(--danger); color:#fff; }
+  .modal-join{ width:100%; margin-top:18px; background:var(--accent); color:#fff; border:none; font-weight:700; font-size:15.5px; padding:12px; border-radius:11px; cursor:pointer; }
+
+  /* ---- Formulaire de création d'événement : le plus simple possible, 2 clics. ---- */
+  .form-field{ margin-bottom:15px; }
+  .form-row-2{ display:flex; gap:10px; }
+  .form-row-2 .form-field{ flex:1; min-width:0; }
+  .form-label{ display:block; font-size:12.5px; font-weight:800; color:var(--text-muted); margin-bottom:5px; text-transform:uppercase; letter-spacing:.03em; }
+  .form-label #ceTitleStar{ color:var(--danger); text-transform:none; }
+  .form-input{ width:100%; box-sizing:border-box; border:1px solid var(--border); background:var(--surface-2); border-radius:10px; padding:10px 11px; font-size:14.5px; color:var(--text); font-family:inherit; }
+  .form-input:focus{ outline:2px solid color-mix(in srgb, var(--accent) 45%, transparent); outline-offset:1px; border-color:var(--accent); }
+  .form-textarea{ resize:vertical; min-height:64px; font-family:inherit; line-height:1.4; }
+  .form-hint{ font-size:12px; color:var(--text-muted); margin-top:5px; }
+  .field-note{ font-size:12px; color:var(--text-muted); line-height:1.5; margin:7px 0 0; }
+  .field-error{ font-size:12px; color:var(--danger); font-weight:700; margin-top:5px; }
+  .field-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:6px; }
+  .field-head .form-label{ margin-bottom:0; }
+  .visibility-switch{ display:flex; align-items:center; gap:7px; flex:none; }
+  .visibility-switch .txt{ font-size:11px; font-weight:700; color:var(--text-muted); white-space:nowrap; }
+
+  /* ---- Sous-pages ouvertes depuis le menu du compte (Mon profil, Paramètres, FAQ, CGU, déconnexion) ---- */
+  .subpage-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:16px; }
+  .subpage-head .page-title{ margin:0; }
+  .subpage-back{ display:inline-flex; align-items:center; gap:5px; flex:none; background:var(--surface); border:1px solid var(--border); color:var(--text-muted); font-size:12.5px; font-weight:700; cursor:pointer; padding:7px 12px 7px 10px; border-radius:99px; font-family:inherit; }
+  .subpage-back svg{ width:13px; height:13px; }
+  .subpage-back:hover{ background:var(--surface-2); color:var(--text); }
+  .modal-btn.gray{ background:var(--surface-2); color:var(--text-muted); }
+  .modal-btn.gray:hover{ background:var(--border); }
+  .key-code{ font-size:24px; font-weight:800; letter-spacing:.06em; margin:0; color:var(--text); }
+  .key-status{ font-size:13.5px; color:var(--text-muted); line-height:1.5; margin:0 0 12px; }
+  .avatar-upload-wrap{ display:flex; flex-direction:column; align-items:center; gap:9px; }
+  .avatar-upload{ width:84px; height:84px; border-radius:50%; background:var(--surface-2); border:1.5px dashed var(--border); display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text-muted); background-size:cover; background-position:center; flex:none; font-weight:800; font-size:22px; }
+  .avatar-upload.has-photo{ border-style:solid; color:transparent; }
+  .avatar-upload-label{ font-size:12.5px; font-weight:700; color:var(--accent); cursor:pointer; background:none; border:none; font-family:inherit; }
+  .accent-swatches{ display:flex; gap:10px; flex-wrap:wrap; }
+  .accent-swatch{ width:34px; height:34px; border-radius:50%; border:2.5px solid transparent; cursor:pointer; padding:0; box-shadow:inset 0 0 0 1px rgba(0,0,0,.08); }
+  .accent-swatch.selected{ border-color:var(--text); }
+  .info-box{ border:1px solid var(--border); background:var(--surface); border-radius:12px; padding:14px; margin-bottom:14px; }
+  .info-box-title{ font-size:13.5px; font-weight:800; margin:0 0 7px; }
+  .info-box-text{ font-size:13px; color:var(--text-muted); line-height:1.55; margin:0; }
+  .info-box-placeholder{ font-style:italic; }
+  .logout-screen{ display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:40px 24px; height:100%; }
+  .logout-icon{ width:64px; height:64px; border-radius:50%; background:var(--surface-2); color:var(--text-muted); display:flex; align-items:center; justify-content:center; margin-bottom:18px; }
+  .logout-icon svg{ width:30px; height:30px; }
+
+  .ce-participants{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; }
+  .ce-chip{ display:flex; align-items:center; gap:5px; background:var(--surface-2); border:1px solid var(--border); border-radius:99px; padding:5px 5px 5px 11px; font-size:12.5px; font-weight:700; color:var(--text); }
+  .ce-chip button{ border:none; background:none; color:var(--text-muted); cursor:pointer; font-size:14px; line-height:1; padding:3px; border-radius:50%; display:flex; }
+  .ce-chip button:hover{ background:var(--border); }
+  .ce-chip button:disabled{ opacity:.35; cursor:default; }
+  .ce-search-wrap{ position:relative; }
+  .ce-search-wrap .form-input{ padding-left:33px; }
+  .ce-search-icon{ position:absolute; left:11px; top:50%; transform:translateY(-50%); font-size:13.5px; color:var(--text-muted); pointer-events:none; }
+  .ce-member-results{ margin-top:6px; max-height:150px; overflow-y:auto; border:1px solid var(--border); border-radius:10px; background:var(--surface); display:none; scrollbar-width:none; -ms-overflow-style:none; }
+  .ce-member-results::-webkit-scrollbar{ display:none; }
+  .ce-member-results.open{ display:block; }
+  .ce-member-row{ padding:9px 12px; font-size:14px; font-weight:600; cursor:pointer; }
+  .ce-member-row:hover{ background:var(--surface-2); }
+  .ce-member-empty{ padding:9px 12px; font-size:13px; color:var(--text-muted); }
+
+  /* ---- Formulaire de création / édition d'annonce (admin) ---- */
+  .af-header{ text-align:center; margin-bottom:18px; padding:0 34px; }
+  .af-header-label{ font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; color:var(--text-muted); }
+  .af-switch-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .af-poll-opt-row{ display:flex; gap:6px; align-items:center; margin-bottom:6px; }
+  .af-poll-opt-row .form-input{ flex:1; }
+  .af-poll-opt-row button{ border:none; background:none; color:var(--text-muted); cursor:pointer; font-size:15px; line-height:1; padding:6px; border-radius:50%; flex:none; display:flex; }
+  .af-poll-opt-row button:hover{ background:var(--border); }
+  .af-add-option{ border:1px dashed var(--border); background:none; color:var(--text-muted); font-size:13px; font-weight:700; padding:8px 12px; border-radius:9px; cursor:pointer; width:100%; margin-top:2px; }
+  .af-add-option:hover{ background:var(--surface-2); }
+  #afPollQuestion{ margin-bottom:8px; }
+  .af-poll-type-select{ margin-bottom:10px; }
+  .af-poll-type-select{ flex:1; min-width:0; cursor:pointer; }
+
+  /* Rendu du sondage dans la liste des annonces */
+  .poll-question{ font-size:13.5px; font-weight:700; margin:8px 0 8px; }
+  .poll-stars{ display:flex; gap:5px; margin-bottom:10px; }
+  .star-btn{ border:none; background:none; padding:0; font-size:23px; line-height:1; color:var(--border); cursor:pointer; }
+  .star-btn.filled{ color:#E3A72B; }
+
+  .modal-btn-row{ display:flex; gap:10px; margin-top:18px; }
+  .modal-btn{ flex:1; border:none; font-weight:800; font-size:15px; padding:12px; border-radius:11px; cursor:pointer; color:#fff; }
+  .modal-btn.primary{ background:var(--accent); }
+  .modal-btn.primary:hover{ filter:brightness(0.93); }
+  .modal-btn.primary:disabled{ opacity:.5; cursor:default; filter:none; }
+  .modal-btn.danger{ background:var(--danger); }
+  .modal-btn.danger:hover{ filter:brightness(0.93); }
+  .modal-btn.outline{ background:var(--surface); border:1.5px solid var(--accent); color:var(--accent); }
+  .modal-btn.outline:hover{ background:var(--surface-2); }
+  .modal-btn-full{ width:100%; flex:none; margin-top:10px; }
+  .ce-repeat-row{ display:flex; align-items:center; gap:8px; margin:0 0 16px; font-size:13.5px; font-weight:400; color:var(--text); cursor:pointer; }
+  .ce-repeat-row input{ width:18px; height:18px; accent-color:var(--accent); cursor:pointer; }
+
+  /* ---- Admin : membres / clés / communautés ---- */
+  .join-btn.gray{ background:var(--surface-2); color:var(--text-muted); }
+  .join-btn.gray:hover{ background:var(--border); }
+  .join-btn.danger{ background:var(--danger); }
+  .admin-row .name .sub{ display:block; font-weight:400; font-size:12px; color:var(--text-muted); margin-top:1px; }
+  .admin-row.reverse{ justify-content:flex-start; }
+  .admin-row.reverse .name{ text-align:right; }
+  .admin-row.hidden-commu{ opacity:.55; }
+  .admin-empty-hint{ font-size:13px; color:var(--text-muted); padding:8px 0; }
+  .admin-keys-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:4px; }
+  .admin-keys-count{ font-size:20px; font-weight:800; }
+  .join-btn.small{ padding:6px 12px; font-size:11.5px; }
+  .admin-add-key-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:8px; margin-bottom:14px; flex-wrap:wrap; }
+  .admin-add-key-row .ce-participants{ margin-bottom:0; flex:1; }
+  .admin-eye-btn{ flex:none; width:34px; height:34px; border-radius:9px; border:1px solid var(--border); background:var(--surface); color:var(--text-muted); cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; }
+  .admin-eye-btn svg{ width:17px; height:17px; }
+  .admin-eye-btn.active{ color:var(--accent); border-color:color-mix(in srgb, var(--accent) 35%, var(--border) 65%); }
+  .admin-row-actions{ display:flex; align-items:center; gap:7px; flex:none; }
+  .admin-keys-suffix{ font-weight:800; color:var(--text); font-size:14px; }
+  .admin-scroll-list{ max-height:450px; overflow-y:auto; }
+  .admin-scroll-list-tall{ max-height:500px; overflow-y:auto; }
+  .subpage-back-row{ margin-bottom:14px; }
+  .member-profile-head{ display:flex; flex-direction:column; align-items:center; gap:4px; margin-bottom:18px; text-align:center; }
+  .member-profile-avatar{ width:88px; height:88px; border-radius:50%; background:var(--surface-2); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:26px; color:var(--text); background-size:cover; background-position:center; margin-bottom:6px; }
+  .member-profile-name{ display:flex; align-items:center; justify-content:center; gap:4px; font-size:19px; font-weight:800; }
+  .member-profile-joined{ font-size:13px; color:var(--text-muted); }
+</style>
+</head>
+<body>
+<div class="phone-frame"><div class="phone-screen">
+
+<header class="topbar">
+  <div class="brand" id="brandHomeBtn" role="button" tabindex="0" title="Retour au Programme">
+    <span class="logo-mark" aria-hidden="true">
+      <svg viewBox="0 0 900 900" xmlns="http://www.w3.org/2000/svg">
+        <path d="M806.334 505.106C774.041 467.516 738.627 466.158 713.47 466.158C686.052 466.158 658.791 474.726 636.708 490.285L636.131 490.7H499.07L498.531 486.307C498.728 486.263 517.33 481.513 532.233 468.072C498.792 452.426 470.519 395.546 469.294 393.056L467.364 389.131L471.68 389.882C480.977 391.502 495.061 393.873 501.317 394.774C488.186 348.931 464.555 321.227 464.314 320.945L461.306 317.465L492.974 316.094C462.88 253.671 407.339 224.116 406.773 223.812L402.006 221.322L407.144 219.723C407.334 219.659 425.589 213.873 438.334 203.718L438.252 203.665C413.186 189.323 336.927 145.676 276.008 145.676C263.313 145.676 251.853 147.578 241.952 151.331C178.184 175.512 175.95 214.918 175.933 215.311L175.895 216.43L134.789 245.006C130.158 248.225 127.749 253.694 128.502 259.283L130.817 276.659L73.8501 314.086C65.3719 319.654 62.3313 330.721 66.7782 339.823L94.4235 396.446H159.602L106.084 433.972L114.063 473.802L130.064 452.131L173.166 441.377C174.294 441.093 175.488 440.953 176.702 440.953C182.489 440.953 187.272 443.998 188.891 448.706C190.956 454.707 188.864 465.408 167.145 482.261C150.227 495.387 97.461 544.131 125.027 622.931H224.413L216.392 650.81H153.522C100.958 650.81 66.2251 662.261 50.2985 684.834C36.7204 704.07 41.5423 725.904 43.1829 731.699L340.194 731.721C341.495 731.559 342.766 731.395 343.986 731.189C351.647 729.95 357.27 728.057 361.161 725.383C363.531 723.753 365.281 721.925 366.817 719.457C369.017 715.923 370.697 710.856 371.808 704.408C373.306 695.84 373.972 684.128 373.955 666.439V664.21H396.944V666.439C396.933 682.683 396.438 693.535 395.281 702.723C393.831 714.14 391.32 722.753 387.375 729.809C387.009 730.45 386.628 731.082 386.23 731.701H499.98C499.919 730.341 499.877 728.894 499.877 727.362C499.888 715.989 501.728 705.083 505.352 694.928C510.403 680.748 518.831 668.57 530.4 658.741C539.428 651.064 550.392 644.844 562.974 640.276C581.466 633.534 603.975 630.111 629.874 630.111H696.403V601.078H722.041V655.685H629.875C604.391 655.685 583.125 659.252 566.68 666.299C553.684 671.876 543.964 679.347 536.974 689.111C533.295 694.296 530.456 700.114 528.534 706.421C526.028 714.631 525.509 722.34 525.516 727.363C525.509 728.939 525.559 730.397 525.634 731.702H841V654.697C841 632.63 839.813 544.077 806.334 505.106Z" fill="currentColor"/>
+        <path d="M576.513 507.31L498 506.743L498.097 467.176C560.682 375.31 556.667 302.739 540.606 234.706C639.4 151.046 753.287 146.895 859.301 145.676C828.812 180.707 829.913 217.511 850.376 250.767C804.057 265.561 801.42 330.192 820.032 368.323C762.853 352.274 707.161 402.038 741.483 459.163C671.944 400.832 570.176 426.196 576.513 507.31Z" fill="currentColor"/>
+      </svg>
+    </span>
+    <span class="brand-name">La Chimère</span>
+  </div>
+  <button class="bell-btn" id="bellBtn" title="Annonces et notifications">
+    <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+      <path d="M193.499,459.298c5.237,30.54,31.518,52.702,62.49,52.702c30.98,0,57.269-22.162,62.506-52.702l0.32-1.86
+        H193.179L193.499,459.298z" fill="currentColor"/>
+      <path d="M469.782,371.98c-5.126-5.128-10.349-9.464-15.402-13.661c-21.252-17.648-39.608-32.888-39.608-96.168v-50.194
+        c0-73.808-51.858-138.572-123.61-154.81c2.876-5.64,4.334-11.568,4.334-17.655C295.496,17.718,277.777,0,255.995,0
+        c-21.776,0-39.492,17.718-39.492,39.492c0,6.091,1.456,12.018,4.334,17.655c-71.755,16.238-123.61,81.002-123.61,154.81v50.194
+        c0,63.28-18.356,78.521-39.608,96.168c-5.052,4.196-10.276,8.533-15.402,13.661l-0.466,0.466v49.798h428.496v-49.798
+        L469.782,371.98z" fill="currentColor"/>
+    </svg>
+    <span class="bell-dot" id="bellDot"></span>
+  </button>
+  <div class="account-wrap">
+    <button class="avatar-btn" id="accountBtn">LM</button>
+    <div class="dropdown" id="accountDropdown">
+      <div class="acc-head">
+        <div class="avatar-btn">LM</div>
+        <div><div class="acc-name">Louis-Marie</div></div>
+      </div>
+      <button class="acc-item" id="accMonProfil">Mon profil</button>
+      <button class="acc-item" id="accLesCles">Les clés</button>
+      <button class="acc-item" id="accParametres">Paramètres</button>
+      <button class="acc-item" id="accFaq">FAQ</button>
+      <button class="acc-item" id="accCgu">CGU</button>
+      <div class="acc-divider"></div>
+      <button class="acc-item danger" id="accLogout">Se déconnecter</button>
+    </div>
+  </div>
+</header>
+
+<div class="announce" id="announce">
+  <span class="txt"></span>
+  <button id="announceClose">×</button>
+</div>
+
+<main>
+
+  <!-- ===================== EVENTS ===================== -->
+  <section class="page active" id="page-events">
+
+    <div class="events-fixed-top">
+      <div class="cal-toolbar">
+        <div class="toolbar-left">
+          <div class="datenav-group">
+            <div class="datenav" id="datenav">
+              <button id="navPrev">‹</button>
+              <span id="navLabel"></span>
+              <button id="navNext">›</button>
+            </div>
+            <button class="view-toggle" id="viewToggle" title="Vue calendaire">📆</button>
+          </div>
+          <div class="avail-wrap">
+            <button type="button" class="avail-btn" id="availBtn"><span>Dispos</span><span class="avail-eye" id="availEyeIcon" aria-hidden="true"></span></button>
+            <div class="dropdown avail-dropdown" id="availDropdown">
+              <button type="button" class="acc-item" id="availShowBtn">Afficher</button>
+              <button type="button" class="acc-item" id="availAddBtn">Indiquer ma dispo</button>
+              <button type="button" class="acc-item danger" id="availDeleteBtn">Supprimer mes dispos</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="filters h-scroll" id="filters">
+        <button class="chip active" data-game="tous">Tous</button>
+        <button class="chip" data-game="warhammer40k">Warhammer 40K</button>
+        <button class="chip" data-game="necromunda">Necromunda</button>
+        <button class="chip" data-game="bloodbowl">Blood Bowl</button>
+        <button class="chip" data-game="plateau">Plateau</button>
+        <button class="chip" data-game="peinture">Peinture</button>
+        <button class="chip" data-game="chill">Chill</button>
+        <button class="chip" data-game="evenement">Evenement</button>
+      </div>
+    </div>
+
+    <div class="events-list-scroll" id="eventsListScroll">
+      <div id="agendaContainer"></div>
+      <div id="gridContainer" hidden></div>
+    </div>
+
+  </section>
+
+  <!-- ===================== CLASSEMENT ===================== -->
+  <section class="page" id="page-ranking">
+    <div class="filters h-scroll" id="rankingCommunityFilter"></div>
+    <div class="admin-stats">
+      <div class="section-card admin-stat"><span class="n" id="rankActiveMembers">0</span><span class="l">membres passés au local cette semaine</span></div>
+      <div class="section-card admin-stat"><span class="n" id="rankEventsCount">0</span><span class="l">parties ou évènements cette semaine</span></div>
+    </div>
+    <h1 class="page-title">Classement</h1>
+    <div class="section-card">
+      <div class="lb-header">
+        <div class="lb-header-spacer"></div>
+        <button type="button" class="lb-col-label active" id="lbSortParties">Parties<br>jouées</button>
+        <button type="button" class="lb-col-label wdl" id="lbSortWins">V / E / D</button>
+      </div>
+      <div id="leaderboardList"></div>
+    </div>
+  </section>
+
+  <!-- ===================== COMMUNAUTÉS ===================== -->
+  <section class="page" id="page-commu">
+    <h1 class="page-title">Communautés</h1>
+    <div class="filters h-scroll" id="communityFilters"></div>
+    <div class="section-card">
+      <h2 class="section-subtitle">Évènements à venir</h2>
+      <div id="communityUpcomingList"></div>
+    </div>
+    <div class="section-card">
+      <h2 class="section-subtitle">Membres</h2>
+      <div id="communityMembersList"></div>
+    </div>
+  </section>
+
+  <!-- ===================== ANNONCES / NOTIFICATIONS ===================== -->
+  <section class="page" id="page-announcements">
+
+    <div class="an-section-head">
+      <h1 class="page-title">Annonces</h1>
+      <button class="icon-btn" id="annMarkAllBtn" title="Tout marquer comme vu">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.49 2 2 6.49 2 12C2 17.51 6.49 22 12 22C17.51 22 22 17.51 22 12C22 6.49 17.51 2 12 2ZM16.78 9.7L11.11 15.37C10.97 15.51 10.78 15.59 10.58 15.59C10.38 15.59 10.19 15.51 10.05 15.37L7.22 12.54C6.93 12.25 6.93 11.77 7.22 11.48C7.51 11.19 7.99 11.19 8.28 11.48L10.58 13.78L15.72 8.64C16.01 8.35 16.49 8.35 16.78 8.64C17.07 8.93 17.07 9.4 16.78 9.7Z" fill="currentColor"/></svg>
+      </button>
+    </div>
+    <div id="announcementsList"></div>
+
+    <div class="an-section-head">
+      <h1 class="page-title">Notifications</h1>
+      <div class="an-section-actions">
+        <button class="icon-btn" id="notifMarkAllBtn" title="Tout marquer comme vu">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.49 2 2 6.49 2 12C2 17.51 6.49 22 12 22C17.51 22 22 17.51 22 12C22 6.49 17.51 2 12 2ZM16.78 9.7L11.11 15.37C10.97 15.51 10.78 15.59 10.58 15.59C10.38 15.59 10.19 15.51 10.05 15.37L7.22 12.54C6.93 12.25 6.93 11.77 7.22 11.48C7.51 11.19 7.99 11.19 8.28 11.48L10.58 13.78L15.72 8.64C16.01 8.35 16.49 8.35 16.78 8.64C17.07 8.93 17.07 9.4 16.78 9.7Z" fill="currentColor"/></svg>
+        </button>
+        <button class="icon-btn danger" id="notifClearBtn" title="Tout supprimer">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 7H20M9 7V4C9 3.44772 9.44772 3 10 3H14C14.5523 3 15 3.44772 15 4V7M18 7L17.3 19.1C17.2 20.7 15.9 22 14.3 22H9.7C8.1 22 6.8 20.7 6.7 19.1L6 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </div>
+    <div id="notificationsList"></div>
+
+  </section>
+
+  <!-- ===================== ADMIN ===================== -->
+  <section class="page" id="page-admin">
+
+    <h1 class="page-title">Clés</h1>
+    <div class="section-card">
+
+      <div class="form-field">
+        <span class="form-label">Code de l'immeuble</span>
+        <input type="text" class="form-input" id="adminBuildingCodeInput" maxlength="12">
+      </div>
+
+      <div class="admin-keys-row">
+        <span><span class="admin-keys-count" id="adminKeysCount"></span> <span class="admin-keys-suffix">clés du local</span></span>
+        <button type="button" class="admin-eye-btn" id="adminEditKeyTotalBtn" title="Modifier le nombre de clés">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14.6 4.4L19.6 9.4M3 21L3.6 17.7C3.7 17.2 3.9 16.8 4.3 16.4L15.6 5.1C16.4 4.3 17.7 4.3 18.5 5.1L18.9 5.5C19.7 6.3 19.7 7.6 18.9 8.4L7.6 19.7C7.2 20.1 6.8 20.3 6.3 20.4L3 21Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+
+      <div class="ce-search-wrap" style="margin-top:10px;">
+        <span class="ce-search-icon" aria-hidden="true">🔍</span>
+        <input type="text" class="form-input" id="adminKeyMemberSearch" placeholder="Rechercher un membre…" autocomplete="off">
+      </div>
+      <div class="ce-member-results" id="adminKeyMemberResults"></div>
+      <div class="admin-add-key-row">
+        <div class="ce-participants" id="adminKeySelectedMember"></div>
+        <button type="button" class="join-btn small" id="adminAddKeyBtn" disabled>Donner une clé</button>
+      </div>
+      <div class="field-note" id="adminKeyLimitNote" style="display:none; margin-top:-6px; margin-bottom:12px;">Nombre maximal de clés atteint — augmente le total pour en donner une nouvelle.</div>
+
+      <div class="modal-section-label">Détenteurs de clé</div>
+      <div class="admin-scroll-list" id="adminKeyHoldersList"></div>
+
+      <div class="admin-keys-row" style="margin-top:16px;">
+        <span><span class="admin-keys-count" id="adminExitKeysCount"></span> <span class="admin-keys-suffix">clés de sortie disponibles</span></span>
+      </div>
+      <div class="modal-section-label">Détenteurs de clés de sortie</div>
+      <div class="admin-scroll-list" id="adminExitKeyHoldersList"></div>
+    </div>
+
+    <h1 class="page-title">Membres</h1>
+    <div class="section-card">
+      <div class="admin-stats" style="margin-bottom:14px;">
+        <div class="section-card admin-stat"><span class="n" id="adminActiveMembers">0</span><span class="l">membres actifs ce mois-ci</span></div>
+        <div class="section-card admin-stat"><span class="n" id="adminTotalMembers">0</span><span class="l">membres au total</span></div>
+      </div>
+      <div class="ce-search-wrap" style="margin-bottom:10px;">
+        <span class="ce-search-icon" aria-hidden="true">🔍</span>
+        <input type="text" class="form-input" id="adminMemberSearch" placeholder="Rechercher un membre…" autocomplete="off">
+      </div>
+      <div class="admin-scroll-list-tall" id="adminMembersList"></div>
+    </div>
+
+    <h1 class="page-title">Communautés</h1>
+    <div class="section-card">
+      <button type="button" class="modal-join" id="adminAddCommunityBtn" style="margin-top:0; margin-bottom:14px;">+ Ajouter une communauté</button>
+      <div id="adminCommunitiesList"></div>
+    </div>
+  </section>
+
+  <!-- ===================== MON PROFIL ===================== -->
+  <section class="page" id="page-profil">
+    <div class="subpage-back-row">
+      <button type="button" class="subpage-back" data-back><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11 5L4 12L11 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 12H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Retour</button>
+    </div>
+
+    <div class="section-card" style="display:flex; flex-direction:column; align-items:center; gap:9px;">
+      <div class="avatar-upload-wrap">
+        <div class="avatar-upload" id="profAvatarUpload" title="Changer la photo de profil">LM</div>
+        <input type="file" accept="image/*" id="profAvatarInput" hidden>
+        <button type="button" class="avatar-upload-label" id="profAvatarLabel">Changer la photo</button>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="form-field">
+        <span class="form-label">Prénom ou pseudo</span>
+        <input type="text" class="form-input" id="profName" value="Louis-Marie B.">
+      </div>
+      <div class="form-field">
+        <div class="field-head">
+          <span class="form-label">Mail</span>
+          <div class="visibility-switch" data-target="profEmailVisible">
+            <span class="txt">Afficher aux autres membres</span>
+            <div class="mini-toggle on" id="profEmailVisible"><div class="k"></div></div>
+          </div>
+        </div>
+        <input type="email" class="form-input" id="profEmail" value="louis-marie.beaudet@exemple.ch">
+      </div>
+      <div class="form-field">
+        <div class="field-head">
+          <span class="form-label">Téléphone</span>
+          <div class="visibility-switch" data-target="profPhoneVisible">
+            <span class="txt">Afficher aux autres membres</span>
+            <div class="mini-toggle on" id="profPhoneVisible"><div class="k"></div></div>
+          </div>
+        </div>
+        <input type="tel" class="form-input" id="profPhone" placeholder="Facultatif">
+      </div>
+      <div class="form-field">
+        <div class="field-head">
+          <span class="form-label">Localisation</span>
+          <div class="visibility-switch" data-target="profLocVisible">
+            <span class="txt">Afficher aux autres membres</span>
+            <div class="mini-toggle on" id="profLocVisible"><div class="k"></div></div>
+          </div>
+        </div>
+        <input type="text" class="form-input" id="profLoc" placeholder="Facultatif — ex : Plainpalais à 15 min du local">
+      </div>
+      <div class="form-field" style="margin-bottom:0;">
+        <span class="form-label">Présentation</span>
+        <textarea class="form-input form-textarea" id="profAbout" rows="4" placeholder="Facultatif"></textarea>
+      </div>
+    </div>
+
+    <h1 class="page-title">Mes communautés</h1>
+    <div class="section-card">
+      <div class="filters h-scroll" id="profCommuFilters"></div>
+    </div>
+
+    <h1 class="page-title">Changer le mot de passe</h1>
+    <div class="section-card">
+      <div class="form-field">
+        <span class="form-label">Mot de passe actuel</span>
+        <input type="password" class="form-input" id="profPassCurrent" placeholder="••••••••">
+      </div>
+      <div class="form-field">
+        <span class="form-label">Nouveau mot de passe</span>
+        <input type="password" class="form-input" id="profPassNew" placeholder="••••••••">
+      </div>
+      <div class="form-field" style="margin-bottom:0;">
+        <span class="form-label">Confirmer le nouveau mot de passe</span>
+        <input type="password" class="form-input" id="profPassConfirm" placeholder="••••••••">
+        <div class="field-error" id="profPassError" style="display:none;"></div>
+      </div>
+    </div>
+
+    <button type="button" class="modal-btn primary" id="profSaveBtn" style="width:100%; margin-bottom:22px;">Enregistrer les modifications</button>
+  </section>
+
+  <!-- ===================== LES CLÉS ===================== -->
+  <section class="page" id="page-cles">
+    <div class="subpage-back-row">
+      <button type="button" class="subpage-back" data-back><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11 5L4 12L11 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 12H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Retour</button>
+    </div>
+    <h1 class="page-title">Les clés</h1>
+
+    <div class="section-card">
+      <div class="modal-section-label" style="margin-top:0;">Code de l'immeuble</div>
+      <p class="key-code" id="clesBuildingCodeDisplay">0722A</p>
+    </div>
+
+    <div class="section-card" id="clesActionsCard"></div>
+
+    <!-- Recherche de membre pour le transfert de clé — masquée tant que "Je donne mes clés à un autre membre" n'a pas été cliqué. -->
+    <div class="section-card" id="clesTransferPanel" hidden>
+      <div class="modal-section-label" style="margin-top:0;">Donner mes clés à…</div>
+      <div class="ce-search-wrap">
+        <span class="ce-search-icon" aria-hidden="true">🔍</span>
+        <input type="text" class="form-input" id="clesMemberSearch" placeholder="Rechercher un membre…" autocomplete="off">
+      </div>
+      <div class="ce-member-results" id="clesMemberResults"></div>
+      <div class="ce-participants" id="clesSelectedMember" style="margin-top:8px;"></div>
+      <div class="modal-btn-row">
+        <button type="button" class="modal-btn gray" id="clesTransferCancel">Annuler</button>
+        <button type="button" class="modal-btn primary" id="clesTransferConfirm" disabled>Confirmer</button>
+      </div>
+    </div>
+
+    <div class="info-box" id="clesConfirmNote" hidden></div>
+  </section>
+
+  <!-- ===================== PARAMÈTRES ===================== -->
+  <section class="page" id="page-parametres">
+    <div class="subpage-back-row">
+      <button type="button" class="subpage-back" data-back><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11 5L4 12L11 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 12H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Retour</button>
+    </div>
+    <h1 class="page-title">Apparence</h1>
+    <div class="section-card">
+      <div class="form-field">
+        <span class="form-label">Thème</span>
+        <div class="filters" id="themeSwitcher">
+          <button type="button" class="chip active" data-theme-choice="light">Clair</button>
+          <button type="button" class="chip" data-theme-choice="dark">Sombre</button>
+        </div>
+      </div>
+      <div class="form-field" style="margin-bottom:0;">
+        <span class="form-label">Couleur d'accent</span>
+        <div class="accent-swatches" id="accentSwatches"></div>
+      </div>
+    </div>
+
+    <h1 class="page-title">Application</h1>
+    <div class="section-card">
+      <button type="button" class="modal-join" id="installAppBtn" style="margin-top:0;">Installer l'application (mode web app)</button>
+      <div class="form-field" style="margin:16px 0 0;">
+        <span class="form-label">Langue</span>
+        <div class="filters" id="langSwitcher">
+          <button type="button" class="chip active" data-lang="fr">Français</button>
+          <button type="button" class="chip" data-lang="en">English</button>
+        </div>
+        <p class="field-note">La traduction complète de l'application sera ajoutée dans une prochaine itération.</p>
+      </div>
+    </div>
+
+    <h1 class="page-title">Notifications</h1>
+    <div class="section-card">
+      <div class="admin-row"><span class="name">Pas de porteur de clé pour un évènement à venir</span><div class="mini-toggle on" data-notif-toggle><div class="k"></div></div></div>
+      <div class="admin-row"><span class="name">Nouvelle annonce du comité</span><div class="mini-toggle on" data-notif-toggle><div class="k"></div></div></div>
+      <div class="admin-row"><span class="name">Ajout à un évènement par un autre membre</span><div class="mini-toggle on" data-notif-toggle><div class="k"></div></div></div>
+    </div>
+
+    <h1 class="page-title">Compte</h1>
+    <div class="section-card">
+      <button type="button" class="modal-btn danger" id="deleteAccountBtn" style="width:100%;">Supprimer mon compte</button>
+    </div>
+
+    <!-- Trois niveaux : super-admin (un seul membre, fixé au développement — voir IS_SUPER_ADMIN),
+         admin et membre. Cette section n'est visible que sur le compte du super-admin, quel que soit
+         son statut admin courant — elle permet de donner ou retirer les droits d'administrateur
+         (le niveau "admin", pas le super-admin lui-même) à n'importe quel membre, y compris à
+         soi-même (pratique pour tester l'app côté membre ou admin sans perdre l'accès à ce réglage). -->
+    <h1 class="page-title" id="paramAdminsTitle" hidden>Administrateurs</h1>
+    <div class="section-card" id="paramAdminsCard" hidden>
+      <div class="ce-search-wrap">
+        <span class="ce-search-icon" aria-hidden="true">🔍</span>
+        <input type="text" class="form-input" id="adminRoleMemberSearch" placeholder="Rechercher un membre…" autocomplete="off">
+      </div>
+      <div class="ce-member-results" id="adminRoleMemberResults"></div>
+      <div class="admin-add-key-row">
+        <div class="ce-participants" id="adminRoleSelectedMember"></div>
+        <button type="button" class="join-btn small" id="adminRoleAddBtn" disabled>Rendre admin</button>
+      </div>
+
+      <div class="modal-section-label">Administrateurs actuels</div>
+      <div class="admin-scroll-list" id="adminRoleList"></div>
+    </div>
+  </section>
+
+  <!-- ===================== FAQ ===================== -->
+  <section class="page" id="page-faq">
+    <div class="subpage-back-row">
+      <button type="button" class="subpage-back" data-back><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11 5L4 12L11 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 12H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Retour</button>
+    </div>
+    <h1 class="page-title">FAQ</h1>
+
+    <div class="info-box">
+      <p class="info-box-title">Comment devenir porteur de clé ?</p>
+      <p class="info-box-text info-box-placeholder">Réponse à venir — ce contenu sera complété par le comité.</p>
+    </div>
+    <div class="info-box">
+      <p class="info-box-title">Comment annuler ma participation à un évènement ?</p>
+      <p class="info-box-text info-box-placeholder">Réponse à venir — ce contenu sera complété par le comité.</p>
+    </div>
+    <div class="info-box">
+      <p class="info-box-title">Comment rejoindre ou quitter une communauté ?</p>
+      <p class="info-box-text info-box-placeholder">Réponse à venir — ce contenu sera complété par le comité.</p>
+    </div>
+    <div class="info-box">
+      <p class="info-box-title">Qui contacter en cas de problème ?</p>
+      <p class="info-box-text info-box-placeholder">Réponse à venir — ce contenu sera complété par le comité.</p>
+    </div>
+  </section>
+
+  <!-- ===================== CGU ===================== -->
+  <section class="page" id="page-cgu">
+    <div class="subpage-back-row">
+      <button type="button" class="subpage-back" data-back><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11 5L4 12L11 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 12H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Retour</button>
+    </div>
+    <h1 class="page-title">Conditions générales d'utilisation</h1>
+
+    <div class="section-card">
+      <p class="info-box-text info-box-placeholder">Contenu à venir — le texte complet des conditions générales d'utilisation du site sera ajouté ici avant la mise en production.</p>
+    </div>
+  </section>
+
+  <!-- ===================== PROFIL MEMBRE (consultation) ===================== -->
+  <section class="page" id="page-membre">
+    <div class="subpage-back-row">
+      <button type="button" class="subpage-back" data-back><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11 5L4 12L11 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 12H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Retour</button>
+    </div>
+
+    <div class="member-profile-head">
+      <div class="member-profile-avatar" id="mpAvatar"></div>
+      <div class="member-profile-name" id="mpName"></div>
+      <div class="member-profile-joined" id="mpJoined"></div>
+    </div>
+
+    <div class="section-card" id="mpBioCard" hidden>
+      <p class="info-box-text" id="mpBio" style="margin:0;"></p>
+    </div>
+
+    <h1 class="page-title">Dernière activité</h1>
+    <div class="section-card">
+      <p class="key-status" id="mpActivity" style="margin:0;"></p>
+    </div>
+
+    <h1 class="page-title">Communautés</h1>
+    <div class="section-card">
+      <div class="filters h-scroll" id="mpCommunities" style="pointer-events:none;"></div>
+    </div>
+
+    <div id="mpContactWrap" hidden>
+      <h1 class="page-title">Contact</h1>
+      <div class="section-card">
+        <div id="mpContactList"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== DÉCONNEXION ===================== -->
+  <section class="page" id="page-logout">
+    <div class="logout-screen">
+      <div class="logout-icon">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 17L20 12L15 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 12H9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M12 5H5C3.89543 5 3 5.89543 3 7V17C3 18.1046 3.89543 19 5 19H12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </div>
+      <h1 class="page-title" style="margin-bottom:8px;">Vous avez été déconnecté</h1>
+      <p class="info-box-text info-box-placeholder" style="margin-bottom:24px;">Dans l'application réelle, vous seriez redirigé vers l'écran de connexion (voir la maquette du parcours d'arrivée et de création de compte).</p>
+      <button type="button" class="modal-btn primary" id="logoutBackBtn" style="flex:none; padding:12px 26px;">Revenir à l'application</button>
+    </div>
+  </section>
+
+</main>
+
+<!-- ===================== BARRE DE NAVIGATION (bas d'écran) ===================== -->
+<nav class="bottom-nav" id="bottomNav">
+  <button type="button" class="bn-btn active" data-page="events">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M3 9.5H21" stroke="currentColor" stroke-width="1.7"/><path d="M8 3V6.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M16 3V6.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+    <span>Programme</span>
+  </button>
+  <button type="button" class="bn-btn" data-page="ranking">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 4H18V9C18 12.3137 15.3137 15 12 15C8.68629 15 6 12.3137 6 9V4Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M6 5.5H3.5V7.5C3.5 9.15685 4.84315 10.5 6.5 10.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M18 5.5H20.5V7.5C20.5 9.15685 19.1569 10.5 17.5 10.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M9 21H15" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 15V21" stroke="currentColor" stroke-width="1.7"/></svg>
+    <span>Leaderboard</span>
+  </button>
+  <button type="button" class="bn-btn" data-page="commu">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="1.7"/><path d="M3.5 20C3.5 16.6863 6.13401 14 9.5 14C11.6822 14 13.5966 15.1128 14.7 16.7728" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="17" cy="8.5" r="2.3" stroke="currentColor" stroke-width="1.7"/><path d="M15.7 14.3C18.4051 14.7269 20.5 16.9909 20.5 20" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M4.3 20H15.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+    <span>Communautés</span>
+  </button>
+  <button type="button" class="bn-btn" data-page="admin" id="navAdmin">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/><path d="M19.4 13.6C19.5 12.5 19.5 11.5 19.4 10.4L21.3 8.9L19.8 6.2L17.5 7C16.8 6.3 16 5.7 15.1 5.3L14.9 3H10.9L10.7 5.3C9.8 5.7 9 6.3 8.3 7L6 6.2L4.5 8.9L6.4 10.4C6.3 11.5 6.3 12.5 6.4 13.6L4.5 15.1L6 17.8L8.3 17C9 17.7 9.8 18.3 10.7 18.7L10.9 21H14.9L15.1 18.7C16 18.3 16.8 17.7 17.5 17L19.8 17.8L21.3 15.1L19.4 13.6Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+    <span>Admin</span>
+  </button>
+</nav>
+
+<button class="fab" id="fabBtn" title="J'organise une partie">＋</button>
+
+<!-- FAB "+" pour les admins sur la page Annonces : ouvre directement le formulaire de création. -->
+<button class="fab" id="annFabBtn" title="Nouvelle annonce" style="display:none;">＋</button>
+
+<div class="modal-overlay" id="eventModal">
+  <div class="modal-box">
+    <button class="modal-close" id="modalClose">×</button>
+    <h3 id="modalTitle"></h3>
+    <div class="modal-meta" id="modalMeta"></div>
+    <div class="modal-section-label" id="modalParticipantsLabel">Participants</div>
+    <ul class="modal-participants" id="modalParticipants"></ul>
+    <div class="modal-btn-row">
+      <button class="modal-btn primary" id="modalJoinBtn">Rejoindre</button>
+      <button class="modal-btn danger" id="modalDeleteBtn">Supprimer</button>
+    </div>
+    <button type="button" class="modal-btn outline modal-btn-full" id="modalTransformBtn" style="display:none;">Transformer en évènement</button>
+  </div>
+</div>
+
+<!-- ===================== SUPPRESSION DE MES DISPONIBILITÉS ===================== -->
+<div class="modal-overlay" id="availDeleteModal">
+  <div class="modal-box">
+    <button class="modal-close" id="availDeleteClose">×</button>
+    <h3>Supprimer mes disponibilités</h3>
+    <p class="field-note" style="margin:6px 0 0;">Toutes les disponibilités que vous avez indiquées vont être supprimées du calendrier.</p>
+    <div class="modal-btn-row">
+      <button type="button" class="modal-btn outline" id="availDeleteCancel">Annuler</button>
+      <button type="button" class="modal-btn danger" id="availDeleteConfirm">Confirmer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== CRÉATION D'ÉVÉNEMENT ===================== -->
+<div class="modal-overlay" id="createEventModal">
+  <div class="modal-box">
+    <button class="modal-close" id="ceClose">×</button>
+    <h3 id="ceModalTitle">Nouvel événement</h3>
+
+    <div class="form-row-2">
+      <div class="form-field">
+        <span class="form-label">Date *</span>
+        <input type="date" class="form-input" id="ceDate">
+      </div>
+      <div class="form-field">
+        <span class="form-label">Heure *</span>
+        <input type="time" class="form-input" id="ceTime">
+      </div>
+    </div>
+
+    <label class="ce-repeat-row" id="ceRepeatRow" hidden>
+      <input type="checkbox" id="ceRepeatWeekly">
+      Se répète toutes les semaines
+    </label>
+
+    <div class="form-field">
+      <span class="form-label">Étiquette</span>
+      <div class="filters h-scroll" id="ceTags">
+        <button type="button" class="chip" data-game="warhammer40k">Warhammer 40K</button>
+        <button type="button" class="chip" data-game="necromunda">Necromunda</button>
+        <button type="button" class="chip" data-game="bloodbowl">Blood Bowl</button>
+        <button type="button" class="chip" data-game="plateau">Plateau</button>
+        <button type="button" class="chip" data-game="peinture">Peinture</button>
+        <button type="button" class="chip" data-game="chill">Chill</button>
+        <button type="button" class="chip" data-game="evenement">Evenement</button>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <span class="form-label">Titre <span id="ceTitleStar">*</span></span>
+      <input type="text" class="form-input" id="ceTitle" placeholder="Ex : Soirée jeux de société">
+    </div>
+
+    <div class="form-field">
+      <span class="form-label">Participants *</span>
+      <div class="ce-participants" id="ceParticipants"></div>
+      <div id="ceParticipantsSearchRow">
+        <div class="ce-search-wrap">
+          <span class="ce-search-icon" aria-hidden="true">🔍</span>
+          <input type="text" class="form-input" id="ceMemberSearch" placeholder="Rechercher un membre…" autocomplete="off">
+        </div>
+        <div class="ce-member-results" id="ceMemberResults"></div>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <span class="form-label">Description</span>
+      <textarea class="form-input form-textarea" id="ceDescription" rows="3" placeholder="Facultatif"></textarea>
+    </div>
+
+    <div class="modal-btn-row">
+      <button class="modal-btn danger" id="ceCancel">Annuler</button>
+      <button class="modal-btn primary" id="ceSubmit" disabled>Valider</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== CRÉATION / ÉDITION D'ANNONCE (admin) ===================== -->
+<div class="modal-overlay" id="announceFormModal">
+  <div class="modal-box">
+    <div class="af-header">
+      <span class="af-header-label">Nouvelle annonce</span>
+      <button class="modal-close" id="afClose">×</button>
+    </div>
+
+    <div class="form-field">
+      <span class="form-label">Titre *</span>
+      <input type="text" class="form-input" id="afTitle" placeholder="Ex : Assemblée générale">
+    </div>
+
+    <div class="form-field">
+      <span class="form-label">Pour</span>
+      <div class="filters h-scroll" id="afAudienceFilter"></div>
+    </div>
+
+    <div class="form-field">
+      <span class="form-label">Description *</span>
+      <textarea class="form-input form-textarea" id="afDescription" rows="3" placeholder="Détails de l'annonce"></textarea>
+    </div>
+
+    <div class="form-field">
+      <span class="form-label">Date *</span>
+      <input type="date" class="form-input" id="afDate">
+    </div>
+
+    <div class="form-field af-switch-row">
+      <span class="form-label" style="margin-bottom:0;">Afficher dans le bandeau d'alerte ? *</span>
+      <div class="mini-toggle" id="afAlertToggle"><div class="k"></div></div>
+    </div>
+
+    <div class="form-field" id="afBannerTextField" hidden>
+      <span class="form-label">Texte du bandeau *</span>
+      <textarea class="form-input form-textarea" id="afBannerText" rows="2" placeholder="Ce texte s'affichera dans le bandeau d'alerte"></textarea>
+    </div>
+
+    <button type="button" class="af-add-option" id="afTogglePoll">+ Créer un sondage</button>
+
+    <div class="form-field" id="afPollSection" hidden style="margin-top:14px;">
+      <textarea class="form-input form-textarea" id="afPollQuestion" rows="3" placeholder="Poser une question…"></textarea>
+      <select class="form-input af-poll-type-select" id="afPollTypeSelect">
+        <option value="single">Réponse unique</option>
+        <option value="multiple">Réponse multiple</option>
+        <option value="rating">Évaluation</option>
+      </select>
+      <div class="af-poll-options" id="afPollOptions"></div>
+      <button type="button" class="af-add-option" id="afAddOption">+ Ajouter une option</button>
+    </div>
+
+    <div class="modal-btn-row">
+      <button class="modal-btn danger" id="afCancel">Annuler</button>
+      <button class="modal-btn primary" id="afSubmit" disabled>Publier</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== ADMIN : SUPPRIMER UN MEMBRE ===================== -->
+<div class="modal-overlay" id="adminDeleteMemberModal">
+  <div class="modal-box">
+    <h3>Supprimer ce membre ?</h3>
+    <p class="key-status">Attention, toutes les informations de ce membre seront supprimées et il ne pourra plus accéder à l'app.</p>
+    <div class="modal-btn-row">
+      <button class="modal-btn gray" id="admDeleteCancel">Annuler</button>
+      <button class="modal-btn danger" id="admDeleteConfirm">Confirmer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== ADMIN : NOMBRE TOTAL DE CLÉS ===================== -->
+<div class="modal-overlay" id="adminKeyTotalModal">
+  <div class="modal-box">
+    <button class="modal-close" id="aktClose">×</button>
+    <h3>Nombre total de clés</h3>
+    <div class="form-field" style="margin-bottom:0;">
+      <span class="form-label">Total (<span id="aktCurrentHolders"></span> actuellement en circulation)</span>
+      <input type="number" class="form-input" id="aktInput" min="0" inputmode="numeric">
+      <div class="field-error" id="aktError" style="display:none;"></div>
+    </div>
+    <div class="modal-btn-row">
+      <button class="modal-btn gray" id="aktCancel">Annuler</button>
+      <button class="modal-btn primary" id="aktSave">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== ADMIN : AJOUTER / MODIFIER UNE COMMUNAUTÉ ===================== -->
+<div class="modal-overlay" id="adminCommunityModal">
+  <div class="modal-box">
+    <button class="modal-close" id="acmClose">×</button>
+    <h3 id="acmTitle">Nouvelle communauté</h3>
+    <div class="form-field" style="margin-bottom:0;">
+      <span class="form-label">Nom de la communauté *</span>
+      <input type="text" class="form-input" id="acmNameInput" placeholder="Ex : Jeux de rôle">
+    </div>
+    <div class="modal-btn-row">
+      <button class="modal-btn gray" id="acmCancel">Annuler</button>
+      <button class="modal-btn primary" id="acmSave" disabled>Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+</div></div>
+
+<script>
+  // ================= DATA =================
+  const DAY_LABELS = {17:'Lundi 17',18:'Mardi 18',19:'Mercredi 19',20:'Jeudi 20',21:'Vendredi 21',22:'Samedi 22',23:'Dimanche 23'};
+  const DAY_SHORT = {17:'Lun',18:'Mar',19:'Mer',20:'Jeu',21:'Ven',22:'Sam',23:'Dim'};
+  const ALL_DAYS = [17,18,19,20,21,22,23];
+  const TODAY = 17;
+
+  const GAME_LABELS = { warhammer40k:'Warhammer 40K', necromunda:'Necromunda', bloodbowl:'Blood Bowl', plateau:'Plateau', peinture:'Peinture', chill:'Chill', evenement:'Evenement' };
+
+  let EVENTS = [
+    { id:1, day:18, start:20, end:23, title:'Warhammer 40k — campagne', games:['warhammer40k'],
+      participants:[{n:'Marc J.',s:'Marc',key:true},{n:'Julie B.',s:'Julie',key:false},{n:'Théo N.',s:'Théo',key:true}] },
+    { id:2, day:19, start:18, end:22, title:'Soirée jeux de société', games:['plateau'],
+      participants:[{n:'Ana C.',s:'Ana',key:false},{n:'Diego R.',s:'Diego',key:false},{n:'Elise M.',s:'Elise',key:false},{n:'Farid K.',s:'Farid',key:false},{n:'Greg T.',s:'Greg',key:false}] },
+    { id:3, day:19, start:20, end:23, title:'Peinture entre amis', games:['peinture'],
+      participants:[{n:'Nadia R.',s:'Nadia',key:false},{n:'Robert K.',s:'Robert',key:false}] },
+    { id:4, day:21, start:19, end:23, title:'Tournoi Blood Bowl', games:['bloodbowl'],
+      participants:[{n:'Marc J.',s:'Marc',key:true},{n:'Sophie L.',s:'Sophie',key:false},{n:'J1',s:'J1',key:false},{n:'J2',s:'J2',key:false},{n:'J3',s:'J3',key:false},{n:'J4',s:'J4',key:false},{n:'J5',s:'J5',key:false},{n:'J6',s:'J6',key:false},{n:'J7',s:'J7',key:false},{n:'J8',s:'J8',key:false},{n:'J9',s:'J9',key:false},{n:'J10',s:'J10',key:false}] },
+    { id:5, day:21, start:20, end:22, title:'Catan', games:['plateau'],
+      participants:[{n:'Léa P.',s:'Léa',key:false},{n:'Paul V.',s:'Paul',key:false}] },
+    { id:6, day:22, start:14, end:18, title:'Catan', games:['plateau'],
+      participants:[{n:'Bruno R.',s:'Bruno',key:true},{n:'Léa P.',s:'Léa',key:false}] },
+    { id:7, day:22, start:14, end:16, title:'Peinture figurines', games:['peinture'],
+      participants:[{n:'Nadia R.',s:'Nadia',key:false}] },
+    { id:8, day:23, start:13, end:17, title:'Session peinture', games:['peinture'],
+      participants:[{n:'Nadia R.',s:'Nadia',key:false}] },
+    { id:9, day:20, start:19, end:22, title:'Necromunda — escarmouche', games:['necromunda'],
+      participants:[{n:'Farid K.',s:'Farid',key:false},{n:'Greg T.',s:'Greg',key:false}] },
+    { id:10, day:23, start:18, end:21, title:'Apéro du club', games:['chill','peinture'],
+      participants:[{n:'Ana C.',s:'Ana',key:false},{n:'Diego R.',s:'Diego',key:false},{n:'Nadia R.',s:'Nadia',key:false}] },
+    // Disponibilités (démo) : masquées par défaut, visibles uniquement via Disponibilités > Afficher.
+    { id:11, day:20, start:19, end:22, title:'Dispo pour du Warhammer 40k', games:['warhammer40k'],
+      participants:[{n:'Théo N.',s:'Théo',key:true}], creator:'Théo N.', avail:true, repeatsWeekly:true },
+    { id:12, day:22, start:18, end:21, title:'Dispo pour du Blood Bowl', games:['bloodbowl'],
+      participants:[{n:'Louis-Marie B.',s:'Louis-Marie',key:true}], creator:'Louis-Marie B.', avail:true, repeatsWeekly:false },
+  ];
+
+  const LEADERBOARD = [
+    { n:'Marc J.', parties:27, w:20, d:2, l:5, communities:['warhammer40k','bloodbowl'] },
+    { n:'Sophie L.', parties:24, w:16, d:3, l:5, communities:['bloodbowl'] },
+    { n:'Théo N.', parties:21, w:14, d:0, l:7, communities:['warhammer40k'] },
+    { n:'Ana C.', parties:18, w:9, d:4, l:5, communities:['plateau','chill','peinture'] },
+    { n:'Bruno R.', parties:16, w:10, d:0, l:6, communities:['plateau'] },
+    { n:'Nadia R.', parties:14, w:6, d:1, l:7, communities:['peinture','chill'] },
+    { n:'Julie B.', parties:12, w:5, d:2, l:5, communities:['warhammer40k'] },
+    { n:'Farid K.', parties:10, w:4, d:0, l:6, communities:['plateau','necromunda'] },
+    { n:'Diego R.', parties:9, w:3, d:1, l:5, communities:['plateau','chill'] },
+    { n:'Léa P.', parties:7, w:0, d:2, l:5, communities:['plateau'] },
+  ];
+
+  // Les boutons V/E/D des évènements (voir renderModalParticipants) sont la source de vérité pour le classement :
+  // à chaque résultat renseigné sur un évènement, on additionne à la base ci-dessus les parties/victoires/égalités/défaites
+  // issues des évènements réels. Un membre qui n'apparaît que via des évènements (pas dans la base LEADERBOARD) est ajouté.
+  function leaderboardWithEventResults(){
+    const extra = {};
+    EVENTS.forEach(ev => ev.participants.forEach(p => {
+      if(!p.result) return;
+      if(!extra[p.n]) extra[p.n] = { parties:0, w:0, d:0, l:0 };
+      extra[p.n].parties++;
+      if(p.result === 'v') extra[p.n].w++;
+      else if(p.result === 'e') extra[p.n].d++;
+      else if(p.result === 'd') extra[p.n].l++;
+    }));
+    const merged = LEADERBOARD.map(m => {
+      const ex = extra[m.n];
+      if(!ex) return m;
+      return { ...m, parties: m.parties + ex.parties, w: m.w + ex.w, d: m.d + ex.d, l: m.l + ex.l };
+    });
+    Object.keys(extra).forEach(name => {
+      if(merged.some(m => m.n === name)) return;
+      const ex = extra[name];
+      merged.push({ n:name, parties:ex.parties, w:ex.w, d:ex.d, l:ex.l, communities:[] });
+    });
+    return merged;
+  }
+
+  // Communautés = mêmes étiquettes que sur la page Orga. Chaque membre choisit librement celles qu'il rejoint ;
+  // "Tous" (la Chimère) regroupe tout le monde d'office et n'a pas besoin d'être listé ici.
+  const COMMUNITY_MEMBERS = [
+    { n:'Marc J.', hasKey:true, admin:false, communities:[{key:'warhammer40k',lastDays:2},{key:'bloodbowl',lastDays:6}],
+      joined:'Membre depuis janvier 2022', bio:'Toujours partant pour une bonne bataille rangée.', email:'marc.j@example.ch', phone:'+41 79 123 45 01', location:'Genève', emailVisible:true, phoneVisible:false, locVisible:true },
+    { n:'Julie B.', hasKey:false, admin:false, communities:[{key:'warhammer40k',lastDays:2}],
+      joined:'Membre depuis juin 2023', bio:'', email:'julie.b@example.ch', phone:'', location:'', emailVisible:true, phoneVisible:false, locVisible:false },
+    { n:'Théo N.', hasKey:true, admin:false, communities:[{key:'warhammer40k',lastDays:9}],
+      joined:'Membre depuis mars 2021', bio:'Fan de campagnes Warhammer 40K depuis 10 ans.', email:'theo.n@example.ch', phone:'+41 79 123 45 03', location:'Lausanne', emailVisible:false, phoneVisible:false, locVisible:true },
+    { n:'Ana C.', hasKey:false, admin:false, communities:[{key:'plateau',lastDays:1},{key:'chill',lastDays:3},{key:'peinture',lastDays:15}],
+      joined:'Membre depuis septembre 2023', bio:'', email:'ana.c@example.ch', phone:'+41 79 123 45 04', location:'', emailVisible:true, phoneVisible:true, locVisible:false },
+    { n:'Diego R.', hasKey:false, admin:false, communities:[{key:'plateau',lastDays:1},{key:'chill',lastDays:3}],
+      joined:'Membre depuis novembre 2022', bio:'Aime autant les jeux de plateau que les soirées chill.', email:'', phone:'', location:'Fribourg', emailVisible:false, phoneVisible:false, locVisible:true },
+    { n:'Elise M.', hasKey:false, admin:false, communities:[{key:'plateau',lastDays:20}],
+      joined:'Membre depuis février 2024', bio:'', email:'elise.m@example.ch', phone:'', location:'', emailVisible:false, phoneVisible:false, locVisible:false },
+    { n:'Farid K.', hasKey:false, admin:false, communities:[{key:'plateau',lastDays:4},{key:'necromunda',lastDays:11}],
+      joined:'Membre depuis avril 2022', bio:'', email:'farid.k@example.ch', phone:'+41 79 123 45 07', location:'Genève', emailVisible:true, phoneVisible:false, locVisible:false },
+    { n:'Greg T.', hasKey:false, admin:false, communities:[{key:'plateau',lastDays:4},{key:'necromunda',lastDays:11}],
+      joined:'Membre depuis avril 2022', bio:'', email:'', phone:'', location:'', emailVisible:false, phoneVisible:false, locVisible:false },
+    { n:'Nadia R.', hasKey:false, admin:false, communities:[{key:'peinture',lastDays:0},{key:'chill',lastDays:3}],
+      joined:'Membre depuis août 2023', bio:'Passionnée de peinture sur figurines, toujours un pinceau à la main.', email:'nadia.r@example.ch', phone:'+41 79 123 45 09', location:'Nyon', emailVisible:true, phoneVisible:true, locVisible:true },
+    { n:'Robert K.', hasKey:false, admin:false, communities:[{key:'peinture',lastDays:15}],
+      joined:'Membre depuis mai 2021', bio:'', email:'', phone:'', location:'', emailVisible:false, phoneVisible:false, locVisible:false },
+    { n:'Sophie L.', hasKey:false, admin:false, communities:[{key:'bloodbowl',lastDays:6}],
+      joined:'Membre depuis octobre 2023', bio:'', email:'sophie.l@example.ch', phone:'', location:'', emailVisible:true, phoneVisible:false, locVisible:false },
+    { n:'Léa P.', hasKey:false, admin:false, communities:[{key:'plateau',lastDays:1}],
+      joined:'Membre depuis juillet 2022', bio:'', email:'', phone:'', location:'Vevey', emailVisible:false, phoneVisible:false, locVisible:true },
+    { n:'Paul V.', hasKey:false, admin:false, communities:[{key:'plateau',lastDays:30}],
+      joined:'Membre depuis janvier 2024', bio:'', email:'paul.v@example.ch', phone:'', location:'', emailVisible:false, phoneVisible:false, locVisible:false },
+    { n:'Bruno R.', hasKey:true, admin:false, communities:[{key:'plateau',lastDays:1}],
+      joined:'Membre depuis décembre 2020', bio:'Un des piliers historiques du club.', email:'bruno.r@example.ch', phone:'+41 79 123 45 14', location:'Genève', emailVisible:true, phoneVisible:true, locVisible:true },
+    { n:'Louis-Marie B.', hasKey:true, admin:true, communities:[{key:'necromunda',lastDays:11},{key:'bloodbowl',lastDays:6}],
+      joined:'Membre depuis mars 2024', bio:'', email:'louis-marie.beaudet@exemple.ch', phone:'', location:'', emailVisible:true, phoneVisible:true, locVisible:true },
+  ];
+
+  // ================= ADMIN — état partagé (clés, code de l'immeuble, communautés) =================
+  let BUILDING_CODE = '0722A';
+  let currentUserHasKey = true; // Louis-Marie est porteur de clé au chargement (démo) — reflété aussi dans Admin > Clés
+  let hasExitKeys = false;
+  let KEY_TOTAL = 10; // nombre total de clés autorisées, modifiable depuis Admin > Clés
+  const EXIT_KEY_TOTAL = 2; // nombre de clés de sortie disponibles (fixe pour cette maquette)
+  let EXIT_KEY_HOLDERS = [{n:'Julie B.', takenOn:'12 août'}]; // détenteurs actuels de clés de sortie (démo, pour illustrer la liste dans Admin)
+  const COMMUNITY_HIDDEN = {}; // key -> true si la communauté est masquée aux membres (reste enregistrée en base)
+  const COMMUNITY_COMPETITIVE = {}; // key -> false si le volet compétitif (V/E/D, classement) est désactivé pour cette communauté — absent/true par défaut
+  function isCommunityCompetitive(key){ return COMMUNITY_COMPETITIVE[key] !== false; }
+  let currentUserPhotoDataUrl = null; // photo de profil ajoutée via Mon profil (démo), réutilisée sur la page de consultation de profil
+  // Reflète la photo de profil (si ajoutée) sur l'avatar du header et celui du menu déroulant du compte ;
+  // sans photo, on garde les initiales. Le contour (voir .account-wrap) reste en couleur d'accent dans les deux cas.
+  function refreshHeaderAvatar(){
+    document.querySelectorAll('.avatar-btn').forEach(el => {
+      if(currentUserPhotoDataUrl){ el.style.backgroundImage = 'url(' + currentUserPhotoDataUrl + ')'; el.textContent = ''; }
+      else { el.style.backgroundImage = ''; el.textContent = 'LM'; }
+    });
+  }
+
+  // ================= PROFIL MEMBRE (consultation) — aides =================
+  const REF_DATE = new Date(2026, 7, 17); // 17 août 2026, aligné sur TODAY=17 (voir section 10 du CDC)
+  const MONTHS_FULL_FR = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+  function formatPastDate(daysAgo){
+    const d = new Date(REF_DATE.getTime() - daysAgo * 86400000);
+    return d.getDate() + ' ' + MONTHS_FULL_FR[d.getMonth()];
+  }
+  // Simplification de maquette : les évènements passés ne sont pas modélisés (EVENTS ne contient que la semaine
+  // en cours), donc la "dernière activité" d'un membre est déduite de sa communauté la plus récemment pratiquée
+  // (COMMUNITY_MEMBERS[].communities[].lastDays) plutôt que d'un évènement réel du calendrier.
+  const GENERIC_EVENT_LABEL_BY_GAME = {
+    warhammer40k:'Warhammer 40k — bataille rangée', necromunda:'Necromunda — escarmouche', bloodbowl:'Tournoi Blood Bowl',
+    plateau:'Soirée jeux de société', peinture:'Session peinture', chill:'Apéro du club', evenement:'Évènement du club',
+  };
+  function memberLastActivityText(member){
+    if(!member.communities.length) return 'Aucune activité récente.';
+    const best = member.communities.reduce((min, c) => c.lastDays < min.lastDays ? c : min, member.communities[0]);
+    const label = GENERIC_EVENT_LABEL_BY_GAME[best.key] || GAME_LABELS[best.key] || 'Activité au club';
+    return best.lastDays === 0
+      ? label + ' (aujourd\'hui).'
+      : label + ' (' + formatPastDate(best.lastDays) + ').';
+  }
+
+  // ================= STATE =================
+  let calView = false, weekIdx = 1, selectedGame = 'tous';
+  // Vue liste : le sélecteur de date affiche la semaine avec le mois tronqué à 3 lettres (Aoû, Sep, Nov…)
+  // pour garder une largeur cohérente d'une semaine à l'autre — voir #navLabel en largeur fixe.
+  const weekLabels = ['10 – 16 Aoû', '17 – 23 Aoû', '24 – 30 Aoû'];
+  // Vue calendaire (mois) : le sélecteur de date garde le même format flèches, mais affiche un nom de mois
+  // plutôt qu'une plage de jours. Comme pour weekIdx, les flèches ne font ici que changer le libellé —
+  // la maquette ne modélise que le mois d'août.
+  let monthIdx = 1;
+  const monthLabels = ['Juillet', 'Août', 'Septembre'];
+  // Disponibilités : masquées par défaut, et seulement tant que l'utilisateur reste sur la page (pas de
+  // mémorisation) — état remis à false à chaque rechargement de la maquette.
+  let showAvailabilities = false;
+
+  // ================= HELPERS =================
+  // Évènements "réels" (hors disponibilités) — utilisé par la vue liste (hors dispos) et TOUJOURS par la vue
+  // calendaire mensuelle, qui ne doit jamais afficher de disponibilité (voir spec Disponibilités).
+  function eventsFor(days){
+    return EVENTS.filter(e => !e.avail && days.includes(e.day) && (selectedGame === 'tous' || e.games.includes(selectedGame)));
+  }
+  // Disponibilités visibles dans la vue liste (uniquement si "Afficher" a été cliqué dans le dropdown).
+  function availsFor(days){
+    if(!showAvailabilities) return [];
+    return EVENTS.filter(e => e.avail && days.includes(e.day) && (selectedGame === 'tous' || e.games.includes(selectedGame)));
+  }
+  function participantsText(p){
+    if(p.length <= 2) return p.map(x => x.s).join(' et ');
+    return p.length + ' participants';
+  }
+  function dayKeyStatus(day){
+    // Les disponibilités ne sont pas des sessions confirmées : elles ne comptent pas pour le statut de clé du jour.
+    const dayEvents = EVENTS.filter(e => e.day === day && !e.avail);
+    if(dayEvents.length === 0) return null;
+    const covered = dayEvents.filter(e => e.participants.some(p => p.key));
+    if(covered.length === 0) return { ok:false };
+    const from = Math.min(...covered.map(e => e.start));
+    return { ok:true, from };
+  }
+  function clusterOverlaps(evs){
+    const sorted = [...evs].sort((a,b) => a.start - b.start);
+    const clusters = [];
+    sorted.forEach(e => {
+      let cluster = clusters.find(c => c.some(o => e.start < o.end && o.start < e.end));
+      if(cluster) cluster.push(e); else clusters.push([e]);
+    });
+    return clusters;
+  }
+
+  // ================= EVENT CARD (agenda) =================
+  function eventCardHtml(e){
+    const tags = e.games.filter(g => !COMMUNITY_HIDDEN[g]).map(g => '<span class="tag genre">'+GAME_LABELS[g]+'</span>').join('');
+    if(e.avail){
+      const member = e.participants[0];
+      return '<div class="event-card avail-card" data-id="'+e.id+'">'
+        + '<div class="top"><div class="top-left"><span class="time">'+e.start+'h – '+e.end+'h</span>'+tags+'</div></div>'
+        + '<div class="title">'+e.title+'</div>'
+        + '<div class="bottom"><span class="who">'+(member ? member.n : '')+'</span>'
+        + '<button class="join-btn" data-contact="'+(member ? member.n : '')+'">Contacter</button></div>'
+        + '</div>';
+    }
+    // Le bouton reflète l'inscription réelle de l'utilisateur courant (et non un simple état visuel local) :
+    // "Rejoint ✓" une fois inscrit, recliquable pour se désinscrire — sauf s'il est l'unique participant,
+    // pour ne jamais laisser l'évènement sans personne (même règle que la fiche modale, voir 12.4).
+    const isJoined = e.participants.some(p => p.n === CURRENT_USER);
+    const lockJoined = isJoined && e.participants.length === 1;
+    return '<div class="event-card" data-id="'+e.id+'">'
+      + '<div class="top"><div class="top-left"><span class="time">'+e.start+'h – '+e.end+'h</span>'+tags+'</div></div>'
+      + '<div class="title">'+e.title+'</div>'
+      + '<div class="bottom"><span class="who">'+participantsText(e.participants)+'</span>'
+      + '<button class="join-btn" data-join="'+e.id+'"'+(lockJoined ? ' disabled' : '')+'>'+(isJoined ? 'Rejoint ✓' : 'Rejoindre')+'</button></div>'
+      + '</div>';
+  }
+
+  function dayHeadHtml(day, opts){
+    opts = opts || {};
+    const isToday = day === TODAY;
+    let left = '<span class="d1">'+DAY_LABELS[day]+'</span>';
+    if(isToday) left += '<span class="d2">aujourd\'hui</span>';
+    const st = dayKeyStatus(day);
+    let btn = '';
+    if(st){
+      if(st.ok) left += '<span class="tag ok">🔑 à partir de '+st.from+'h</span>';
+      else { left += '<span class="tag warn">⚠ Pas de clé</span>'; if(!opts.noAlertBtn) btn = '<button class="cta-mini" data-alert-day="'+day+'">Envoyer l\'alerte</button>'; }
+    }
+    return '<div class="day-head"><div class="day-head-left">'+left+'</div>'+btn+'</div>';
+  }
+
+  // ================= AGENDA RENDER =================
+  function renderAgenda(container, days, opts){
+    opts = opts || {};
+    let html = '';
+    days.forEach(day => {
+      // "allEvs" détermine si la journée a réellement quelque chose (pour choisir le bon message vide) :
+      // les disponibilités ne comptent que si elles sont actuellement affichées.
+      const allEvs = EVENTS.filter(e => e.day === day && (!e.avail || showAvailabilities));
+      const evs = eventsFor([day]).concat(availsFor([day]));
+      if(allEvs.length === 0){
+        if(opts.skipEmptyDays && day !== TODAY) return;
+        html += '<div class="day-unit'+(day===TODAY?' today':'')+'">' + dayHeadHtml(day)
+          + '<div class="agenda-empty">'+(day===TODAY ? 'Rien de prévu pour l\'instant — sois le premier à proposer une partie !' : 'Rien de prévu pour l\'instant.')+'</div></div>';
+        return;
+      }
+      if(evs.length === 0){
+        html += '<div class="day-unit'+(day===TODAY?' today':'')+'">' + dayHeadHtml(day) + '<div class="agenda-empty">Rien pour ce filtre.</div></div>';
+        return;
+      }
+      html += '<div class="day-unit'+(day===TODAY?' today':'')+'">' + dayHeadHtml(day);
+      const sorted = [...evs].sort((a,b) => a.start - b.start);
+      sorted.forEach(e => { html += eventCardHtml(e); });
+      html += '</div>';
+    });
+    container.innerHTML = html;
+  }
+
+  // ================= GRID RENDER (vue calendaire = vue mois) =================
+  // La vue calendaire affiche toujours le mois entier (août), pas seulement la semaine en cours.
+  // Comme les évènements de la maquette ne portent qu'un numéro de jour (pas une vraie date), le jour de la
+  // semaine de chaque numéro est calculé arithmétiquement à partir de TODAY=17='Lundi' (voir DAY_LABELS),
+  // plutôt qu'avec un vrai objet Date — ça garantit que la grille reste cohérente avec les libellés Lundi–Dimanche
+  // utilisés partout ailleurs dans la maquette, même si le 17 août 2026 réel ne tombe pas un lundi.
+  const MONTH_DAYS = 31; // août
+  const MONTH_LABEL = 'Août';
+  function weekdayOfMonthDay(d){ return ((d - TODAY) % 7 + 7) % 7; } // 0=Lundi ... 6=Dimanche
+  function monthGridHtml(){
+    const startPad = weekdayOfMonthDay(1);
+    const totalCells = Math.ceil((startPad + MONTH_DAYS) / 7) * 7;
+    const rows = totalCells / 7;
+    const MAX_PILLS = 3;
+    let header = '<div class="month-grid-header">' + ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'].map(w => '<div class="mgh-cell">'+w+'</div>').join('') + '</div>';
+    // Nombre de lignes fixé dynamiquement pour que chaque ligne se partage équitablement (1fr) la hauteur
+    // disponible : la grille remplit l'écran sans jamais déborder ni nécessiter de scroll.
+    let body = '<div class="month-grid-body" style="grid-template-rows:repeat('+rows+',1fr);">';
+    for(let i = 0; i < totalCells; i++){
+      const dayNum = i - startPad + 1;
+      if(dayNum < 1 || dayNum > MONTH_DAYS){ body += '<div class="month-cell is-pad"></div>'; continue; }
+      const dayEvs = eventsFor([dayNum]);
+      let pills = '';
+      dayEvs.slice(0, MAX_PILLS).forEach(e => {
+        // Si toutes les communautés de l'évènement sont masquées aux membres, on ne révèle pas leur nom :
+        // l'étiquette retombe sur un libellé générique plutôt que d'exposer une communauté cachée.
+        const visibleGames = e.games.filter(g => !COMMUNITY_HIDDEN[g]);
+        const label = visibleGames.length ? GAME_LABELS[visibleGames[0]] : 'Évènement';
+        const noKey = e.participants.some(p => p.key) ? '' : ' no-key';
+        pills += '<div class="month-evt'+noKey+'" data-id="'+e.id+'" title="'+e.title+'">'+label+'</div>';
+      });
+      if(dayEvs.length > MAX_PILLS) pills += '<div class="month-more">+'+(dayEvs.length - MAX_PILLS)+'</div>';
+      const pillsRow = pills ? '<div class="month-evt-row">'+pills+'</div>' : '';
+      body += '<div class="month-cell'+(dayNum === TODAY ? ' is-today' : '')+'"><div class="mc-num">'+dayNum+'</div>'+pillsRow+'</div>';
+    }
+    body += '</div>';
+    return '<div class="month-grid">' + header + body + '</div>';
+  }
+  function renderGrid(container){ container.innerHTML = monthGridHtml(); }
+
+  // ================= MODAL =================
+  const eventModal = document.getElementById('eventModal');
+  const modalJoinBtn = document.getElementById('modalJoinBtn');
+  const modalDeleteBtn = document.getElementById('modalDeleteBtn');
+  const modalTransformBtn = document.getElementById('modalTransformBtn');
+  const modalParticipantsLabel = document.getElementById('modalParticipantsLabel');
+  let currentModalEventId = null;
+
+  // "Contacter" sur une dispo : plus de modale de contact, on va directement sur la fiche profil du
+  // membre (qui affiche ses coordonnées si partagées, sinon l'invitation à passer par le WhatsApp du club).
+  function goToMemberProfile(name){
+    eventModal.classList.remove('open');
+    openMemberProfile(name);
+    showPage('membre');
+  }
+
+  // Pour une disponibilité, pas de liste de participants ni de boutons V/E/D : juste le nom du membre
+  // (cliquable pour accéder à son profil, comme pour un participant d'évènement normal).
+  function renderModalParticipants(e){
+    modalParticipantsLabel.style.display = e.avail ? 'none' : '';
+    if(e.avail){
+      const p = e.participants[0];
+      document.getElementById('modalParticipants').innerHTML = p ? (
+        '<li><span class="avatar">'+p.s.slice(0,2).toUpperCase()+'</span>'
+        + '<span class="mp-name" data-member="'+p.n+'">'+p.n+(p.key ? ' <span class="tag ok" style="margin-left:4px;">🔑</span>' : '')+'</span></li>'
+      ) : '';
+      return;
+    }
+    // Le trio V/E/D n'est affiché que si au moins une étiquette de l'évènement reste compétitive
+    // (voir Admin > Communautés) ; s'il n'a que des étiquettes non compétitives, on le masque entièrement.
+    const eventCompetitive = e.games.some(g => isCommunityCompetitive(g));
+    document.getElementById('modalParticipants').innerHTML = e.participants.map((p, i) =>
+      '<li><span class="avatar">'+p.s.slice(0,2).toUpperCase()+'</span>'
+      + '<span class="mp-name" data-member="'+p.n+'">'+p.n+(p.key ? ' <span class="tag ok" style="margin-left:4px;">🔑</span>' : '')+'</span>'
+      + (eventCompetitive
+        ? '<div class="ved-group" data-idx="'+i+'">'
+          +   '<button type="button" class="ved-btn v'+(p.result==='v' ? ' active' : '')+'" data-result="v" title="Victoire">V</button>'
+          +   '<button type="button" class="ved-btn e'+(p.result==='e' ? ' active' : '')+'" data-result="e" title="Égalité">E</button>'
+          +   '<button type="button" class="ved-btn d'+(p.result==='d' ? ' active' : '')+'" data-result="d" title="Défaite">D</button>'
+          + '</div>'
+        : '')
+      + '</li>'
+    ).join('');
+  }
+  // Clic sur le nom d'un participant (évènement normal ou dispo) : accès à son profil, modale fermée d'abord.
+  // Clic sur un bouton V/E/D : un seul résultat actif par participant (re-cliquer sur le même le désélectionne),
+  // sans aucune contrainte entre participants — chacun peut avoir n'importe quelle combinaison.
+  // Ces résultats sont la source de vérité pour le classement (voir leaderboardWithEventResults).
+  document.getElementById('modalParticipants').addEventListener('click', (ev) => {
+    const nameEl = ev.target.closest('.mp-name[data-member]');
+    if(nameEl){ eventModal.classList.remove('open'); openMemberProfile(nameEl.dataset.member); showPage('membre'); return; }
+    const btn = ev.target.closest('.ved-btn');
+    if(!btn) return;
+    const e = EVENTS.find(v => v.id === currentModalEventId);
+    if(!e) return;
+    const idx = Number(btn.closest('.ved-group').dataset.idx);
+    const p = e.participants[idx];
+    if(!p) return;
+    const result = btn.dataset.result;
+    p.result = (p.result === result) ? null : result;
+    renderModalParticipants(e);
+    renderLeaderboard();
+  });
+  // Rejoindre/Se désinscrire (Contacter pour une dispo) à la place du bouton, et Supprimer / Transformer en
+  // évènement visibles pour le créateur ou un·e admin (pour cette maquette, l'utilisateur courant est admin).
+  function updateModalActions(e){
+    const canManage = IS_ADMIN || e.creator === CURRENT_USER;
+    if(e.avail){
+      modalJoinBtn.textContent = 'Contacter';
+      modalJoinBtn.disabled = false;
+      modalDeleteBtn.style.display = canManage ? '' : 'none';
+      modalTransformBtn.style.display = canManage ? '' : 'none';
+      return;
+    }
+    modalTransformBtn.style.display = 'none';
+    const isJoined = e.participants.some(p => p.n === CURRENT_USER);
+    modalJoinBtn.textContent = isJoined ? 'Se désinscrire' : 'Rejoindre';
+    // Seul·e inscrit·e : on garde le bouton visible (pour montrer l'état) mais désactivé,
+    // impossible de se désinscrire en laissant l'événement sans aucun participant.
+    modalJoinBtn.disabled = isJoined && e.participants.length === 1;
+    modalDeleteBtn.style.display = canManage ? '' : 'none';
+  }
+  function openModal(id){
+    const e = EVENTS.find(ev => ev.id === Number(id));
+    if(!e) return;
+    currentModalEventId = e.id;
+    document.getElementById('modalTitle').textContent = e.title;
+    const st = dayKeyStatus(e.day);
+    let meta = '<span>'+DAY_LABELS[e.day]+' · '+e.start+'h–'+e.end+'h</span>';
+    meta += st && st.ok ? '<span class="tag ok">🔑 club ouvert dès '+st.from+'h</span>' : '<span class="tag warn">⚠ Pas de porteur de clé confirmé</span>';
+    if(e.avail && e.repeatsWeekly) meta += '<span class="tag genre">🔁 Toutes les semaines</span>';
+    document.getElementById('modalMeta').innerHTML = meta;
+    renderModalParticipants(e);
+    updateModalActions(e);
+    eventModal.classList.add('open');
+  }
+  document.getElementById('modalClose').addEventListener('click', () => eventModal.classList.remove('open'));
+  modalJoinBtn.addEventListener('click', () => {
+    if(modalJoinBtn.disabled) return;
+    const e = EVENTS.find(ev => ev.id === currentModalEventId);
+    if(!e) return;
+    if(e.avail){ goToMemberProfile(e.participants[0] && e.participants[0].n); return; }
+    const idx = e.participants.findIndex(p => p.n === CURRENT_USER);
+    if(idx >= 0) e.participants.splice(idx, 1);
+    else e.participants.push({ n: CURRENT_USER, s: CURRENT_USER.split(' ')[0], key:false });
+    renderModalParticipants(e);
+    updateModalActions(e);
+    render();
+    renderRankingStats();
+    renderCommunityMembers();
+  });
+  modalDeleteBtn.addEventListener('click', () => {
+    EVENTS = EVENTS.filter(ev => ev.id !== currentModalEventId);
+    eventModal.classList.remove('open');
+    render();
+    renderRankingStats();
+    renderCommunityUpcoming();
+  });
+  // Transformer une dispo en évènement : un nouvel évènement (nouvel id) reprend toutes les infos de la
+  // dispo, qui est elle-même supprimée — la dispo cesse donc d'exister en tant que telle.
+  modalTransformBtn.addEventListener('click', () => {
+    const e = EVENTS.find(ev => ev.id === currentModalEventId);
+    if(!e) return;
+    EVENTS.push({
+      id: Math.max(...EVENTS.map(ev => ev.id)) + 1,
+      day: e.day, start: e.start, end: e.end, title: e.title, games: [...e.games],
+      description: e.description, participants: e.participants.map(p => ({...p})),
+      creator: e.creator,
+    });
+    EVENTS = EVENTS.filter(ev => ev.id !== e.id);
+    eventModal.classList.remove('open');
+    render();
+    renderRankingStats();
+    renderCommunityUpcoming();
+  });
+  eventModal.addEventListener('click', e => { if(e.target === eventModal) eventModal.classList.remove('open'); });
+
+  // ================= CRÉATION D'ÉVÉNEMENT (formulaire "+") =================
+  const CURRENT_USER = 'Louis-Marie B.';
+  const MEMBERS = ['Louis-Marie B.','Marc J.','Julie B.','Théo N.','Ana C.','Diego R.','Elise M.','Farid K.','Greg T.','Nadia R.','Robert K.','Léa P.','Paul V.','Bruno R.','Sophie L.'];
+
+  const createEventModal = document.getElementById('createEventModal');
+  const ceModalTitle = document.getElementById('ceModalTitle');
+  const ceDateInput = document.getElementById('ceDate');
+  const ceTimeInput = document.getElementById('ceTime');
+  const ceTagsEl = document.getElementById('ceTags');
+  const ceTitleInput = document.getElementById('ceTitle');
+  const ceTitleStar = document.getElementById('ceTitleStar');
+  const ceParticipantsEl = document.getElementById('ceParticipants');
+  const ceParticipantsSearchRow = document.getElementById('ceParticipantsSearchRow');
+  const ceRepeatRow = document.getElementById('ceRepeatRow');
+  const ceRepeatWeekly = document.getElementById('ceRepeatWeekly');
+  const ceMemberSearch = document.getElementById('ceMemberSearch');
+  const ceResultsEl = document.getElementById('ceMemberResults');
+  const ceDescriptionInput = document.getElementById('ceDescription');
+  const ceSubmitBtn = document.getElementById('ceSubmit');
+  let ceParticipantsList = [CURRENT_USER];
+  // 'event' = formulaire "+" habituel ; 'avail' = "Indiquer ma dispo" (pas de recherche de participants,
+  // case "se répète toutes les semaines" en plus — voir openCeModal).
+  let ceMode = 'event';
+
+  function renderCeParticipants(){
+    ceParticipantsEl.innerHTML = ceParticipantsList.map(name => {
+      const canRemove = ceParticipantsList.length > 1;
+      return '<span class="ce-chip">'+name+(name === CURRENT_USER ? ' (moi)' : '')+'<button type="button" data-remove="'+name+'" title="Retirer"'+(canRemove ? '' : ' disabled')+'>×</button></span>';
+    }).join('');
+    validateCeForm();
+  }
+
+  function renderCeResults(query){
+    const q = query.trim().toLowerCase();
+    const available = MEMBERS.filter(m => !ceParticipantsList.includes(m));
+    if(!q){ ceResultsEl.classList.remove('open'); ceResultsEl.innerHTML = ''; return; }
+    const matches = available.filter(m => m.toLowerCase().includes(q));
+    ceResultsEl.innerHTML = matches.length
+      ? matches.slice(0,6).map(m => '<div class="ce-member-row" data-add="'+m+'">'+m+'</div>').join('')
+      : '<div class="ce-member-empty">Aucun membre trouvé.</div>';
+    ceResultsEl.classList.add('open');
+  }
+
+  ceMemberSearch.addEventListener('input', () => renderCeResults(ceMemberSearch.value));
+  ceMemberSearch.addEventListener('focus', () => { if(ceMemberSearch.value) renderCeResults(ceMemberSearch.value); });
+  ceResultsEl.addEventListener('click', (e) => {
+    const row = e.target.closest('[data-add]');
+    if(!row) return;
+    const name = row.dataset.add;
+    if(!ceParticipantsList.includes(name)) ceParticipantsList.push(name);
+    ceMemberSearch.value = '';
+    ceResultsEl.classList.remove('open'); ceResultsEl.innerHTML = '';
+    renderCeParticipants();
+  });
+  ceParticipantsEl.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-remove]');
+    if(!btn || btn.disabled) return;
+    ceParticipantsList = ceParticipantsList.filter(n => n !== btn.dataset.remove);
+    renderCeParticipants();
+  });
+  document.addEventListener('click', (e) => {
+    if(!e.target.closest('#ceMemberSearch') && !e.target.closest('#ceMemberResults')) ceResultsEl.classList.remove('open');
+  });
+
+  // Étiquette : autant d'étiquettes que voulu, sans limite (re-cliquer désélectionne juste celle-ci).
+  function updateCeTitleRequirement(){
+    const activeTags = [...ceTagsEl.querySelectorAll('.chip.active')];
+    if(activeTags.length){
+      ceTitleStar.style.display = 'none';
+      ceTitleInput.placeholder = 'Par défaut : "'+activeTags.map(c => c.textContent).join(' + ')+'"';
+    } else {
+      ceTitleStar.style.display = '';
+      ceTitleInput.placeholder = 'Ex : Soirée jeux de société';
+    }
+    validateCeForm();
+  }
+  ceTagsEl.addEventListener('click', (e) => {
+    const btn = e.target.closest('.chip');
+    if(!btn) return;
+    btn.classList.toggle('active');
+    updateCeTitleRequirement();
+  });
+  makeDragScrollable(ceTagsEl);
+
+  [ceDateInput, ceTimeInput, ceTitleInput].forEach(el => el.addEventListener('input', validateCeForm));
+
+  function validateCeForm(){
+    const hasTag = ceTagsEl.querySelectorAll('.chip.active').length > 0;
+    const ok = !!ceDateInput.value && !!ceTimeInput.value && (!!ceTitleInput.value.trim() || hasTag) && ceParticipantsList.length >= 1;
+    ceSubmitBtn.disabled = !ok;
+  }
+
+  function resetCeForm(){
+    ceDateInput.value = '2026-08-17';
+    ceTimeInput.value = '';
+    ceTitleInput.value = '';
+    ceDescriptionInput.value = '';
+    ceRepeatWeekly.checked = false;
+    ceMemberSearch.value = '';
+    ceResultsEl.classList.remove('open'); ceResultsEl.innerHTML = '';
+    ceTagsEl.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    ceParticipantsList = [CURRENT_USER];
+    renderCeParticipants();
+    updateCeTitleRequirement();
+  }
+
+  // Ouvre le formulaire en mode évènement classique ("+") ou en mode disponibilité ("Indiquer ma dispo") :
+  // en mode dispo, pas de recherche de participants (on reste seul·e sur sa dispo) et une case "se répète
+  // toutes les semaines" apparaît.
+  function openCeModal(mode){
+    ceMode = mode;
+    resetCeForm();
+    ceModalTitle.textContent = mode === 'avail' ? 'Indiquer une disponibilité' : 'Nouvel événement';
+    ceParticipantsSearchRow.hidden = mode === 'avail';
+    ceRepeatRow.hidden = mode !== 'avail';
+    createEventModal.classList.add('open');
+  }
+
+  function closeCeModal(){ createEventModal.classList.remove('open'); }
+  document.getElementById('fabBtn').addEventListener('click', () => openCeModal('event'));
+  document.getElementById('ceClose').addEventListener('click', closeCeModal);
+  document.getElementById('ceCancel').addEventListener('click', closeCeModal);
+  createEventModal.addEventListener('click', (e) => { if(e.target === createEventModal) closeCeModal(); });
+
+  ceSubmitBtn.addEventListener('click', () => {
+    if(ceSubmitBtn.disabled) return;
+    const activeTagBtns = [...ceTagsEl.querySelectorAll('.chip.active')];
+    const games = activeTagBtns.map(c => c.dataset.game);
+    const defaultTitle = ceMode === 'avail' ? 'Disponibilité' : 'Événement';
+    const title = ceTitleInput.value.trim() || (activeTagBtns.length ? activeTagBtns.map(c => c.textContent).join(' + ') : defaultTitle);
+    const day = Number(ceDateInput.value.split('-')[2]); // maquette simplifiée : jour du mois — la vraie gestion de date sera faite au développement
+    const startHour = Number(ceTimeInput.value.split(':')[0]);
+    const newEntry = {
+      id: Math.max(...EVENTS.map(e => e.id)) + 1,
+      day, start: startHour, end: Math.min(startHour + 2, 23),
+      title, games,
+      description: ceDescriptionInput.value.trim(),
+      participants: ceParticipantsList.map(n => ({ n, s: n.split(' ')[0], key:false })),
+      creator: CURRENT_USER,
+    };
+    if(ceMode === 'avail'){
+      newEntry.avail = true;
+      newEntry.repeatsWeekly = ceRepeatWeekly.checked;
+    }
+    EVENTS.push(newEntry);
+    closeCeModal();
+    render();
+    renderRankingStats();
+    renderCommunityUpcoming();
+  });
+
+  // Delegate clicks for event cards / grid events / join buttons / contact buttons / alert buttons
+  document.addEventListener('click', (e) => {
+    const joinBtn = e.target.closest('[data-join]');
+    if(joinBtn){
+      e.stopPropagation();
+      if(joinBtn.disabled) return;
+      const ev = EVENTS.find(v => v.id === Number(joinBtn.dataset.join));
+      if(!ev) return;
+      const idx = ev.participants.findIndex(p => p.n === CURRENT_USER);
+      if(idx >= 0) ev.participants.splice(idx, 1);
+      else ev.participants.push({ n: CURRENT_USER, s: CURRENT_USER.split(' ')[0], key:false });
+      render();
+      renderRankingStats();
+      renderCommunityMembers();
+      return;
+    }
+    const contactBtn = e.target.closest('[data-contact]');
+    if(contactBtn){ e.stopPropagation(); goToMemberProfile(contactBtn.dataset.contact); return; }
+    const card = e.target.closest('.event-card, .gevent, .month-evt');
+    if(card && card.dataset.id){ openModal(card.dataset.id); return; }
+    const alertBtn = e.target.closest('[data-alert-day]');
+    if(alertBtn){ alertBtn.textContent = 'Message copié ✓'; return; }
+  });
+
+  // ================= PAGE NAV =================
+  // Pages principales (barre du bas) : on retient la dernière visitée pour que les sous-pages
+  // ouvertes depuis le menu du compte (profil, clés, paramètres, FAQ, CGU) puissent y revenir.
+  const MAIN_PAGES = ['events', 'ranking', 'commu', 'admin'];
+  let lastMainPage = 'events';
+  function showPage(name){
+    document.querySelectorAll('.page').forEach(v => v.classList.toggle('active', v.id === 'page-' + name));
+    document.querySelectorAll('.nav-btn, .bn-btn').forEach(b => b.classList.toggle('active', b.dataset.page === name));
+    document.getElementById('bellBtn').classList.toggle('active', name === 'announcements');
+    // Le "+" ne sert qu'à organiser un événement : pertinent uniquement sur la page Events.
+    document.getElementById('fabBtn').style.display = (name === 'events') ? '' : 'none';
+    // Le "+" de la page Annonces ne sert qu'aux admins, pour créer une annonce.
+    document.getElementById('annFabBtn').style.display = (name === 'announcements' && IS_ADMIN) ? '' : 'none';
+    if(MAIN_PAGES.includes(name)) lastMainPage = name;
+  }
+  document.querySelectorAll('.nav-btn, .bn-btn').forEach(btn => btn.addEventListener('click', () => showPage(btn.dataset.page)));
+  document.getElementById('bellBtn').addEventListener('click', () => showPage('announcements'));
+  // Le logo et le nom du club, dans l'en-tête, ramènent toujours à la page Programme.
+  document.getElementById('brandHomeBtn').addEventListener('click', () => showPage('events'));
+  document.getElementById('brandHomeBtn').addEventListener('keydown', (e) => { if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); showPage('events'); } });
+  // Sous-pages ouvertes depuis le menu du compte : le bouton "Retour" ramène toujours vers la
+  // dernière page principale visitée (Programme par défaut).
+  document.querySelectorAll('.subpage-back').forEach(btn => btn.addEventListener('click', () => showPage(lastMainPage)));
+
+  // On masque plutôt que de retirer le nœud : l'annonce en alerte peut avoir besoin de le réafficher plus tard.
+  document.getElementById('announceClose').addEventListener('click', () => { document.getElementById('announce').style.display = 'none'; });
+
+  // ================= ACCOUNT / CREATE POPOVERS =================
+  const accountBtn = document.getElementById('accountBtn'), accountDropdown = document.getElementById('accountDropdown');
+  accountBtn.addEventListener('click', e => { e.stopPropagation(); accountDropdown.classList.toggle('open'); });
+  document.addEventListener('click', (e) => {
+    if(!accountDropdown.contains(e.target) && e.target !== accountBtn) accountDropdown.classList.remove('open');
+  });
+
+  // Chaque entrée du menu du compte ouvre une sous-page en plein écran et referme le menu.
+  function openFromDropdown(page){ accountDropdown.classList.remove('open'); showPage(page); }
+  document.getElementById('accMonProfil').addEventListener('click', () => openFromDropdown('profil'));
+  document.getElementById('accLesCles').addEventListener('click', () => openFromDropdown('cles'));
+  document.getElementById('accParametres').addEventListener('click', () => openFromDropdown('parametres'));
+  document.getElementById('accFaq').addEventListener('click', () => openFromDropdown('faq'));
+  document.getElementById('accCgu').addEventListener('click', () => openFromDropdown('cgu'));
+  document.getElementById('accLogout').addEventListener('click', () => openFromDropdown('logout'));
+  document.getElementById('logoutBackBtn').addEventListener('click', () => showPage(lastMainPage));
+
+  // ================= ADMIN VISIBILITY =================
+  // IS_ADMIN est dérivé de la liste des administrateurs (voir Paramètres > Administrateurs, section
+  // visible uniquement chez le porteur du projet) et peut donc changer en cours de session, y compris
+  // pour l'utilisateur courant — d'où un simple show/hide de l'onglet plutôt qu'une suppression du DOM.
+  let IS_ADMIN = false;
+  const navAdminBtn = document.getElementById('navAdmin');
+  function refreshAdminStatus(){
+    const me = COMMUNITY_MEMBERS.find(m => m.n === CURRENT_USER);
+    IS_ADMIN = !!(me && me.admin);
+    navAdminBtn.hidden = !IS_ADMIN;
+    // Si l'utilisateur courant vient de perdre ses droits admin alors qu'il consultait la page Admin,
+    // on le ramène sur Programme plutôt que de le laisser sur une page qui ne lui est plus destinée.
+    if(!IS_ADMIN && document.getElementById('page-admin').classList.contains('active')) showPage('events');
+  }
+  refreshAdminStatus();
+
+  // ================= ANNONCES / NOTIFICATIONS =================
+  // Annonces : uniquement des messages du comité (peuvent contenir un sondage à choix unique ou multiple).
+  // Les sondages ne sont modifiables (créés/édités) que par les admins, depuis la page Admin — pas ici.
+  let ANNOUNCEMENTS = [
+    { id:1, day:'28', month:'Sept.', title:'Assemblée générale', body:"19h au local — présence souhaitée pour le vote du budget 2027.", poll:null, seen:true, alert:true,
+      bannerText:"Assemblée générale le 28 septembre à 19h — présence souhaitée !", audience:'tous' },
+    { id:2, day:'25', month:'Sept.', title:'Stage de peinture', body:'', seen:false, alert:false, bannerText:'', audience:'tous',
+      poll:{ kind:'single', question:'Qui est intéressé par un stage de peinture le 25 septembre ?', options:['Oui','Non'], votes:{} } },
+    { id:3, day:'14', month:'Sept.', title:'Tournoi Blood Bowl — inscriptions ouvertes', body:"12 places, premier arrivé premier servi. Inscription directe depuis l'événement du calendrier.", poll:null, seen:false, alert:false, bannerText:'', audience:'tous' },
+    { id:4, day:'2', month:'Sept.', title:'Nouvelles copies de clés disponibles', body:"3 clés supplémentaires ont été taillées, contactez le bureau si vous êtes régulier·ère et sans clé.", poll:null, seen:true, alert:false, bannerText:'', audience:'tous' },
+    { id:5, day:'20', month:'Sept.', title:'Necromunda — nouvelle saison de campagne', body:"Lancement de la nouvelle saison, inscrivez vos gangs avant le 20.", poll:null, seen:false, alert:false, bannerText:'', audience:'necromunda' },
+  ];
+  let nextAnnId = 6;
+
+  // Notifications : ajouts à des événements + rappels (clé manquante), générées côté membre.
+  let NOTIFICATIONS = [
+    { id:1, text:"<strong>Marc J.</strong> t'a ajouté à l'événement « Tournoi Blood Bowl » (vendredi 21, 19h–23h).", unread:true },
+    { id:2, text:"⚠ Pas de porteur de clé confirmé pour « Soirée jeux de société » (mercredi 19, 18h–22h), à laquelle tu es inscrit·e.", unread:true },
+    { id:3, text:"Des membres ont besoin d'une clé pour « Session peinture » (dimanche 23, 13h–17h).", unread:false },
+    { id:4, text:"<strong>Nadia R.</strong> t'a ajouté à l'événement « Peinture entre amis » (mercredi 19, 20h–23h).", unread:false },
+  ];
+
+  const announcementsListEl = document.getElementById('announcementsList');
+  const notificationsListEl = document.getElementById('notificationsList');
+  const bellDot = document.getElementById('bellDot');
+  let notifClearConfirm = false;
+
+  function updateBellIndicator(){
+    const anyUnread = visibleAnnouncements().some(a => !a.seen) || NOTIFICATIONS.some(n => n.unread);
+    bellDot.classList.toggle('show', anyUnread);
+  }
+
+  function pollResultsHtml(poll){
+    const allVotes = Object.values(poll.votes);
+    if(poll.kind === 'rating'){
+      const ratings = allVotes.filter(v => typeof v === 'number' && v > 0);
+      if(!ratings.length) return 'Aucun vote pour l\'instant.';
+      const counts = {};
+      ratings.forEach(v => { counts[v] = (counts[v] || 0) + 1; });
+      return Object.keys(counts).map(Number).sort((a,b) => b - a).map(v => {
+        const c = counts[v];
+        const pct = Math.round((c / ratings.length) * 100);
+        return '★'.repeat(v) + ' : ' + c + ', ' + pct + '%';
+      }).join('<br>');
+    }
+    const voters = allVotes.filter(v => Array.isArray(v) && v.length);
+    if(!voters.length) return 'Aucun vote pour l\'instant.';
+    return poll.options.map((opt, i) => {
+      const c = voters.filter(v => v.includes(i)).length;
+      const pct = Math.round((c / voters.length) * 100);
+      return opt + ' : ' + c + ', ' + pct + '%';
+    }).join('<br>');
+  }
+  function announcementCardHtml(a){
+    let pollHtml = '';
+    if(a.poll){
+      const voted = a.poll.votes[CURRENT_USER];
+      const questionHtml = a.poll.question ? '<div class="poll-question">'+a.poll.question+'</div>' : '';
+      let bodyHtml;
+      if(a.poll.kind === 'rating'){
+        const current = typeof voted === 'number' ? voted : 0;
+        let stars = '';
+        for(let i=1;i<=5;i++) stars += '<button type="button" class="star-btn'+(i<=current?' filled':'')+'" data-star="'+i+'">★</button>';
+        bodyHtml = '<div class="poll-stars" data-poll-stars="'+a.id+'" data-pending="'+current+'">'+stars+'</div>';
+      } else {
+        const votedArr = Array.isArray(voted) ? voted : [];
+        const type = a.poll.kind === 'multiple' ? 'checkbox' : 'radio';
+        bodyHtml = '<div class="poll-options">'+a.poll.options.map((opt, i) =>
+          '<label class="poll-opt"><input type="'+type+'" name="poll-'+a.id+'" data-opt="'+i+'"'+(votedArr.includes(i) ? ' checked' : '')+'><span>'+opt+'</span></label>'
+        ).join('')+'</div>';
+      }
+      pollHtml = '<div class="ann-poll" data-poll="'+a.id+'">'+questionHtml+bodyHtml
+        + '<div class="poll-actions">'
+        + '<button type="button" class="join-btn poll-vote-btn" data-poll-submit="'+a.id+'" disabled>Voter</button>'
+        + (IS_ADMIN ? '<button type="button" class="poll-results-btn" data-poll-results="'+a.id+'">Voir les résultats</button>' : '')
+        + '</div>'
+        + (IS_ADMIN ? '<div class="poll-results" data-poll-results-panel="'+a.id+'" hidden></div>' : '')
+        + '</div>';
+    }
+    const alertIcon = a.alert ? '<span class="ann-alert-icon" title="Affichée dans le bandeau">🔊</span>' : '';
+    const audienceBadge = (a.audience && a.audience !== 'tous' && !COMMUNITY_HIDDEN[a.audience]) ? '<span class="audience-badge">'+GAME_LABELS[a.audience]+'</span>' : '';
+    const bodyText = a.body ? '<div class="d2">'+a.body+'</div>' : '';
+    return '<div class="section-card ann-card" data-id="'+a.id+'">'
+      + '<div class="ann-date"><span class="d">'+a.day+'</span><span class="m">'+a.month+'</span></div>'
+      + '<div class="ann-body"><div class="t">'+alertIcon+a.title+audienceBadge+'</div>'+bodyText+pollHtml+'</div>'
+      + '<button type="button" class="ann-dot'+(a.seen ? '' : ' unread')+'" data-toggle-ann="'+a.id+'" title="Marquer comme '+(a.seen ? 'non vue' : 'vue')+'"></button>'
+      + '</div>';
+  }
+  // Un membre ne voit que les annonces "Tous" + celles des communautés qu'il a rejointes ;
+  // ce filtrage est automatique, il n'y a pas de sélecteur pour le membre (cf. page Communautés).
+  // Les admins voient toutes les annonces, avec un badge indiquant le ciblage, pour pouvoir les gérer.
+  function currentUserCommunities(){
+    const me = COMMUNITY_MEMBERS.find(m => m.n === CURRENT_USER);
+    return me ? me.communities.map(c => c.key) : [];
+  }
+  function visibleAnnouncements(){
+    if(IS_ADMIN) return ANNOUNCEMENTS;
+    const myCommunities = currentUserCommunities();
+    return ANNOUNCEMENTS.filter(a => !a.audience || a.audience === 'tous' || myCommunities.includes(a.audience));
+  }
+  function renderAnnouncements(){
+    const visible = visibleAnnouncements();
+    announcementsListEl.innerHTML = visible.length
+      ? visible.map(announcementCardHtml).join('')
+      : '<div class="empty-hint">Aucune annonce pour l\'instant.</div>';
+    updateBellIndicator();
+  }
+  function updateAlertBanner(){
+    const bannerEl = document.getElementById('announce');
+    const alertAnn = ANNOUNCEMENTS.find(a => a.alert);
+    if(alertAnn){
+      bannerEl.querySelector('.txt').textContent = '📣 ' + alertAnn.bannerText;
+      bannerEl.style.display = '';
+    } else {
+      bannerEl.style.display = 'none';
+    }
+  }
+  announcementsListEl.addEventListener('change', (e) => {
+    const input = e.target.closest('.ann-poll input');
+    if(!input) return;
+    input.closest('.ann-poll').querySelector('.poll-vote-btn').disabled = false;
+  });
+  announcementsListEl.addEventListener('click', (e) => {
+    const starBtn = e.target.closest('.star-btn');
+    if(starBtn){
+      const wrap = starBtn.closest('.poll-stars');
+      const val = Number(starBtn.dataset.star);
+      wrap.dataset.pending = val;
+      [...wrap.querySelectorAll('.star-btn')].forEach(s => s.classList.toggle('filled', Number(s.dataset.star) <= val));
+      wrap.closest('.ann-poll').querySelector('.poll-vote-btn').disabled = false;
+      return;
+    }
+    const voteBtn = e.target.closest('.poll-vote-btn');
+    if(voteBtn){
+      const a = ANNOUNCEMENTS.find(x => x.id === Number(voteBtn.dataset.pollSubmit));
+      if(a){
+        const wrap = voteBtn.closest('.ann-poll');
+        if(a.poll.kind === 'rating'){
+          const val = Number(wrap.querySelector('.poll-stars').dataset.pending || 0);
+          if(val > 0) a.poll.votes[CURRENT_USER] = val;
+        } else {
+          a.poll.votes[CURRENT_USER] = [...wrap.querySelectorAll('input:checked')].map(i => Number(i.dataset.opt));
+        }
+        voteBtn.disabled = true;
+      }
+      return;
+    }
+    const resultsBtn = e.target.closest('.poll-results-btn');
+    if(resultsBtn){
+      const a = ANNOUNCEMENTS.find(x => x.id === Number(resultsBtn.dataset.pollResults));
+      const panel = resultsBtn.closest('.ann-poll').querySelector('.poll-results');
+      if(a && panel){
+        if(panel.hidden){
+          panel.innerHTML = pollResultsHtml(a.poll);
+          panel.hidden = false;
+          resultsBtn.textContent = 'Masquer les résultats';
+        } else {
+          panel.hidden = true;
+          resultsBtn.textContent = 'Voir les résultats';
+        }
+      }
+      return;
+    }
+    const dotBtn = e.target.closest('.ann-dot');
+    if(dotBtn){
+      const a = ANNOUNCEMENTS.find(x => x.id === Number(dotBtn.dataset.toggleAnn));
+      if(a){ a.seen = !a.seen; renderAnnouncements(); }
+      return;
+    }
+    if(e.target.closest('.ann-poll')) return;
+    if(!IS_ADMIN) return;
+    const card = e.target.closest('.ann-card');
+    if(card) openAnnounceForm(Number(card.dataset.id));
+  });
+  document.getElementById('annMarkAllBtn').addEventListener('click', () => {
+    visibleAnnouncements().forEach(a => a.seen = true);
+    renderAnnouncements();
+  });
+
+  // ================= FORMULAIRE ANNONCE (création / édition, admin) =================
+  const announceFormModal = document.getElementById('announceFormModal');
+  const afTitleInput = document.getElementById('afTitle');
+  const afDescriptionInput = document.getElementById('afDescription');
+  const afDateInput = document.getElementById('afDate');
+  const afAlertToggle = document.getElementById('afAlertToggle');
+  const afBannerTextField = document.getElementById('afBannerTextField');
+  const afBannerTextInput = document.getElementById('afBannerText');
+  const afTogglePollBtn = document.getElementById('afTogglePoll');
+  const afPollSection = document.getElementById('afPollSection');
+  const afPollQuestion = document.getElementById('afPollQuestion');
+  const afPollTypeSelect = document.getElementById('afPollTypeSelect');
+  const afPollOptionsEl = document.getElementById('afPollOptions');
+  const afSubmitBtn = document.getElementById('afSubmit');
+  const afAudienceFilterEl = document.getElementById('afAudienceFilter');
+  let afEditingId = null;
+  let afPollOptionsState = [];
+  let afAudience = 'tous';
+  const MONTHS_FR = ['Janv.','Févr.','Mars','Avr.','Mai','Juin','Juil.','Août','Sept.','Oct.','Nov.','Déc.'];
+
+  function renderAfAudienceFilter(){
+    afAudienceFilterEl.innerHTML = communityChipsHtml(key => key === afAudience);
+  }
+  afAudienceFilterEl.addEventListener('click', (e) => {
+    const btn = e.target.closest('.chip');
+    if(!btn) return;
+    afAudience = btn.dataset.commu;
+    renderAfAudienceFilter();
+  });
+
+  function renderAfPollOptions(){
+    const isRating = afPollTypeSelect.value === 'rating';
+    afPollOptionsEl.hidden = isRating;
+    document.getElementById('afAddOption').hidden = isRating || afPollOptionsState.length >= 5;
+    if(isRating) return;
+    afPollOptionsEl.innerHTML = afPollOptionsState.map((opt, i) =>
+      '<div class="af-poll-opt-row"><input type="text" class="form-input" data-poll-opt-idx="'+i+'" value="'+opt.replace(/"/g,'&quot;')+'" placeholder="Option '+(i+1)+'">'
+      + (afPollOptionsState.length > 2 ? '<button type="button" data-remove-opt="'+i+'" title="Retirer">×</button>' : '')
+      + '</div>'
+    ).join('');
+  }
+  afPollOptionsEl.addEventListener('input', (e) => {
+    const input = e.target.closest('[data-poll-opt-idx]');
+    if(!input) return;
+    afPollOptionsState[Number(input.dataset.pollOptIdx)] = input.value;
+    validateAnnounceForm();
+  });
+  afPollOptionsEl.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-remove-opt]');
+    if(!btn) return;
+    afPollOptionsState.splice(Number(btn.dataset.removeOpt), 1);
+    renderAfPollOptions();
+    validateAnnounceForm();
+  });
+  document.getElementById('afAddOption').addEventListener('click', () => {
+    if(afPollOptionsState.length >= 5) return;
+    afPollOptionsState.push('');
+    renderAfPollOptions();
+    validateAnnounceForm();
+  });
+  afPollTypeSelect.addEventListener('change', () => { renderAfPollOptions(); validateAnnounceForm(); });
+  afTogglePollBtn.addEventListener('click', () => {
+    const opening = afPollSection.hidden;
+    afPollSection.hidden = !opening;
+    afTogglePollBtn.textContent = opening ? '− Retirer le sondage' : '+ Créer un sondage';
+    if(opening && afPollOptionsState.length === 0){ afPollOptionsState = ['', '']; renderAfPollOptions(); }
+    validateAnnounceForm();
+  });
+  afAlertToggle.addEventListener('click', () => {
+    afAlertToggle.classList.toggle('on');
+    afBannerTextField.hidden = !afAlertToggle.classList.contains('on');
+    validateAnnounceForm();
+  });
+  [afTitleInput, afDescriptionInput, afDateInput, afBannerTextInput, afPollQuestion].forEach(el => el.addEventListener('input', validateAnnounceForm));
+
+  function validateAnnounceForm(){
+    let ok = !!afTitleInput.value.trim() && !!afDescriptionInput.value.trim() && !!afDateInput.value;
+    if(afAlertToggle.classList.contains('on')) ok = ok && !!afBannerTextInput.value.trim();
+    if(!afPollSection.hidden){
+      ok = ok && !!afPollQuestion.value.trim();
+      if(afPollTypeSelect.value !== 'rating') ok = ok && afPollOptionsState.length >= 2 && afPollOptionsState.every(o => o.trim());
+    }
+    afSubmitBtn.disabled = !ok;
+  }
+
+  function resetAnnounceForm(){
+    afTitleInput.value = '';
+    afDescriptionInput.value = '';
+    afDateInput.value = new Date().toISOString().slice(0,10);
+    afAlertToggle.classList.remove('on');
+    afBannerTextField.hidden = true;
+    afBannerTextInput.value = '';
+    afPollSection.hidden = true;
+    afTogglePollBtn.textContent = '+ Créer un sondage';
+    afPollQuestion.value = '';
+    afPollTypeSelect.value = 'single';
+    afPollOptionsState = [];
+    renderAfPollOptions();
+    afAudience = 'tous';
+    renderAfAudienceFilter();
+  }
+  function openAnnounceForm(id){
+    resetAnnounceForm();
+    afEditingId = id || null;
+    if(afEditingId){
+      const a = ANNOUNCEMENTS.find(x => x.id === afEditingId);
+      if(a){
+        afTitleInput.value = a.title;
+        afDescriptionInput.value = a.body || '';
+        afAudience = a.audience || 'tous';
+        renderAfAudienceFilter();
+        const monthIdx = MONTHS_FR.indexOf(a.month);
+        if(monthIdx > -1){
+          const year = new Date().getFullYear();
+          afDateInput.value = year + '-' + String(monthIdx + 1).padStart(2,'0') + '-' + String(a.day).padStart(2,'0');
+        }
+        if(a.alert){ afAlertToggle.classList.add('on'); afBannerTextField.hidden = false; afBannerTextInput.value = a.bannerText || ''; }
+        if(a.poll){
+          afPollSection.hidden = false;
+          afTogglePollBtn.textContent = '− Retirer le sondage';
+          afPollQuestion.value = a.poll.question || '';
+          afPollTypeSelect.value = a.poll.kind;
+          afPollOptionsState = a.poll.kind === 'rating' ? [] : [...a.poll.options];
+          if(afPollOptionsState.length < 2) afPollOptionsState = ['', ''];
+          renderAfPollOptions();
+        }
+      }
+    }
+    document.getElementById('afCancel').textContent = afEditingId ? 'Supprimer' : 'Annuler';
+    validateAnnounceForm();
+    announceFormModal.classList.add('open');
+  }
+  function closeAnnounceForm(){ announceFormModal.classList.remove('open'); }
+  document.getElementById('annFabBtn').addEventListener('click', () => openAnnounceForm(null));
+  document.getElementById('afClose').addEventListener('click', closeAnnounceForm);
+  document.getElementById('afCancel').addEventListener('click', () => {
+    if(afEditingId){
+      ANNOUNCEMENTS = ANNOUNCEMENTS.filter(a => a.id !== afEditingId);
+      closeAnnounceForm();
+      renderAnnouncements();
+      updateAlertBanner();
+    } else {
+      closeAnnounceForm();
+    }
+  });
+  announceFormModal.addEventListener('click', (e) => { if(e.target === announceFormModal) closeAnnounceForm(); });
+
+  afSubmitBtn.addEventListener('click', () => {
+    if(afSubmitBtn.disabled) return;
+    const [y, m, d] = afDateInput.value.split('-').map(Number);
+    const isAlert = afAlertToggle.classList.contains('on');
+    let poll = null;
+    if(!afPollSection.hidden){
+      poll = { kind: afPollTypeSelect.value, question: afPollQuestion.value.trim(), votes:{} };
+      if(poll.kind !== 'rating') poll.options = afPollOptionsState.map(o => o.trim()).filter(Boolean);
+    }
+    const fields = {
+      title: afTitleInput.value.trim(), body: afDescriptionInput.value.trim(),
+      day: String(d), month: MONTHS_FR[m-1], alert: isAlert, bannerText: isAlert ? afBannerTextInput.value.trim() : '',
+      audience: afAudience,
+    };
+    if(afEditingId){
+      const a = ANNOUNCEMENTS.find(x => x.id === afEditingId);
+      Object.assign(a, fields);
+      a.poll = poll ? Object.assign({ votes: a.poll && a.poll.kind === poll.kind ? a.poll.votes : {} }, poll) : null;
+    } else {
+      ANNOUNCEMENTS.unshift(Object.assign({ id: nextAnnId++, seen: false, poll }, fields));
+    }
+    if(isAlert){
+      const keepId = afEditingId || (ANNOUNCEMENTS[0] && ANNOUNCEMENTS[0].id);
+      ANNOUNCEMENTS.forEach(a => { if(a.id !== keepId) a.alert = false; });
+    }
+    closeAnnounceForm();
+    renderAnnouncements();
+    updateAlertBanner();
+  });
+
+  function notificationCardHtml(n){
+    return '<div class="notif-card" data-id="'+n.id+'">'
+      + '<button class="notif-close" data-remove-notif="'+n.id+'" title="Supprimer">×</button>'
+      + '<div class="notif-text">'+n.text+'</div>'
+      + '<button class="notif-dot'+(n.unread ? ' unread' : '')+'" data-toggle-notif="'+n.id+'" title="Marquer comme '+(n.unread ? 'lue' : 'non lue')+'"></button>'
+      + '</div>';
+  }
+  function renderNotifications(){
+    notificationsListEl.innerHTML = NOTIFICATIONS.length
+      ? NOTIFICATIONS.map(notificationCardHtml).join('')
+      : '<div class="empty-hint">Aucune notification pour l\'instant.</div>';
+    notifClearConfirm = false;
+    updateNotifClearBtn();
+    updateBellIndicator();
+  }
+  notificationsListEl.addEventListener('click', (e) => {
+    const toggleBtn = e.target.closest('[data-toggle-notif]');
+    if(toggleBtn){
+      const n = NOTIFICATIONS.find(x => x.id === Number(toggleBtn.dataset.toggleNotif));
+      if(n){ n.unread = !n.unread; renderNotifications(); }
+      return;
+    }
+    const removeBtn = e.target.closest('[data-remove-notif]');
+    if(removeBtn){
+      NOTIFICATIONS = NOTIFICATIONS.filter(x => x.id !== Number(removeBtn.dataset.removeNotif));
+      renderNotifications();
+    }
+  });
+  document.getElementById('notifMarkAllBtn').addEventListener('click', () => {
+    NOTIFICATIONS.forEach(n => n.unread = false);
+    renderNotifications();
+  });
+
+  const notifClearBtn = document.getElementById('notifClearBtn');
+  const notifClearIcon = notifClearBtn.innerHTML;
+  function updateNotifClearBtn(){
+    notifClearBtn.disabled = NOTIFICATIONS.length === 0;
+    notifClearBtn.classList.toggle('confirm', notifClearConfirm);
+    notifClearBtn.innerHTML = notifClearConfirm ? 'Sûr ?' : notifClearIcon;
+  }
+  notifClearBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if(notifClearBtn.disabled) return;
+    if(notifClearConfirm){
+      NOTIFICATIONS = [];
+      renderNotifications();
+    } else {
+      notifClearConfirm = true;
+      updateNotifClearBtn();
+    }
+  });
+  document.addEventListener('click', (e) => {
+    if(notifClearConfirm && e.target !== notifClearBtn){ notifClearConfirm = false; updateNotifClearBtn(); }
+  });
+
+  renderAnnouncements();
+  renderNotifications();
+  updateAlertBanner();
+
+  // ================= COMMUNAUTÉS (données/aides partagées) =================
+  function communityChipsHtml(isActiveFn){
+    return '<button type="button" class="chip'+(isActiveFn('tous') ? ' active' : '')+'" data-commu="tous">Tous</button>'
+      + Object.keys(GAME_LABELS).filter(key => !COMMUNITY_HIDDEN[key]).map(key =>
+        '<button type="button" class="chip'+(isActiveFn(key) ? ' active' : '')+'" data-commu="'+key+'">'+GAME_LABELS[key]+'</button>'
+      ).join('');
+  }
+
+  // ================= CLASSEMENT =================
+  function wdlHtml(m){
+    const w = m.w > 0 ? '<span class="w">'+m.w+'</span>' : '<span class="w">-</span>';
+    const d = m.d > 0 ? '<span class="d">'+m.d+'</span>' : '<span class="d">-</span>';
+    const l = m.l > 0 ? '<span class="lo">'+m.l+'</span>' : '<span class="lo">-</span>';
+    return w + '<span class="sep"> / </span>' + d + '<span class="sep"> / </span>' + l;
+  }
+  function leaderboardRowHtml(m, i, showWdl){
+    const rank = i + 1;
+    const rankClass = rank === 1 ? ' top1' : rank === 2 ? ' top2' : rank === 3 ? ' top3' : '';
+    const initials = m.n.split(' ').map(part => part.charAt(0)).join('').slice(0,2).toUpperCase();
+    return '<div class="lb-row">'
+      + '<div class="lb-rank'+rankClass+'">'+rank+'</div>'
+      + '<div class="avatar">'+initials+'</div>'
+      + '<div class="lb-info"><div class="lb-name">'+m.n+'</div></div>'
+      + '<div class="lb-stats"><span class="n">'+m.parties+'</span><span class="l">parties</span></div>'
+      + (showWdl ? '<div class="lb-wdl">'+wdlHtml(m)+'</div>' : '')
+      + '</div>';
+  }
+  let rankSortBy = 'parties';
+  let rankCommunityFilter = 'tous';
+  const rankingCommunityFilterEl = document.getElementById('rankingCommunityFilter');
+  function renderRankingCommunityFilter(){
+    rankingCommunityFilterEl.innerHTML = communityChipsHtml(key => key === rankCommunityFilter);
+  }
+  rankingCommunityFilterEl.addEventListener('click', (e) => {
+    const btn = e.target.closest('.chip');
+    if(!btn) return;
+    rankCommunityFilter = btn.dataset.commu;
+    renderRankingCommunityFilter();
+    renderLeaderboard();
+    renderRankingStats();
+  });
+  // Le volet compétitif (colonne V/E/D + tri par victoires) n'est affiché que si la communauté
+  // sélectionnée le permet (voir Admin > Communautés) ; sous "Tous", il reste affiché car il agrège
+  // les résultats de toutes les communautés, y compris celles restées compétitives.
+  function renderLeaderboard(){
+    const showWdl = rankCommunityFilter === 'tous' || isCommunityCompetitive(rankCommunityFilter);
+    if(!showWdl && rankSortBy === 'wins') rankSortBy = 'parties';
+    const sortKey = rankSortBy === 'wins' ? 'w' : 'parties';
+    const board = leaderboardWithEventResults();
+    const pool = rankCommunityFilter === 'tous'
+      ? board
+      : board.filter(m => m.communities.includes(rankCommunityFilter));
+    const top = [...pool].sort((a, b) => b[sortKey] - a[sortKey]).slice(0, 10);
+    document.getElementById('leaderboardList').innerHTML = top.length
+      ? top.map((m, i) => leaderboardRowHtml(m, i, showWdl)).join('')
+      : '<div class="empty-hint">Aucun membre du top 10 dans cette communauté.</div>';
+    document.getElementById('lbSortParties').classList.toggle('active', rankSortBy === 'parties');
+    document.getElementById('lbSortWins').classList.toggle('active', rankSortBy === 'wins');
+    document.getElementById('lbSortWins').hidden = !showWdl;
+  }
+  document.getElementById('lbSortParties').addEventListener('click', () => { rankSortBy = 'parties'; renderLeaderboard(); });
+  document.getElementById('lbSortWins').addEventListener('click', () => { rankSortBy = 'wins'; renderLeaderboard(); });
+  function renderRankingStats(){
+    const relevantEvents = rankCommunityFilter === 'tous'
+      ? EVENTS
+      : EVENTS.filter(ev => ev.games.includes(rankCommunityFilter));
+    const uniqueMembers = new Set();
+    relevantEvents.forEach(ev => ev.participants.forEach(p => uniqueMembers.add(p.n)));
+    document.getElementById('rankActiveMembers').textContent = uniqueMembers.size;
+    document.getElementById('rankEventsCount').textContent = relevantEvents.length;
+  }
+  renderRankingCommunityFilter();
+  renderLeaderboard();
+  renderRankingStats();
+
+  // ================= PAGE COMMUNAUTÉS =================
+  let selectedCommunities = ['tous'];
+  const communityFiltersEl = document.getElementById('communityFilters');
+  function renderCommunityFilters(){
+    communityFiltersEl.innerHTML = communityChipsHtml(key => selectedCommunities.includes(key));
+  }
+  communityFiltersEl.addEventListener('click', (e) => {
+    const btn = e.target.closest('.chip');
+    if(!btn) return;
+    const key = btn.dataset.commu;
+    if(key === 'tous'){
+      selectedCommunities = ['tous'];
+    } else {
+      selectedCommunities = selectedCommunities.filter(k => k !== 'tous');
+      const idx = selectedCommunities.indexOf(key);
+      if(idx >= 0) selectedCommunities.splice(idx, 1); else selectedCommunities.push(key);
+      if(!selectedCommunities.length) selectedCommunities = ['tous'];
+    }
+    renderCommunityFilters();
+    renderCommunityMembers();
+    renderCommunityUpcoming();
+  });
+  function memberRelevantCommunities(member){
+    return selectedCommunities.includes('tous')
+      ? member.communities
+      : member.communities.filter(c => selectedCommunities.includes(c.key));
+  }
+  function memberMostRecentDays(member){
+    const relevant = memberRelevantCommunities(member);
+    if(!relevant.length) return Infinity;
+    return relevant.reduce((min, c) => c.lastDays < min ? c.lastDays : min, Infinity);
+  }
+  function memberActivityText(member){
+    const days = memberMostRecentDays(member);
+    if(days === Infinity) return 'Aucune activité récente';
+    if(days === 0) return 'Dernière partie aujourd\'hui';
+    if(days === 1) return 'Dernière partie hier';
+    return 'Dernière partie il y a ' + days + ' jours';
+  }
+  function memberMatchesCommunityFilter(member){
+    if(selectedCommunities.includes('tous')) return true;
+    return member.communities.some(c => selectedCommunities.includes(c.key));
+  }
+  function memberCardHtml(member){
+    const initials = member.n.split(' ').map(part => part.charAt(0)).join('').slice(0,2).toUpperCase();
+    const keyIcon = member.hasKey ? '<span class="member-key" title="Porteur de clé">🔑</span>' : '';
+    return '<button type="button" class="member-card" data-member="'+member.n+'" title="Voir le profil">'
+      + '<div class="avatar">'+initials+'</div>'
+      + '<div class="member-info"><div class="member-name">'+member.n+keyIcon+'</div><div class="member-activity">'+memberActivityText(member)+'</div></div>'
+      + '</button>';
+  }
+  function renderCommunityMembers(){
+    const list = COMMUNITY_MEMBERS.filter(memberMatchesCommunityFilter)
+      .sort((a, b) => memberMostRecentDays(a) - memberMostRecentDays(b));
+    document.getElementById('communityMembersList').innerHTML = list.length
+      ? list.map(memberCardHtml).join('')
+      : '<div class="empty-hint">Aucun membre dans cette sélection.</div>';
+  }
+  function eventMatchesCommunitySelection(ev){
+    if(selectedCommunities.includes('tous')) return true;
+    return ev.games.some(g => selectedCommunities.includes(g));
+  }
+  function renderCommunityUpcoming(){
+    const upcoming = EVENTS.filter(ev => ev.day >= TODAY && eventMatchesCommunitySelection(ev))
+      .sort((a, b) => a.day - b.day || a.start - b.start);
+    document.getElementById('communityUpcomingList').innerHTML = upcoming.length
+      ? upcoming.map(ev => '<div class="commu-event-row"><div class="commu-event-day">'+(DAY_SHORT[ev.day] || ev.day)+' '+ev.start+'h</div><div class="commu-event-title">'+ev.title+'</div></div>').join('')
+      : '<div class="empty-hint">Aucun évènement à venir dans cette sélection.</div>';
+  }
+  document.getElementById('communityMembersList').addEventListener('click', (e) => {
+    const card = e.target.closest('[data-member]');
+    if(!card) return;
+    openMemberProfile(card.dataset.member);
+    showPage('membre');
+  });
+  renderCommunityFilters();
+  renderCommunityMembers();
+  renderCommunityUpcoming();
+
+  // ================= CALENDAR CONTROLLER =================
+  const agendaContainer = document.getElementById('agendaContainer');
+  const gridContainer = document.getElementById('gridContainer');
+  const datenav = document.getElementById('datenav');
+  const navLabel = document.getElementById('navLabel');
+  const viewToggle = document.getElementById('viewToggle');
+  const filtersEl = document.getElementById('filters');
+
+  function updateNavLabel(){
+    navLabel.textContent = calView ? monthLabels[monthIdx] : weekLabels[weekIdx];
+  }
+
+  function render(){
+    viewToggle.classList.toggle('active', calView);
+    viewToggle.title = calView ? 'Revenir à la vue liste' : 'Vue calendaire';
+    updateNavLabel();
+
+    agendaContainer.hidden = calView;
+    gridContainer.hidden = !calView;
+    document.getElementById('eventsListScroll').classList.toggle('cal-mode', calView);
+
+    if(calView){ renderGrid(gridContainer); return; }
+    renderAgenda(agendaContainer, ALL_DAYS);
+  }
+
+  viewToggle.addEventListener('click', () => { calView = !calView; render(); });
+  filtersEl.addEventListener('click', (e) => {
+    const btn = e.target.closest('.chip');
+    if(!btn) return;
+    selectedGame = btn.dataset.game;
+    filtersEl.querySelectorAll('.chip').forEach(b => b.classList.toggle('active', b === btn));
+    render();
+  });
+  document.getElementById('navPrev').addEventListener('click', () => {
+    if(calView) monthIdx = Math.max(0, monthIdx - 1);
+    else weekIdx = Math.max(0, weekIdx - 1);
+    render();
+  });
+  document.getElementById('navNext').addEventListener('click', () => {
+    if(calView) monthIdx = Math.min(monthLabels.length - 1, monthIdx + 1);
+    else weekIdx = Math.min(weekLabels.length - 1, weekIdx + 1);
+    render();
+  });
+
+  // ================= DISPONIBILITÉS =================
+  const availBtn = document.getElementById('availBtn');
+  const availDropdown = document.getElementById('availDropdown');
+  const availShowBtn = document.getElementById('availShowBtn');
+  const availDeleteModal = document.getElementById('availDeleteModal');
+  availBtn.addEventListener('click', (e) => { e.stopPropagation(); availDropdown.classList.toggle('open'); });
+  document.addEventListener('click', (e) => {
+    if(!availDropdown.contains(e.target) && e.target !== availBtn) availDropdown.classList.remove('open');
+  });
+  function updateAvailShowLabel(){
+    availShowBtn.textContent = showAvailabilities ? 'Masquer' : 'Afficher';
+    document.getElementById('availEyeIcon').innerHTML = adminEyeIconSvg(!showAvailabilities);
+  }
+  updateAvailShowLabel();
+  // Afficher/Masquer : purement en mémoire, non conservé — repasse à "masqué" si on quitte puis revient sur la page.
+  availShowBtn.addEventListener('click', () => {
+    showAvailabilities = !showAvailabilities;
+    updateAvailShowLabel();
+    availDropdown.classList.remove('open');
+    render();
+  });
+  document.getElementById('availAddBtn').addEventListener('click', () => {
+    availDropdown.classList.remove('open');
+    openCeModal('avail');
+  });
+  document.getElementById('availDeleteBtn').addEventListener('click', () => {
+    availDropdown.classList.remove('open');
+    availDeleteModal.classList.add('open');
+  });
+  function closeAvailDeleteModal(){ availDeleteModal.classList.remove('open'); }
+  document.getElementById('availDeleteClose').addEventListener('click', closeAvailDeleteModal);
+  document.getElementById('availDeleteCancel').addEventListener('click', closeAvailDeleteModal);
+  availDeleteModal.addEventListener('click', (e) => { if(e.target === availDeleteModal) closeAvailDeleteModal(); });
+  document.getElementById('availDeleteConfirm').addEventListener('click', () => {
+    EVENTS = EVENTS.filter(e => !(e.avail && e.creator === CURRENT_USER));
+    closeAvailDeleteModal();
+    render();
+    renderRankingStats();
+    renderCommunityUpcoming();
+  });
+
+  // Scroll horizontal sans barre visible, pilotable au clic-glisser (souris) en plus du swipe tactile natif.
+  // Utilisé pour les tags de filtre ET pour la nav du header quand elle ne tient pas sur une ligne.
+  function makeDragScrollable(el){
+    let isDown = false, startX = 0, startScroll = 0, moved = false;
+    el.addEventListener('mousedown', (e) => {
+      isDown = true; moved = false;
+      startX = e.pageX; startScroll = el.scrollLeft;
+      el.classList.add('dragging');
+    });
+    window.addEventListener('mousemove', (e) => {
+      if(!isDown) return;
+      const dx = e.pageX - startX;
+      if(Math.abs(dx) > 3) moved = true;
+      el.scrollLeft = startScroll - dx;
+    });
+    window.addEventListener('mouseup', () => { isDown = false; el.classList.remove('dragging'); });
+    // Empêche le clic d'activer un chip/bouton juste après un glissé.
+    el.addEventListener('click', (e) => { if(moved){ e.stopPropagation(); e.preventDefault(); moved = false; } }, true);
+  }
+  makeDragScrollable(filtersEl);
+  makeDragScrollable(rankingCommunityFilterEl);
+  makeDragScrollable(communityFiltersEl);
+  makeDragScrollable(afAudienceFilterEl);
+
+  render();
+
+  // ================= MON PROFIL =================
+    const avatarUpload = document.getElementById('profAvatarUpload');
+    const avatarInput = document.getElementById('profAvatarInput');
+    const avatarLabel = document.getElementById('profAvatarLabel');
+    avatarUpload.addEventListener('click', () => avatarInput.click());
+    avatarLabel.addEventListener('click', () => avatarInput.click());
+    avatarInput.addEventListener('change', () => {
+      const file = avatarInput.files && avatarInput.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        currentUserPhotoDataUrl = reader.result;
+        avatarUpload.style.backgroundImage = 'url(' + reader.result + ')';
+        avatarUpload.classList.add('has-photo');
+        avatarUpload.textContent = '';
+        avatarLabel.textContent = 'Changer la photo';
+        refreshHeaderAvatar();
+      };
+      reader.readAsDataURL(file);
+    });
+
+    ['profEmailVisible','profPhoneVisible','profLocVisible'].forEach(id => {
+      const el = document.getElementById(id);
+      el.addEventListener('click', () => el.classList.toggle('on'));
+    });
+
+    // Mêmes communautés que le questionnaire de création de compte, pré-sélectionnées
+    // selon l'appartenance actuelle (voir COMMUNITY_MEMBERS) — modifiable à tout moment.
+    const profCommuFiltersEl = document.getElementById('profCommuFilters');
+    const meCommunityEntry = COMMUNITY_MEMBERS.find(m => m.n === CURRENT_USER);
+    let profSelectedCommunities = new Set(meCommunityEntry ? meCommunityEntry.communities.map(c => c.key) : []);
+
+    // Pré-remplit les champs de contact et la présentation depuis la fiche membre (voir COMMUNITY_MEMBERS).
+    if(meCommunityEntry){
+      document.getElementById('profEmail').value = meCommunityEntry.email || '';
+      document.getElementById('profPhone').value = meCommunityEntry.phone || '';
+      document.getElementById('profLoc').value = meCommunityEntry.location || '';
+      document.getElementById('profAbout').value = meCommunityEntry.bio || '';
+      document.getElementById('profEmailVisible').classList.toggle('on', !!meCommunityEntry.emailVisible);
+      document.getElementById('profPhoneVisible').classList.toggle('on', !!meCommunityEntry.phoneVisible);
+      document.getElementById('profLocVisible').classList.toggle('on', !!meCommunityEntry.locVisible);
+    }
+    function renderProfCommuFilters(){
+      profCommuFiltersEl.innerHTML = Object.keys(GAME_LABELS).filter(key => !COMMUNITY_HIDDEN[key]).map(key =>
+        '<button type="button" class="chip'+(profSelectedCommunities.has(key) ? ' active' : '')+'" data-commu="'+key+'">'+GAME_LABELS[key]+'</button>'
+      ).join('');
+    }
+    profCommuFiltersEl.addEventListener('click', (e) => {
+      const btn = e.target.closest('.chip');
+      if(!btn) return;
+      const key = btn.dataset.commu;
+      if(profSelectedCommunities.has(key)) profSelectedCommunities.delete(key); else profSelectedCommunities.add(key);
+      renderProfCommuFilters();
+    });
+    renderProfCommuFilters();
+    makeDragScrollable(profCommuFiltersEl);
+
+    const profPassCurrent = document.getElementById('profPassCurrent');
+    const profPassNew = document.getElementById('profPassNew');
+    const profPassConfirm = document.getElementById('profPassConfirm');
+    const profPassError = document.getElementById('profPassError');
+    const profSaveBtn = document.getElementById('profSaveBtn');
+
+    profSaveBtn.addEventListener('click', () => {
+      const current = profPassCurrent.value, next = profPassNew.value, confirm = profPassConfirm.value;
+      const changingPassword = current || next || confirm;
+      profPassError.style.display = 'none';
+      profPassConfirm.classList.remove('error');
+      if(changingPassword){
+        if(!current || !next || !confirm){
+          profPassError.textContent = 'Renseigne les trois champs pour changer de mot de passe.';
+          profPassError.style.display = ''; profPassConfirm.classList.add('error');
+          return;
+        }
+        if(next !== confirm){
+          profPassError.textContent = 'Les mots de passe ne correspondent pas.';
+          profPassError.style.display = ''; profPassConfirm.classList.add('error');
+          return;
+        }
+      }
+      // Persiste les communautés choisies : on garde l'ancienneté ("lastDays") de celles déjà rejointes.
+      if(meCommunityEntry){
+        const kept = meCommunityEntry.communities.filter(c => profSelectedCommunities.has(c.key));
+        const keptKeys = kept.map(c => c.key);
+        const added = [...profSelectedCommunities].filter(k => !keptKeys.includes(k)).map(k => ({ key:k, lastDays:0 }));
+        meCommunityEntry.communities = [...kept, ...added];
+        // Persiste également les coordonnées, la présentation et leur visibilité (le prénom/pseudo n'est
+        // volontairement pas répercuté sur CURRENT_USER, qui reste la clé d'identification fixe de cette démo).
+        meCommunityEntry.email = document.getElementById('profEmail').value.trim();
+        meCommunityEntry.phone = document.getElementById('profPhone').value.trim();
+        meCommunityEntry.location = document.getElementById('profLoc').value.trim();
+        meCommunityEntry.bio = document.getElementById('profAbout').value.trim();
+        meCommunityEntry.emailVisible = document.getElementById('profEmailVisible').classList.contains('on');
+        meCommunityEntry.phoneVisible = document.getElementById('profPhoneVisible').classList.contains('on');
+        meCommunityEntry.locVisible = document.getElementById('profLocVisible').classList.contains('on');
+        renderCommunityMembers();
+      }
+      profPassCurrent.value = ''; profPassNew.value = ''; profPassConfirm.value = '';
+      const original = profSaveBtn.textContent;
+      profSaveBtn.textContent = 'Modifications enregistrées ✓';
+      profSaveBtn.disabled = true;
+      setTimeout(() => { profSaveBtn.textContent = original; profSaveBtn.disabled = false; }, 1800);
+    });
+
+  // ================= PARAMÈTRES =================
+  (function(){
+    const themeSwitcher = document.getElementById('themeSwitcher');
+    themeSwitcher.addEventListener('click', (e) => {
+      const btn = e.target.closest('.chip');
+      if(!btn) return;
+      themeSwitcher.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c === btn));
+      document.documentElement.dataset.theme = btn.dataset.themeChoice;
+    });
+
+    // Mêmes leviers que ceux déjà utilisés pour la couleur de marque du club (voir section 12.1 du CDC).
+    const ACCENTS = ['#3F6EA5','#2F8F5A','#B4533F','#7B5EA7','#B4862F','#3F8FA0'];
+    const accentSwatchesEl = document.getElementById('accentSwatches');
+    accentSwatchesEl.innerHTML = ACCENTS.map((hex, i) =>
+      '<button type="button" class="accent-swatch'+(i === 0 ? ' selected' : '')+'" data-accent="'+hex+'" style="background:'+hex+';" title="'+hex+'"></button>'
+    ).join('');
+    accentSwatchesEl.addEventListener('click', (e) => {
+      const btn = e.target.closest('.accent-swatch');
+      if(!btn) return;
+      accentSwatchesEl.querySelectorAll('.accent-swatch').forEach(s => s.classList.toggle('selected', s === btn));
+      document.documentElement.style.setProperty('--accent', btn.dataset.accent);
+    });
+
+    const langSwitcher = document.getElementById('langSwitcher');
+    langSwitcher.addEventListener('click', (e) => {
+      const btn = e.target.closest('.chip');
+      if(!btn) return;
+      langSwitcher.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c === btn));
+      // Pas de traduction réelle pour l'instant (voir la note sous le sélecteur) : seul l'état choisi change.
+    });
+
+    document.querySelectorAll('#page-parametres [data-notif-toggle]').forEach(t => {
+      t.addEventListener('click', () => t.classList.toggle('on'));
+    });
+
+    // Bouton "Sûr ?" : même mécanisme que la suppression groupée des notifications (voir 12.5).
+    const deleteAccountBtn = document.getElementById('deleteAccountBtn');
+    let deleteConfirm = false;
+    deleteAccountBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if(deleteAccountBtn.disabled) return;
+      if(!deleteConfirm){
+        deleteConfirm = true;
+        deleteAccountBtn.textContent = 'Sûr ? Cette action est irréversible.';
+        return;
+      }
+      deleteAccountBtn.textContent = 'Compte supprimé (simulation)';
+      deleteAccountBtn.disabled = true;
+    });
+    document.addEventListener('click', (e) => {
+      if(deleteConfirm && !deleteAccountBtn.disabled && e.target !== deleteAccountBtn){
+        deleteConfirm = false;
+        deleteAccountBtn.textContent = 'Supprimer mon compte';
+      }
+    });
+  })();
+
+  // ================= LES CLÉS =================
+    // currentUserHasKey / hasExitKeys sont désormais des variables globales (voir plus haut),
+    // partagées avec la page Admin (Clés) pour rester synchronisées dans les deux sens.
+    const actionsCard = document.getElementById('clesActionsCard');
+    const transferPanel = document.getElementById('clesTransferPanel');
+    const confirmNote = document.getElementById('clesConfirmNote');
+    const memberSearch = document.getElementById('clesMemberSearch');
+    const memberResultsEl = document.getElementById('clesMemberResults');
+    const selectedMemberEl = document.getElementById('clesSelectedMember');
+    const transferCancelBtn = document.getElementById('clesTransferCancel');
+    const transferConfirmBtn = document.getElementById('clesTransferConfirm');
+    let transferSelectedMember = null;
+
+    function showConfirmNote(html){
+      confirmNote.innerHTML = '<p class="info-box-text">'+html+'</p>';
+      confirmNote.hidden = false;
+    }
+    function hideConfirmNote(){ confirmNote.hidden = true; }
+
+    function syncCommunityMemberKeyFlag(){
+      const entry = COMMUNITY_MEMBERS.find(m => m.n === CURRENT_USER);
+      if(entry){ entry.hasKey = currentUserHasKey; renderCommunityMembers(); }
+      renderAdminKeys();
+    }
+
+    function renderClesBuildingCode(){
+      const el = document.getElementById('clesBuildingCodeDisplay');
+      if(el) el.textContent = BUILDING_CODE;
+    }
+
+    function nextUpcomingEventForCurrentUser(){
+      const upcoming = EVENTS.filter(e => e.day >= TODAY && e.participants.some(p => p.n === CURRENT_USER));
+      upcoming.sort((a, b) => a.day - b.day || a.start - b.start);
+      return upcoming[0] || null;
+    }
+
+    function renderActionsCard(){
+      hideConfirmNote();
+      transferPanel.hidden = true;
+      if(currentUserHasKey){
+        actionsCard.innerHTML =
+          '<div class="modal-section-label" style="margin-top:0;">Actions</div>'
+          + '<button type="button" class="modal-join" id="clesGiveBtn" style="margin-top:0;">Je donne mes clés à un autre membre</button>'
+          + '<button type="button" class="modal-btn danger" id="clesLostBtn" style="width:100%; margin-top:10px;">J\'ai perdu mes clés</button>';
+        document.getElementById('clesGiveBtn').addEventListener('click', openTransferPanel);
+        document.getElementById('clesLostBtn').addEventListener('click', onLostKeys);
+      } else if(hasExitKeys){
+        actionsCard.innerHTML =
+          '<div class="modal-section-label" style="margin-top:0;">Statut</div>'
+          + '<p class="key-status" style="margin-bottom:0;">Tu as les clés de sortie — n\'oublie pas de les laisser à ton prochain passage au local.</p>';
+      } else {
+        actionsCard.innerHTML =
+          '<div class="modal-section-label" style="margin-top:0;">Actions</div>'
+          + '<button type="button" class="modal-join" id="clesBorrowBtn" style="margin-top:0;">J\'ai emprunté les clés pour sortir</button>'
+          + '<p class="field-note">Ces clés ne font pas de toi un porteur de clé : elles servent uniquement à fermer la porte en partant. Les administrateurs en sont informés.</p>';
+        document.getElementById('clesBorrowBtn').addEventListener('click', onBorrowExitKeys);
+      }
+    }
+
+    function openTransferPanel(){
+      transferPanel.hidden = false;
+      transferSelectedMember = null;
+      memberSearch.value = '';
+      memberResultsEl.classList.remove('open'); memberResultsEl.innerHTML = '';
+      selectedMemberEl.innerHTML = '';
+      transferConfirmBtn.disabled = true;
+    }
+    transferCancelBtn.addEventListener('click', () => { transferPanel.hidden = true; });
+
+    function renderMemberResults(query){
+      const q = query.trim().toLowerCase();
+      const available = MEMBERS.filter(m => m !== CURRENT_USER && m !== transferSelectedMember);
+      if(!q){ memberResultsEl.classList.remove('open'); memberResultsEl.innerHTML = ''; return; }
+      const matches = available.filter(m => m.toLowerCase().includes(q));
+      memberResultsEl.innerHTML = matches.length
+        ? matches.slice(0,6).map(m => '<div class="ce-member-row" data-pick="'+m+'">'+m+'</div>').join('')
+        : '<div class="ce-member-empty">Aucun membre trouvé.</div>';
+      memberResultsEl.classList.add('open');
+    }
+    memberSearch.addEventListener('input', () => renderMemberResults(memberSearch.value));
+    memberSearch.addEventListener('focus', () => { if(memberSearch.value) renderMemberResults(memberSearch.value); });
+    memberResultsEl.addEventListener('click', (e) => {
+      const row = e.target.closest('[data-pick]');
+      if(!row) return;
+      transferSelectedMember = row.dataset.pick;
+      memberSearch.value = '';
+      memberResultsEl.classList.remove('open'); memberResultsEl.innerHTML = '';
+      selectedMemberEl.innerHTML = '<span class="ce-chip">'+transferSelectedMember+'<button type="button" data-clear title="Retirer">×</button></span>';
+      transferConfirmBtn.disabled = false;
+    });
+    selectedMemberEl.addEventListener('click', (e) => {
+      if(!e.target.closest('[data-clear]')) return;
+      transferSelectedMember = null;
+      selectedMemberEl.innerHTML = '';
+      transferConfirmBtn.disabled = true;
+    });
+    document.addEventListener('click', (e) => {
+      if(!e.target.closest('#clesMemberSearch') && !e.target.closest('#clesMemberResults')) memberResultsEl.classList.remove('open');
+    });
+
+    transferConfirmBtn.addEventListener('click', () => {
+      if(!transferSelectedMember) return;
+      const recipient = transferSelectedMember;
+      NOTIFICATIONS.unshift(
+        { id: Date.now() + 1, text: 'Les clés de <strong>'+CURRENT_USER+'</strong> ont été transmises à <strong>'+recipient+'</strong>.', unread:true },
+        { id: Date.now(), text: 'Tu as transmis tes clés à <strong>'+recipient+'</strong>, qui a été notifié·e — les administrateurs le sont également.', unread:true }
+      );
+      renderNotifications(); updateBellIndicator();
+      currentUserHasKey = false;
+      syncCommunityMemberKeyFlag();
+      showConfirmNote('Clé transmise à <strong>'+recipient+'</strong>. '+recipient+' et les administrateurs ont été notifiés.');
+      renderActionsCard();
+    });
+
+    function onLostKeys(){
+      currentUserHasKey = false;
+      syncCommunityMemberKeyFlag();
+      NOTIFICATIONS.unshift({ id: Date.now(), text: '<strong>'+CURRENT_USER+'</strong> a signalé la perte de ses clés.', unread:true });
+      renderNotifications(); updateBellIndicator();
+      showConfirmNote('Perte de clé signalée. Les administrateurs ont été notifiés.');
+      renderActionsCard();
+    }
+
+    function onBorrowExitKeys(){
+      hasExitKeys = true;
+      if(!EXIT_KEY_HOLDERS.some(h => h.n === CURRENT_USER)) EXIT_KEY_HOLDERS.push({n: CURRENT_USER, takenOn: TODAY + ' août'});
+      renderAdminKeys();
+      const notifs = [{ id: Date.now(), text: '<strong>'+CURRENT_USER+'</strong> a emprunté les clés de sortie.', unread:true }];
+      // Simplification de maquette : le rappel "prochain évènement" est généré immédiatement plutôt qu'au
+      // moment réel de cet évènement (qui n'existe pas encore côté serveur dans cette démo statique).
+      const next = nextUpcomingEventForCurrentUser();
+      if(next){
+        notifs.unshift({ id: Date.now() + 1, text: "N'oublie pas de laisser les clés de sortie en passant, avant « "+next.title+" » ("+DAY_LABELS[next.day]+").", unread:true });
+      }
+      NOTIFICATIONS.unshift(...notifs);
+      renderNotifications(); updateBellIndicator();
+      showConfirmNote('Emprunt des clés de sortie signalé aux administrateurs.'+(next ? ' Un rappel a été ajouté pour ton prochain évènement.' : ''));
+      renderActionsCard();
+    }
+
+    renderActionsCard();
+    renderClesBuildingCode();
+
+  // ================= ADMIN =================
+  const ADMIN_ACTIVE_DAYS_THRESHOLD = TODAY; // "actif ce mois-ci" ≈ une activité depuis le 1er du mois (démo : on approxime avec le quantième du jour courant)
+
+  function adminMemberOverallLastDays(member){
+    if(!member.communities.length) return Infinity;
+    return member.communities.reduce((min, c) => c.lastDays < min ? c.lastDays : min, Infinity);
+  }
+  function adminActivityText(days){
+    if(days === Infinity) return 'Aucune activité récente';
+    if(days === 0) return 'Dernière activité aujourd\'hui';
+    if(days === 1) return 'Dernière activité hier';
+    return 'Dernière activité il y a ' + days + ' jours';
+  }
+
+  let adminMemberSearchQuery = '';
+  const adminMemberSearchInput = document.getElementById('adminMemberSearch');
+  adminMemberSearchInput.addEventListener('input', () => {
+    adminMemberSearchQuery = adminMemberSearchInput.value.trim().toLowerCase();
+    renderAdminMembers();
+  });
+  function renderAdminMembers(){
+    const others = COMMUNITY_MEMBERS.filter(m => m.n !== CURRENT_USER);
+    const activeCount = COMMUNITY_MEMBERS.filter(m => adminMemberOverallLastDays(m) <= ADMIN_ACTIVE_DAYS_THRESHOLD).length;
+    document.getElementById('adminActiveMembers').textContent = activeCount;
+    document.getElementById('adminTotalMembers').textContent = COMMUNITY_MEMBERS.length;
+    const filtered = adminMemberSearchQuery ? others.filter(m => m.n.toLowerCase().includes(adminMemberSearchQuery)) : others;
+    document.getElementById('adminMembersList').innerHTML = filtered.length
+      ? filtered.slice().sort((a,b) => adminMemberOverallLastDays(a) - adminMemberOverallLastDays(b)).map(m =>
+          '<div class="admin-row"><span class="name">'+m.n+'<span class="sub">'+adminActivityText(adminMemberOverallLastDays(m))+'</span></span>'
+          + '<button type="button" class="join-btn danger small" data-delete-member="'+m.n+'">Supprimer</button></div>'
+        ).join('')
+      : '<div class="admin-empty-hint">'+(adminMemberSearchQuery ? 'Aucun membre ne correspond à cette recherche.' : 'Aucun autre membre.')+'</div>';
+  }
+  document.getElementById('adminMembersList').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-delete-member]');
+    if(!btn) return;
+    admDeleteTarget = btn.dataset.deleteMember;
+    document.getElementById('adminDeleteMemberModal').classList.add('open');
+  });
+  let admDeleteTarget = null;
+  document.getElementById('admDeleteCancel').addEventListener('click', () => {
+    document.getElementById('adminDeleteMemberModal').classList.remove('open');
+    admDeleteTarget = null;
+  });
+  document.getElementById('adminDeleteMemberModal').addEventListener('click', (e) => {
+    if(e.target === document.getElementById('adminDeleteMemberModal')){
+      document.getElementById('adminDeleteMemberModal').classList.remove('open');
+      admDeleteTarget = null;
+    }
+  });
+  document.getElementById('admDeleteConfirm').addEventListener('click', () => {
+    if(!admDeleteTarget) return;
+    const idx = COMMUNITY_MEMBERS.findIndex(m => m.n === admDeleteTarget);
+    if(idx > -1) COMMUNITY_MEMBERS.splice(idx, 1);
+    EXIT_KEY_HOLDERS = EXIT_KEY_HOLDERS.filter(h => h.n !== admDeleteTarget);
+    document.getElementById('adminDeleteMemberModal').classList.remove('open');
+    admDeleteTarget = null;
+    renderAdminMembers();
+    renderAdminKeys();
+    renderCommunityMembers();
+  });
+
+  // ---- Code de l'immeuble ----
+  const adminBuildingCodeInput = document.getElementById('adminBuildingCodeInput');
+  adminBuildingCodeInput.value = BUILDING_CODE;
+  adminBuildingCodeInput.addEventListener('input', () => {
+    BUILDING_CODE = adminBuildingCodeInput.value.trim() || BUILDING_CODE;
+    renderClesBuildingCode();
+  });
+
+  // ---- Clés ----
+  let admKeySelectedMember = null;
+  const admKeyMemberSearch = document.getElementById('adminKeyMemberSearch');
+  const admKeyMemberResultsEl = document.getElementById('adminKeyMemberResults');
+  const admKeySelectedMemberEl = document.getElementById('adminKeySelectedMember');
+  const admAddKeyBtn = document.getElementById('adminAddKeyBtn');
+
+  function renderAdminKeys(){
+    const holders = COMMUNITY_MEMBERS.filter(m => m.hasKey);
+    document.getElementById('adminKeysCount').textContent = holders.length + ' / ' + KEY_TOTAL;
+    document.getElementById('adminKeyHoldersList').innerHTML = holders.length
+      ? holders.map(m => '<div class="admin-row"><span class="name">'+m.n+'</span><button type="button" class="join-btn gray small" data-remove-key="'+m.n+'">Retirer</button></div>').join('')
+      : '<div class="admin-empty-hint">Aucun détenteur de clé actuellement.</div>';
+    document.getElementById('adminExitKeysCount').textContent = EXIT_KEY_HOLDERS.length + ' / ' + EXIT_KEY_TOTAL;
+    document.getElementById('adminExitKeyHoldersList').innerHTML = EXIT_KEY_HOLDERS.length
+      ? EXIT_KEY_HOLDERS.map(h => '<div class="admin-row"><span class="name">'+h.n+'</span><span class="field-note" style="margin:0;">Prises le '+h.takenOn+'</span></div>').join('')
+      : '<div class="admin-empty-hint">Aucun détenteur de clé de sortie actuellement.</div>';
+    document.getElementById('adminKeyLimitNote').style.display = (holders.length >= KEY_TOTAL) ? '' : 'none';
+    renderAdminKeySearchState();
+  }
+  function renderAdminKeySearchState(){
+    const holders = COMMUNITY_MEMBERS.filter(m => m.hasKey).length;
+    admAddKeyBtn.disabled = !admKeySelectedMember || holders >= KEY_TOTAL;
+  }
+  admKeyMemberSearch.addEventListener('input', () => {
+    const q = admKeyMemberSearch.value.trim().toLowerCase();
+    if(!q){ admKeyMemberResultsEl.classList.remove('open'); admKeyMemberResultsEl.innerHTML = ''; return; }
+    const nonHolders = COMMUNITY_MEMBERS.filter(m => !m.hasKey && m.n !== admKeySelectedMember).map(m => m.n);
+    const matches = nonHolders.filter(n => n.toLowerCase().includes(q));
+    admKeyMemberResultsEl.innerHTML = matches.length
+      ? matches.slice(0,6).map(n => '<div class="ce-member-row" data-pick="'+n+'">'+n+'</div>').join('')
+      : '<div class="ce-member-empty">Aucun membre non porteur trouvé.</div>';
+    admKeyMemberResultsEl.classList.add('open');
+  });
+  admKeyMemberSearch.addEventListener('focus', () => { if(admKeyMemberSearch.value) admKeyMemberSearch.dispatchEvent(new Event('input')); });
+  admKeyMemberResultsEl.addEventListener('click', (e) => {
+    const row = e.target.closest('[data-pick]');
+    if(!row) return;
+    admKeySelectedMember = row.dataset.pick;
+    admKeyMemberSearch.value = '';
+    admKeyMemberResultsEl.classList.remove('open'); admKeyMemberResultsEl.innerHTML = '';
+    admKeySelectedMemberEl.innerHTML = '<span class="ce-chip">'+admKeySelectedMember+'<button type="button" data-clear title="Retirer">×</button></span>';
+    renderAdminKeySearchState();
+  });
+  admKeySelectedMemberEl.addEventListener('click', (e) => {
+    if(!e.target.closest('[data-clear]')) return;
+    admKeySelectedMember = null;
+    admKeySelectedMemberEl.innerHTML = '';
+    renderAdminKeySearchState();
+  });
+  document.addEventListener('click', (e) => {
+    if(!e.target.closest('#adminKeyMemberSearch') && !e.target.closest('#adminKeyMemberResults')) admKeyMemberResultsEl.classList.remove('open');
+  });
+  admAddKeyBtn.addEventListener('click', () => {
+    if(admAddKeyBtn.disabled || !admKeySelectedMember) return;
+    const entry = COMMUNITY_MEMBERS.find(m => m.n === admKeySelectedMember);
+    if(entry) entry.hasKey = true;
+    if(admKeySelectedMember === CURRENT_USER){ currentUserHasKey = true; renderActionsCard(); }
+    admKeySelectedMember = null;
+    admKeySelectedMemberEl.innerHTML = '';
+    renderAdminKeys();
+    renderCommunityMembers();
+  });
+  document.getElementById('adminKeyHoldersList').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-remove-key]');
+    if(!btn) return;
+    const name = btn.dataset.removeKey;
+    const entry = COMMUNITY_MEMBERS.find(m => m.n === name);
+    if(entry) entry.hasKey = false;
+    if(name === CURRENT_USER){ currentUserHasKey = false; renderActionsCard(); }
+    renderAdminKeys();
+    renderCommunityMembers();
+  });
+
+  // ---- Administrateurs (Paramètres, réglage caché — voir IS_SUPER_ADMIN) ----
+  // Trois niveaux de droits : super-admin (un seul membre, désigné une fois pour toutes au développement,
+  // indépendamment de toute liste modifiable ici), admin (COMMUNITY_MEMBERS[].admin, géré depuis cette
+  // section) et membre (tout le reste). IS_SUPER_ADMIN ne conditionne QUE la visibilité de cette section :
+  // le super-admin garde son propre champ "admin" comme n'importe qui, modifiable ici comme les autres.
+  // Même mécanique que l'ajout/retrait d'un porteur de clé ci-dessus : recherche de membre, sélection,
+  // bouton d'action, puis liste des membres concernés avec un retrait immédiat sans confirmation.
+  // Contrairement à Admin > Clés, l'utilisateur courant lui-même peut apparaître dans la recherche
+  // (pour se retirer ses propres droits admin) et dans la liste (pour se les redonner) — aucune exclusion,
+  // ce qui permet au super-admin de tester l'app côté membre ou admin sans perdre l'accès à ce réglage.
+  const IS_SUPER_ADMIN = CURRENT_USER === 'Louis-Marie B.'; // démo : un seul membre, fixé au développement réel
+  let admRoleSelectedMember = null;
+  const admRoleMemberSearch = document.getElementById('adminRoleMemberSearch');
+  const admRoleMemberResultsEl = document.getElementById('adminRoleMemberResults');
+  const admRoleSelectedMemberEl = document.getElementById('adminRoleSelectedMember');
+  const admRoleAddBtn = document.getElementById('adminRoleAddBtn');
+
+  function renderAdminRoles(){
+    const admins = COMMUNITY_MEMBERS.filter(m => m.admin);
+    document.getElementById('adminRoleList').innerHTML = admins.length
+      ? admins.map(m => '<div class="admin-row"><span class="name">'+m.n+'</span><button type="button" class="join-btn gray small" data-remove-admin="'+m.n+'">Retirer</button></div>').join('')
+      : '<div class="admin-empty-hint">Aucun administrateur actuellement.</div>';
+    admRoleAddBtn.disabled = !admRoleSelectedMember;
+  }
+  admRoleMemberSearch.addEventListener('input', () => {
+    const q = admRoleMemberSearch.value.trim().toLowerCase();
+    if(!q){ admRoleMemberResultsEl.classList.remove('open'); admRoleMemberResultsEl.innerHTML = ''; return; }
+    const nonAdmins = COMMUNITY_MEMBERS.filter(m => !m.admin && m.n !== admRoleSelectedMember).map(m => m.n);
+    const matches = nonAdmins.filter(n => n.toLowerCase().includes(q));
+    admRoleMemberResultsEl.innerHTML = matches.length
+      ? matches.slice(0,6).map(n => '<div class="ce-member-row" data-pick="'+n+'">'+n+'</div>').join('')
+      : '<div class="ce-member-empty">Aucun membre non administrateur trouvé.</div>';
+    admRoleMemberResultsEl.classList.add('open');
+  });
+  admRoleMemberSearch.addEventListener('focus', () => { if(admRoleMemberSearch.value) admRoleMemberSearch.dispatchEvent(new Event('input')); });
+  admRoleMemberResultsEl.addEventListener('click', (e) => {
+    const row = e.target.closest('[data-pick]');
+    if(!row) return;
+    admRoleSelectedMember = row.dataset.pick;
+    admRoleMemberSearch.value = '';
+    admRoleMemberResultsEl.classList.remove('open'); admRoleMemberResultsEl.innerHTML = '';
+    admRoleSelectedMemberEl.innerHTML = '<span class="ce-chip">'+admRoleSelectedMember+'<button type="button" data-clear title="Retirer">×</button></span>';
+    renderAdminRoles();
+  });
+  admRoleSelectedMemberEl.addEventListener('click', (e) => {
+    if(!e.target.closest('[data-clear]')) return;
+    admRoleSelectedMember = null;
+    admRoleSelectedMemberEl.innerHTML = '';
+    renderAdminRoles();
+  });
+  document.addEventListener('click', (e) => {
+    if(!e.target.closest('#adminRoleMemberSearch') && !e.target.closest('#adminRoleMemberResults')) admRoleMemberResultsEl.classList.remove('open');
+  });
+  admRoleAddBtn.addEventListener('click', () => {
+    if(admRoleAddBtn.disabled || !admRoleSelectedMember) return;
+    const entry = COMMUNITY_MEMBERS.find(m => m.n === admRoleSelectedMember);
+    if(entry) entry.admin = true;
+    admRoleSelectedMember = null;
+    admRoleSelectedMemberEl.innerHTML = '';
+    renderAdminRoles();
+    refreshAdminStatus();
+  });
+  document.getElementById('adminRoleList').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-remove-admin]');
+    if(!btn) return;
+    const name = btn.dataset.removeAdmin;
+    const entry = COMMUNITY_MEMBERS.find(m => m.n === name);
+    if(entry) entry.admin = false;
+    renderAdminRoles();
+    refreshAdminStatus();
+  });
+  if(IS_SUPER_ADMIN){
+    document.getElementById('paramAdminsTitle').hidden = false;
+    document.getElementById('paramAdminsCard').hidden = false;
+    renderAdminRoles();
+  }
+
+  // ---- Modifier le nombre total de clés ----
+  const adminKeyTotalModal = document.getElementById('adminKeyTotalModal');
+  const aktInput = document.getElementById('aktInput');
+  const aktError = document.getElementById('aktError');
+  document.getElementById('adminEditKeyTotalBtn').addEventListener('click', () => {
+    const holders = COMMUNITY_MEMBERS.filter(m => m.hasKey).length;
+    document.getElementById('aktCurrentHolders').textContent = holders;
+    aktInput.value = KEY_TOTAL;
+    aktInput.min = holders;
+    aktError.style.display = 'none';
+    adminKeyTotalModal.classList.add('open');
+  });
+  document.getElementById('aktClose').addEventListener('click', () => adminKeyTotalModal.classList.remove('open'));
+  document.getElementById('aktCancel').addEventListener('click', () => adminKeyTotalModal.classList.remove('open'));
+  adminKeyTotalModal.addEventListener('click', (e) => { if(e.target === adminKeyTotalModal) adminKeyTotalModal.classList.remove('open'); });
+  document.getElementById('aktSave').addEventListener('click', () => {
+    const holders = COMMUNITY_MEMBERS.filter(m => m.hasKey).length;
+    const val = Number(aktInput.value);
+    if(!Number.isFinite(val) || val < holders){
+      aktError.textContent = 'Le total ne peut pas être inférieur au nombre de porteurs actuels ('+holders+').';
+      aktError.style.display = '';
+      return;
+    }
+    KEY_TOTAL = val;
+    adminKeyTotalModal.classList.remove('open');
+    renderAdminKeys();
+  });
+
+  // ---- Communautés ----
+  let admCommunityEditingKey = null;
+  function slugifyCommunityName(name){
+    const stripped = name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+    let base = 'commu_' + stripped.replace(/[^a-z0-9]+/g,'').slice(0,24);
+    if(base === 'commu_') base = 'commu';
+    let key = base, i = 2;
+    while(GAME_LABELS[key]) { key = base + i; i++; }
+    return key;
+  }
+  function adminEyeIconSvg(hidden){
+    return hidden
+      ? '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 3L21 21M10.6 10.7A2 2 0 0 0 13.3 13.4M9.4 5.5C10.2 5.2 11.1 5 12 5C17 5 20.3 9.3 21.4 11.2C21.6 11.5 21.6 11.9 21.4 12.2C21 12.9 20.1 14.2 18.8 15.6M6.5 6.9C4.7 8.2 3.4 10 2.6 11.2C2.4 11.5 2.4 11.9 2.6 12.2C3.7 14.1 7 18.4 12 18.4C13.6 18.4 15 18 16.1 17.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+      : '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.6 12.2C2.4 11.9 2.4 11.5 2.6 11.2C3.7 9.3 7 5 12 5C17 5 20.3 9.3 21.4 11.2C21.6 11.5 21.6 11.9 21.4 12.2C20.3 14.1 17 18.4 12 18.4C7 18.4 3.7 14.1 2.6 12.2Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="11.7" r="2.6" stroke="currentColor" stroke-width="1.6"/></svg>';
+  }
+  // Icône trophée — identique à celle de l'onglet Leaderboard de la barre de navigation, pour bien
+  // associer visuellement ce bouton au volet compétitif (classement, V/E/D) qu'il active ou désactive.
+  const adminTrophyIconSvg = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 4H18V9C18 12.3137 15.3137 15 12 15C8.68629 15 6 12.3137 6 9V4Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M6 5.5H3.5V7.5C3.5 9.15685 4.84315 10.5 6.5 10.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M18 5.5H20.5V7.5C20.5 9.15685 19.1569 10.5 17.5 10.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M9 21H15" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 15V21" stroke="currentColor" stroke-width="1.7"/></svg>';
+  function renderAdminCommunities(){
+    const keys = Object.keys(GAME_LABELS);
+    document.getElementById('adminCommunitiesList').innerHTML = keys.map(key => {
+      const hidden = !!COMMUNITY_HIDDEN[key];
+      const competitive = isCommunityCompetitive(key);
+      return '<div class="admin-row'+(hidden ? ' hidden-commu' : '')+'">'
+        + '<span class="name">'+GAME_LABELS[key]+(hidden ? '<span class="sub">Masquée aux membres</span>' : '')+'</span>'
+        + '<div class="admin-row-actions">'
+        + '<button type="button" class="admin-eye-btn'+(competitive ? ' active' : '')+'" data-toggle-competitive="'+key+'" title="'+(competitive ? 'Désactiver le classement (V/E/D)' : 'Activer le classement (V/E/D)')+'">'+adminTrophyIconSvg+'</button>'
+        + '<button type="button" class="admin-eye-btn'+(hidden ? ' active' : '')+'" data-toggle-visibility="'+key+'" title="'+(hidden ? 'Rendre visible' : 'Masquer aux membres')+'">'+adminEyeIconSvg(hidden)+'</button>'
+        + '<button type="button" class="join-btn gray small" data-edit-community="'+key+'">Modifier</button>'
+        + '</div></div>';
+    }).join('');
+  }
+  document.getElementById('adminCommunitiesList').addEventListener('click', (e) => {
+    const trophyBtn = e.target.closest('[data-toggle-competitive]');
+    if(trophyBtn){
+      const key = trophyBtn.dataset.toggleCompetitive;
+      COMMUNITY_COMPETITIVE[key] = !isCommunityCompetitive(key);
+      renderAdminCommunities();
+      renderLeaderboard();
+      render();
+      return;
+    }
+    const eyeBtn = e.target.closest('[data-toggle-visibility]');
+    if(eyeBtn){
+      const key = eyeBtn.dataset.toggleVisibility;
+      COMMUNITY_HIDDEN[key] = !COMMUNITY_HIDDEN[key];
+      renderAdminCommunities();
+      renderCommunityFilters(); renderCommunityMembers(); renderCommunityUpcoming();
+      renderRankingCommunityFilter();
+      renderProfCommuFilters();
+      renderAnnouncements();
+      render();
+      return;
+    }
+    const editBtn = e.target.closest('[data-edit-community]');
+    if(editBtn) openCommunityModal(editBtn.dataset.editCommunity);
+  });
+  function openCommunityModal(key){
+    admCommunityEditingKey = key || null;
+    document.getElementById('acmTitle').textContent = key ? 'Modifier la communauté' : 'Nouvelle communauté';
+    document.getElementById('acmNameInput').value = key ? GAME_LABELS[key] : '';
+    document.getElementById('acmSave').disabled = !key;
+    document.getElementById('adminCommunityModal').classList.add('open');
+  }
+  document.getElementById('adminAddCommunityBtn').addEventListener('click', () => openCommunityModal(null));
+  document.getElementById('acmClose').addEventListener('click', () => document.getElementById('adminCommunityModal').classList.remove('open'));
+  document.getElementById('acmCancel').addEventListener('click', () => document.getElementById('adminCommunityModal').classList.remove('open'));
+  document.getElementById('adminCommunityModal').addEventListener('click', (e) => { if(e.target === document.getElementById('adminCommunityModal')) document.getElementById('adminCommunityModal').classList.remove('open'); });
+  document.getElementById('acmNameInput').addEventListener('input', (e) => {
+    document.getElementById('acmSave').disabled = !e.target.value.trim();
+  });
+  document.getElementById('acmSave').addEventListener('click', () => {
+    const name = document.getElementById('acmNameInput').value.trim();
+    if(!name) return;
+    if(admCommunityEditingKey){
+      GAME_LABELS[admCommunityEditingKey] = name;
+    } else {
+      const key = slugifyCommunityName(name);
+      GAME_LABELS[key] = name;
+    }
+    document.getElementById('adminCommunityModal').classList.remove('open');
+    renderAdminCommunities();
+    renderCommunityFilters(); renderCommunityMembers(); renderCommunityUpcoming();
+    renderRankingCommunityFilter();
+    renderProfCommuFilters();
+    renderAnnouncements();
+  });
+
+  renderAdminMembers();
+  renderAdminKeys();
+  renderAdminCommunities();
+
+  // ================= PROFIL MEMBRE (consultation) =================
+  function openMemberProfile(name){
+    const member = COMMUNITY_MEMBERS.find(m => m.n === name);
+    if(!member) return;
+    const initials = member.n.split(' ').map(part => part.charAt(0)).join('').slice(0,2).toUpperCase();
+    const avatarEl = document.getElementById('mpAvatar');
+    if(name === CURRENT_USER && currentUserPhotoDataUrl){
+      avatarEl.style.backgroundImage = 'url(' + currentUserPhotoDataUrl + ')';
+      avatarEl.textContent = '';
+    } else {
+      avatarEl.style.backgroundImage = '';
+      avatarEl.textContent = initials;
+    }
+    const keyIcon = member.hasKey ? '<span class="member-key" title="Détenteur de clé">🔑</span>' : '';
+    document.getElementById('mpName').innerHTML = member.n + keyIcon;
+    document.getElementById('mpJoined').textContent = member.joined || '';
+
+    const bioCard = document.getElementById('mpBioCard');
+    if(member.bio){
+      document.getElementById('mpBio').textContent = member.bio;
+      bioCard.hidden = false;
+    } else {
+      bioCard.hidden = true;
+    }
+
+    document.getElementById('mpActivity').textContent = memberLastActivityText(member);
+
+    const visibleCommunities = member.communities.filter(c => !COMMUNITY_HIDDEN[c.key]);
+    document.getElementById('mpCommunities').innerHTML = visibleCommunities.length
+      ? visibleCommunities.map(c => '<span class="tag genre">'+GAME_LABELS[c.key]+'</span>').join('')
+      : '<div class="admin-empty-hint">Aucune communauté.</div>';
+
+    // Section Contact : coordonnées partagées si renseignées, sinon invitation à passer par le
+    // groupe WhatsApp du club (notamment utile depuis le bouton "Contacter" d'une disponibilité).
+    const contactRows = [];
+    if(member.emailVisible && member.email) contactRows.push(['Mail', member.email]);
+    if(member.phoneVisible && member.phone) contactRows.push(['Téléphone', member.phone]);
+    if(member.locVisible && member.location) contactRows.push(['Localisation', member.location]);
+    document.getElementById('mpContactList').innerHTML = contactRows.length
+      ? contactRows.map(([label, value]) =>
+          '<div class="admin-row"><span class="name">'+label+'</span><span class="field-note" style="margin:0;">'+value+'</span></div>'
+        ).join('')
+      : '<p class="field-note" style="margin:0;">Ce membre n\'a pas indiqué ses coordonnées. Postez un message sur le groupe WhatsApp pour le retrouver !</p>';
+    document.getElementById('mpContactWrap').hidden = false;
+  }
+</script>
+</body>
+</html>
