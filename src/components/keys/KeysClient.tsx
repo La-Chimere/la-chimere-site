@@ -5,6 +5,7 @@ import { Modal } from "@/components/ui/Modal";
 import { MemberPicker, type PickableMember } from "@/components/ui/MemberPicker";
 import { borrowExitKey, reportLostKey, transferKey } from "@/lib/keys-actions";
 import { useT } from "@/components/i18n/LocaleProvider";
+import { BackArrowIcon } from "@/components/ui/icons";
 
 interface KeysClientProps {
   hasKey: boolean;
@@ -25,7 +26,7 @@ export function KeysClient({ hasKey, hasExitKey, buildingCode, otherMembers }: K
     <div className="page">
       <div className="subpage-back-row">
         <a href="/programme" className="subpage-back">
-          ‹ {t("common.back")}
+          <BackArrowIcon /> {t("common.back")}
         </a>
       </div>
       <h1 className="page-title">{t("header.theKeys")}</h1>

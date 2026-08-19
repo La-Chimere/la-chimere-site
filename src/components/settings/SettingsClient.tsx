@@ -8,6 +8,7 @@ import { deleteOwnAccount, updateNotificationPrefs } from "@/lib/profile-actions
 import { setAdminRole } from "@/lib/admin-actions";
 import { useT } from "@/components/i18n/LocaleProvider";
 import { LanguageToggle } from "@/components/i18n/LanguageToggle";
+import { BackArrowIcon } from "@/components/ui/icons";
 
 const ACCENTS = ["#3F6EA5", "#2F8F5A", "#B4533F", "#7B5EA7", "#B4862F", "#3F8FA0"];
 
@@ -70,7 +71,7 @@ export function SettingsClient({
     <div className="page">
       <div className="subpage-back-row">
         <a href="/programme" className="subpage-back">
-          ‹ {t("common.back")}
+          <BackArrowIcon /> {t("common.back")}
         </a>
       </div>
 

@@ -14,6 +14,7 @@ import {
 import type { Announcement, NotificationItem } from "@/lib/announcements-types";
 import type { CommunityOption } from "@/lib/events-types";
 import { useT } from "@/components/i18n/LocaleProvider";
+import { CheckCircleIcon, TrashIcon } from "@/components/ui/icons";
 
 interface AnnouncementsClientProps {
   announcements: Announcement[];
@@ -50,7 +51,7 @@ export function AnnouncementsClient({
             }
             aria-label={t("announcements.markAllSeen")}
           >
-            ✓
+            <CheckCircleIcon />
           </button>
         </div>
       </div>
@@ -81,14 +82,14 @@ export function AnnouncementsClient({
             onClick={() => startTransition(() => markAllNotificationsRead())}
             aria-label={t("notifications.markAllRead")}
           >
-            ✓
+            <CheckCircleIcon />
           </button>
           <DangerConfirmButton
             className="icon-btn danger"
             disabled={notifications.length === 0}
             onConfirm={() => startTransition(() => deleteAllNotifications())}
           >
-            🗑
+            <TrashIcon />
           </DangerConfirmButton>
         </div>
       </div>

@@ -14,7 +14,7 @@ export function AlertBanner({ text }: AlertBannerProps) {
 
   return (
     <div className="announce">
-      <span className="txt">{text}</span>
+      <span className="txt">📣 {text}</span>
       <button type="button" onClick={() => setDismissed(true)} aria-label={t("common.hide")}>
         ×
       </button>

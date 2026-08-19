@@ -28,7 +28,7 @@ export function AnnouncementCard({ announcement: a, isAdmin, onEdit }: Announcem
       </div>
       <div className="ann-body">
         <div className="t">
-          {a.banner && <span className="ann-alert-icon">📢</span>}
+          {a.banner && <span className="ann-alert-icon">🔊</span>}
           {a.title}
           {a.targetCommunityLabel && <span className="audience-badge">{a.targetCommunityLabel}</span>}
         </div>

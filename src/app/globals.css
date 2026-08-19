@@ -1631,6 +1631,21 @@ main {
   line-height: 1.5;
   margin: 7px 0 0;
 }
+.success-icon {
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--success) 16%, var(--surface) 84%);
+  color: var(--success);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+}
+.success-icon svg {
+  width: 36px;
+  height: 36px;
+}
 .field-error {
   font-size: 12px;
   color: var(--danger);

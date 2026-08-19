@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { LogoIcon } from "@/components/ui/icons";
 import { useT } from "@/components/i18n/LocaleProvider";
 import { LanguageToggle } from "@/components/i18n/LanguageToggle";
+import { BackArrowIcon } from "@/components/ui/icons";
 
 const initialState: AuthActionState = {};
 
@@ -50,7 +51,7 @@ export default function LoginPage() {
             style={{ marginBottom: 16 }}
             onClick={() => setShowForm(false)}
           >
-            ‹ {t("common.back")}
+            <BackArrowIcon /> {t("common.back")}
           </button>
           <div className="form-field">
             <label className="form-label" htmlFor="displayName">

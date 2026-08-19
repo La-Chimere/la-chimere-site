@@ -6,6 +6,7 @@ import { completeSignup } from "@/lib/auth-actions";
 import { Button } from "@/components/ui/Button";
 import { ToggleSwitch } from "@/components/ui/ToggleSwitch";
 import { useT } from "@/components/i18n/LocaleProvider";
+import { CheckIcon } from "@/components/ui/icons";
 
 interface SignupWizardProps {
   communities: { id: string; label: string }[];
@@ -78,7 +79,9 @@ export function SignupWizard({ communities }: SignupWizardProps) {
   if (step === "success") {
     return (
       <div style={{ textAlign: "center" }}>
-        <div style={{ fontSize: 56, marginBottom: 18 }}>✅</div>
+        <div className="success-icon">
+          <CheckIcon />
+        </div>
         <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 20 }}>{t("signup.success.title")}</h1>
         <Button variant="primary" full onClick={() => router.push("/programme")}>
           {t("signup.success.cta")}
