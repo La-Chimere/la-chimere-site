@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { loginEmailFromSlug } from "@/lib/slug";
+import { serverT } from "@/lib/i18n/server";
 
 async function requireUser() {
   const supabase = await createClient();
@@ -83,13 +84,13 @@ export async function changePassword(currentPassword: string, newPassword: strin
     .select("login_slug")
     .eq("id", userId)
     .single();
-  if (!profile?.login_slug) return { error: "Impossible de vérifier le mot de passe actuel." };
+  if (!profile?.login_slug) return { error: await serverT("profile.error.cannotVerifyPassword") };
 
   const { error: verifyError } = await supabase.auth.signInWithPassword({
     email: loginEmailFromSlug(profile.login_slug),
     password: currentPassword,
   });
-  if (verifyError) return { error: "Mot de passe actuel incorrect." };
+  if (verifyError) return { error: await serverT("profile.error.wrongCurrentPassword") };
 
   const { error } = await supabase.auth.updateUser({ password: newPassword });
   if (error) return { error: error.message };

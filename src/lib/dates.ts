@@ -11,30 +11,38 @@ import {
   subMonths,
   isSameDay,
 } from "date-fns";
-import { fr } from "date-fns/locale";
+import { fr, enUS } from "date-fns/locale";
+import type { Locale } from "@/lib/i18n/core";
+
+function dfnsLocale(locale: Locale) {
+  return locale === "en" ? enUS : fr;
+}
 
 // Le club est basé en Suisse (voir CDC section 6.1) ; la semaine commence le
-// lundi comme c'est l'usage en Suisse romande.
-const WEEK_OPTIONS = { locale: fr, weekStartsOn: 1 as const };
+// lundi comme c'est l'usage en Suisse romande, quelle que soit la langue
+// d'affichage choisie (CDC : bascule de langue en 14.4).
+const WEEK_STARTS_ON = 1 as const;
 
-export function weekRangeLabel(reference: Date): string {
-  const start = startOfWeek(reference, WEEK_OPTIONS);
-  const end = endOfWeek(reference, WEEK_OPTIONS);
+export function weekRangeLabel(reference: Date, locale: Locale = "fr"): string {
+  const options = { locale: dfnsLocale(locale), weekStartsOn: WEEK_STARTS_ON };
+  const start = startOfWeek(reference, options);
+  const end = endOfWeek(reference, options);
   const startDay = format(start, "d");
   const endDay = format(end, "d");
-  const endMonth = format(end, "MMM", { locale: fr }).replace(".", "");
+  const endMonth = format(end, "MMM", options).replace(".", "");
   const capitalized = endMonth.charAt(0).toUpperCase() + endMonth.slice(1);
   return `${startDay} – ${endDay} ${capitalized}`;
 }
 
-export function monthLabel(reference: Date): string {
-  const label = format(reference, "MMMM", { locale: fr });
+export function monthLabel(reference: Date, locale: Locale = "fr"): string {
+  const label = format(reference, "MMMM", { locale: dfnsLocale(locale) });
   return label.charAt(0).toUpperCase() + label.slice(1);
 }
 
 export function daysOfWeek(reference: Date): Date[] {
-  const start = startOfWeek(reference, WEEK_OPTIONS);
-  const end = endOfWeek(reference, WEEK_OPTIONS);
+  const options = { weekStartsOn: WEEK_STARTS_ON };
+  const start = startOfWeek(reference, options);
+  const end = endOfWeek(reference, options);
   return eachDayOfInterval({ start, end });
 }
 
@@ -55,8 +63,9 @@ export function previousMonth(reference: Date): Date {
 }
 
 export function monthGridDays(reference: Date): Date[] {
-  const start = startOfWeek(startOfMonth(reference), WEEK_OPTIONS);
-  const end = endOfWeek(endOfMonth(reference), WEEK_OPTIONS);
+  const options = { weekStartsOn: WEEK_STARTS_ON };
+  const start = startOfWeek(startOfMonth(reference), options);
+  const end = endOfWeek(endOfMonth(reference), options);
   return eachDayOfInterval({ start, end });
 }
 
@@ -68,15 +77,15 @@ export function isSameMonth(date: Date, reference: Date): boolean {
   return date.getMonth() === reference.getMonth();
 }
 
-export function dayLabel(date: Date): string {
-  const label = format(date, "EEEE d MMMM", { locale: fr });
+export function dayLabel(date: Date, locale: Locale = "fr"): string {
+  const label = format(date, "EEEE d MMMM", { locale: dfnsLocale(locale) });
   return label.charAt(0).toUpperCase() + label.slice(1);
 }
 
-// Format compact "Mer. 19 août" pour les listes d'évènements condensées
-// (CDC 12.8 : liste des évènements à venir par communauté).
-export function shortDayLabel(date: Date): string {
-  const label = format(date, "EEE d MMM", { locale: fr }).replace(/\./g, "");
+// Format compact "Mer. 19 août" / "Wed 19 Aug" pour les listes d'évènements
+// condensées (CDC 12.8 : liste des évènements à venir par communauté).
+export function shortDayLabel(date: Date, locale: Locale = "fr"): string {
+  const label = format(date, "EEE d MMM", { locale: dfnsLocale(locale) }).replace(/\./g, "");
   return label.charAt(0).toUpperCase() + label.slice(1);
 }
 
@@ -85,13 +94,10 @@ export function isoDate(date: Date): string {
 }
 
 // "Dernière partie aujourd'hui / hier / il y a X jours" (CDC 12.8/12.11).
-export function relativeActivityLabel(isoDateString: string | null): string {
-  if (!isoDateString) return "Aucune activité récente";
-  const days = Math.round(
+export function relativeActivityDays(isoDateString: string | null): number | null {
+  if (!isoDateString) return null;
+  return Math.round(
     (new Date(isoDate(new Date())).getTime() - new Date(isoDateString).getTime()) /
       86_400_000,
   );
-  if (days <= 0) return "Dernière partie aujourd'hui";
-  if (days === 1) return "Dernière partie hier";
-  return `Dernière partie il y a ${days} jours`;
 }

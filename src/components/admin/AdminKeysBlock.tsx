@@ -9,6 +9,7 @@ import {
   updateBuildingCode,
   updateKeyTotal,
 } from "@/lib/admin-actions";
+import { useT } from "@/components/i18n/LocaleProvider";
 import type { AdminMember, ClubSettings } from "@/lib/admin-types";
 
 interface AdminKeysBlockProps {
@@ -17,6 +18,7 @@ interface AdminKeysBlockProps {
 }
 
 export function AdminKeysBlock({ members, settings }: AdminKeysBlockProps) {
+  const { t } = useT();
   const [, startTransition] = useTransition();
   const [buildingCode, setBuildingCode] = useState(settings.buildingCode ?? "");
   const [newHolder, setNewHolder] = useState<PickableMember[]>([]);
@@ -60,10 +62,10 @@ export function AdminKeysBlock({ members, settings }: AdminKeysBlockProps) {
 
   return (
     <div className="section-card">
-      <div className="section-subtitle">Clés</div>
+      <div className="section-subtitle">{t("admin.keys.title")}</div>
 
       <div className="form-field">
-        <label className="form-label">Code d&apos;entrée de l&apos;immeuble</label>
+        <label className="form-label">{t("admin.keys.buildingCode")}</label>
         <input
           className="form-input"
           maxLength={12}
@@ -86,13 +88,13 @@ export function AdminKeysBlock({ members, settings }: AdminKeysBlockProps) {
             setTotalError(null);
           }}
         >
-          Modifier le nombre de clés
+          {t("admin.keys.editTotal")}
         </button>
       </div>
 
       <div className="admin-add-key-row">
         <div className="ce-participants" style={{ flex: 1 }}>
-          <MemberPicker members={nonHolders} selected={newHolder} onChange={setNewHolder} placeholder="Rechercher un membre…" />
+          <MemberPicker members={nonHolders} selected={newHolder} onChange={setNewHolder} />
         </div>
         <button
           type="button"
@@ -100,12 +102,12 @@ export function AdminKeysBlock({ members, settings }: AdminKeysBlockProps) {
           disabled={newHolder.length === 0 || keyHolders.length >= settings.totalKeys}
           onClick={addHolder}
         >
-          Ajouter
+          {t("common.add")}
         </button>
       </div>
       {addKeyError && <p className="field-error">{addKeyError}</p>}
       {keyHolders.length >= settings.totalKeys && (
-        <p className="field-note">Nombre maximal de clés déjà atteint.</p>
+        <p className="field-note">{t("admin.keys.maxReached")}</p>
       )}
 
       <div className="admin-scroll-list">
@@ -120,7 +122,7 @@ export function AdminKeysBlock({ members, settings }: AdminKeysBlockProps) {
                 })
               }
             >
-              Retirer
+              {t("common.remove")}
             </button>
             <span className="name">{m.displayName}</span>
           </div>
@@ -128,11 +130,11 @@ export function AdminKeysBlock({ members, settings }: AdminKeysBlockProps) {
       </div>
 
       <div className="section-subtitle" style={{ marginTop: 18 }}>
-        Clés de sortie ({exitKeyHolders.length} / {settings.totalExitKeys})
+        {t("admin.keys.exitKeys", { current: exitKeyHolders.length, total: settings.totalExitKeys })}
       </div>
       <div className="admin-scroll-list">
         {exitKeyHolders.length === 0 ? (
-          <p className="admin-empty-hint">Personne n&apos;a actuellement emprunté de clé de sortie.</p>
+          <p className="admin-empty-hint">{t("admin.keys.noExitKeyHolders")}</p>
         ) : (
           exitKeyHolders.map((m) => (
             <div className="admin-row reverse" key={m.profileId}>
@@ -141,7 +143,7 @@ export function AdminKeysBlock({ members, settings }: AdminKeysBlockProps) {
                 className="join-btn gray small"
                 onClick={() => startTransition(() => setExitKeyHolder(m.profileId, false))}
               >
-                Retirer
+                {t("common.remove")}
               </button>
               <span className="name">{m.displayName}</span>
             </div>
@@ -150,7 +152,7 @@ export function AdminKeysBlock({ members, settings }: AdminKeysBlockProps) {
       </div>
 
       <Modal open={!!editingTotal} onClose={() => setEditingTotal(null)}>
-        <h3>Modifier le nombre de clés</h3>
+        <h3>{t("admin.keys.editTotal")}</h3>
         <div className="form-field">
           <input
             type="number"
@@ -162,10 +164,10 @@ export function AdminKeysBlock({ members, settings }: AdminKeysBlockProps) {
         {totalError && <p className="field-error">{totalError}</p>}
         <div className="modal-btn-row">
           <button type="button" className="modal-btn gray" onClick={() => setEditingTotal(null)}>
-            Annuler
+            {t("common.cancel")}
           </button>
           <button type="button" className="modal-btn primary" onClick={saveTotal}>
-            Enregistrer
+            {t("common.save")}
           </button>
         </div>
       </Modal>

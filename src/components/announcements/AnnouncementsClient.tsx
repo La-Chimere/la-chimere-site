@@ -13,6 +13,7 @@ import {
 } from "@/lib/announcements-actions";
 import type { Announcement, NotificationItem } from "@/lib/announcements-types";
 import type { CommunityOption } from "@/lib/events-types";
+import { useT } from "@/components/i18n/LocaleProvider";
 
 interface AnnouncementsClientProps {
   announcements: Announcement[];
@@ -28,6 +29,7 @@ export function AnnouncementsClient({
   communities,
   isAdmin,
 }: AnnouncementsClientProps) {
+  const { t } = useT();
   const [, startTransition] = useTransition();
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Announcement | null>(null);
@@ -37,7 +39,7 @@ export function AnnouncementsClient({
   return (
     <div className="page">
       <div className="an-section-head">
-        <h1 className="page-title">Annonces</h1>
+        <h1 className="page-title">{t("announcements.title")}</h1>
         <div className="an-section-actions">
           <button
             type="button"
@@ -46,7 +48,7 @@ export function AnnouncementsClient({
             onClick={() =>
               startTransition(() => markAllAnnouncementsSeen(announcements.map((a) => a.id)))
             }
-            aria-label="Tout marquer comme vu"
+            aria-label={t("announcements.markAllSeen")}
           >
             ✓
           </button>
@@ -54,7 +56,7 @@ export function AnnouncementsClient({
       </div>
 
       {announcements.length === 0 ? (
-        <p className="empty-hint">Aucune annonce pour l&apos;instant.</p>
+        <p className="empty-hint">{t("announcements.none")}</p>
       ) : (
         announcements.map((a) => (
           <AnnouncementCard
@@ -70,14 +72,14 @@ export function AnnouncementsClient({
       )}
 
       <div className="an-section-head">
-        <h1 className="page-title">Notifications</h1>
+        <h1 className="page-title">{t("notifications.title")}</h1>
         <div className="an-section-actions">
           <button
             type="button"
             className="icon-btn"
             disabled={!hasUnreadNotifications}
             onClick={() => startTransition(() => markAllNotificationsRead())}
-            aria-label="Tout marquer comme lu"
+            aria-label={t("notifications.markAllRead")}
           >
             ✓
           </button>
@@ -92,7 +94,7 @@ export function AnnouncementsClient({
       </div>
 
       {notifications.length === 0 ? (
-        <p className="empty-hint">Aucune notification.</p>
+        <p className="empty-hint">{t("notifications.none")}</p>
       ) : (
         notifications.map((n) => <NotificationCard key={n.id} notification={n} />)
       )}

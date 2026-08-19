@@ -5,10 +5,12 @@ import Link from "next/link";
 import { login, type AuthActionState } from "@/lib/auth-actions";
 import { Button } from "@/components/ui/Button";
 import { LogoIcon } from "@/components/ui/icons";
+import { useT } from "@/components/i18n/LocaleProvider";
 
 const initialState: AuthActionState = {};
 
 export default function LoginPage() {
+  const { t } = useT();
   const [showForm, setShowForm] = useState(false);
   const [state, formAction, pending] = useActionState(login, initialState);
 
@@ -18,20 +20,20 @@ export default function LoginPage() {
         <LogoIcon />
       </div>
       <h1 style={{ fontSize: 24, fontWeight: 800, marginBottom: 28 }}>
-        Bienvenue au Club
+        {t("login.welcomeLine1")}
         <br />
-        La Chimère !
+        {t("login.welcomeLine2")}
       </h1>
 
       {!showForm ? (
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <Link href="/signup" style={{ textDecoration: "none" }}>
             <Button variant="primary" full type="button">
-              Créer mon compte
+              {t("login.createAccount")}
             </Button>
           </Link>
           <Button variant="outline" full type="button" onClick={() => setShowForm(true)}>
-            Me connecter
+            {t("login.logIn")}
           </Button>
         </div>
       ) : (
@@ -42,24 +44,24 @@ export default function LoginPage() {
             style={{ marginBottom: 16 }}
             onClick={() => setShowForm(false)}
           >
-            ‹ Retour
+            ‹ {t("common.back")}
           </button>
           <div className="form-field">
             <label className="form-label" htmlFor="displayName">
-              Pseudo
+              {t("login.nickname")}
             </label>
             <input
               id="displayName"
               name="displayName"
               className="form-input"
-              placeholder="Ton pseudo"
+              placeholder={t("login.nicknamePlaceholder")}
               autoComplete="username"
               required
             />
           </div>
           <div className="form-field">
             <label className="form-label" htmlFor="password">
-              Mot de passe
+              {t("login.password")}
             </label>
             <input
               id="password"
@@ -72,7 +74,7 @@ export default function LoginPage() {
           </div>
           {state.error && <p className="field-error">{state.error}</p>}
           <Button variant="primary" full type="submit" disabled={pending}>
-            {pending ? "Connexion…" : "Se connecter"}
+            {pending ? t("login.loggingIn") : t("login.logIn")}
           </Button>
         </form>
       )}

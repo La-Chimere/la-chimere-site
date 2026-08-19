@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { deleteMyAvailabilities } from "@/lib/events-actions";
+import { useT } from "@/components/i18n/LocaleProvider";
 
 interface AvailabilityMenuProps {
   showAvailabilities: boolean;
@@ -13,6 +14,7 @@ interface AvailabilityMenuProps {
 // Bouton "Dispos" + menu déroulant (CDC 12.12) : Afficher/Masquer,
 // Indiquer ma dispo, Supprimer mes dispos.
 export function AvailabilityMenu({ showAvailabilities, onToggleShow, onIndicate }: AvailabilityMenuProps) {
+  const { t } = useT();
   const [open, setOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -33,7 +35,7 @@ export function AvailabilityMenu({ showAvailabilities, onToggleShow, onIndicate 
         onClick={() => setOpen((v) => !v)}
       >
         <span className="avail-eye">{showAvailabilities ? "👁" : "🙈"}</span>
-        Dispos
+        {t("availability.menuButton")}
       </button>
       <div className={`dropdown avail-dropdown ${open ? "open" : ""}`}>
         <button
@@ -44,7 +46,7 @@ export function AvailabilityMenu({ showAvailabilities, onToggleShow, onIndicate 
             setOpen(false);
           }}
         >
-          {showAvailabilities ? "Masquer" : "Afficher"}
+          {showAvailabilities ? t("availability.hide") : t("availability.show")}
         </button>
         <button
           type="button"
@@ -54,7 +56,7 @@ export function AvailabilityMenu({ showAvailabilities, onToggleShow, onIndicate 
             setOpen(false);
           }}
         >
-          Indiquer ma dispo
+          {t("availability.indicate")}
         </button>
         <button
           type="button"
@@ -64,18 +66,16 @@ export function AvailabilityMenu({ showAvailabilities, onToggleShow, onIndicate 
             setOpen(false);
           }}
         >
-          Supprimer mes dispos
+          {t("availability.deleteMine")}
         </button>
       </div>
 
       <Modal open={confirmOpen} onClose={() => setConfirmOpen(false)}>
-        <h3>Supprimer mes disponibilités</h3>
-        <p className="field-note">
-          Toutes les disponibilités que vous avez indiquées vont être supprimées du calendrier.
-        </p>
+        <h3>{t("availability.deleteConfirmTitle")}</h3>
+        <p className="field-note">{t("availability.deleteConfirmBody")}</p>
         <div className="modal-btn-row">
           <button type="button" className="modal-btn gray" onClick={() => setConfirmOpen(false)}>
-            Annuler
+            {t("common.cancel")}
           </button>
           <button
             type="button"
@@ -85,7 +85,7 @@ export function AvailabilityMenu({ showAvailabilities, onToggleShow, onIndicate 
               setConfirmOpen(false);
             }}
           >
-            Confirmer
+            {t("common.confirm")}
           </button>
         </div>
       </Modal>

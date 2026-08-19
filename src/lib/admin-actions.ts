@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireAdmin, requireSuperAdmin } from "@/lib/admin-guard";
 import { slugify } from "@/lib/slug";
+import { serverT } from "@/lib/i18n/server";
 
 export async function validateMember(profileId: string) {
   const { admin } = await requireAdmin();
@@ -33,7 +34,7 @@ export async function updateKeyTotal(field: "total_keys" | "total_exit_keys", va
     .eq(holderField, true);
 
   if (value < (count ?? 0)) {
-    return { error: "Le nouveau total ne peut pas être inférieur au nombre de porteurs actuels." };
+    return { error: await serverT("admin.error.totalBelowHolders") };
   }
 
   await admin.from("club_settings").update({ [field]: value }).eq("id", 1);
@@ -50,7 +51,7 @@ export async function setKeyHolder(profileId: string, hasKey: boolean) {
       admin.from("profiles").select("id", { count: "exact", head: true }).eq("has_key", true),
     ]);
     if ((count ?? 0) >= (settings?.total_keys ?? 0)) {
-      return { error: "Nombre maximal de clés déjà atteint." };
+      return { error: await serverT("admin.error.maxKeysReached") };
     }
   }
 

@@ -8,6 +8,7 @@ import {
   LeaderboardIcon,
   ProgrammeIcon,
 } from "@/components/ui/icons";
+import { useT } from "@/components/i18n/LocaleProvider";
 
 interface BottomNavProps {
   isAdmin: boolean;
@@ -15,16 +16,16 @@ interface BottomNavProps {
 
 interface NavItem {
   page: string;
-  label: string;
+  labelKey: string;
   Icon: () => React.JSX.Element;
   adminOnly?: boolean;
 }
 
 const ITEMS: NavItem[] = [
-  { page: "programme", label: "Programme", Icon: ProgrammeIcon },
-  { page: "leaderboard", label: "Leaderboard", Icon: LeaderboardIcon },
-  { page: "communities", label: "Communautés", Icon: CommunitiesIcon },
-  { page: "admin", label: "Admin", Icon: AdminIcon, adminOnly: true },
+  { page: "programme", labelKey: "nav.programme", Icon: ProgrammeIcon },
+  { page: "leaderboard", labelKey: "nav.leaderboard", Icon: LeaderboardIcon },
+  { page: "communities", labelKey: "nav.communities", Icon: CommunitiesIcon },
+  { page: "admin", labelKey: "nav.admin", Icon: AdminIcon, adminOnly: true },
 ];
 
 // Nav ancrée en bas de l'écran, cf. CDC 12.2 : 4 entrées (Programme /
@@ -32,10 +33,11 @@ const ITEMS: NavItem[] = [
 // administrateurs.
 export function BottomNav({ isAdmin }: BottomNavProps) {
   const pathname = usePathname();
+  const { t } = useT();
 
   return (
     <nav className="bottom-nav">
-      {ITEMS.map(({ page, label, Icon, adminOnly }) => {
+      {ITEMS.map(({ page, labelKey, Icon, adminOnly }) => {
         if (adminOnly && !isAdmin) return null;
         const active = pathname?.startsWith(`/${page}`);
         return (
@@ -45,7 +47,7 @@ export function BottomNav({ isAdmin }: BottomNavProps) {
             className={`bn-btn ${active ? "active" : ""}`}
           >
             <Icon />
-            <span>{label}</span>
+            <span>{t(labelKey)}</span>
           </Link>
         );
       })}

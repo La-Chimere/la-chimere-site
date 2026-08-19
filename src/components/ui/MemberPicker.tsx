@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useT } from "@/components/i18n/LocaleProvider";
 
 export interface PickableMember {
   id: string;
@@ -23,9 +24,11 @@ export function MemberPicker({
   members,
   selected,
   onChange,
-  placeholder = "Rechercher un membre…",
+  placeholder,
   disallowRemovingLast = false,
 }: MemberPickerProps) {
+  const { t } = useT();
+  const resolvedPlaceholder = placeholder ?? t("memberPicker.searchPlaceholder");
   const [query, setQuery] = useState("");
 
   const results = useMemo(() => {
@@ -58,7 +61,7 @@ export function MemberPicker({
                 type="button"
                 onClick={() => remove(m.id)}
                 disabled={disallowRemovingLast && selected.length <= 1}
-                aria-label={`Retirer ${m.displayName}`}
+                aria-label={t("memberPicker.remove", { name: m.displayName })}
               >
                 ×
               </button>
@@ -72,11 +75,11 @@ export function MemberPicker({
           className="form-input"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder={placeholder}
+          placeholder={resolvedPlaceholder}
         />
         <div className={`ce-member-results ${results.length ? "open" : ""}`}>
           {results.length === 0 && query.trim() ? (
-            <div className="ce-member-empty">Aucun membre trouvé.</div>
+            <div className="ce-member-empty">{t("memberPicker.noResults")}</div>
           ) : (
             results.map((m) => (
               <div className="ce-member-row" key={m.id} onClick={() => add(m)}>

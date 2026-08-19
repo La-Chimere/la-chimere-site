@@ -6,13 +6,15 @@ import { DangerConfirmButton } from "@/components/ui/DangerConfirmButton";
 import { MemberPicker, type PickableMember } from "@/components/ui/MemberPicker";
 import { deleteOwnAccount, updateNotificationPrefs } from "@/lib/profile-actions";
 import { setAdminRole } from "@/lib/admin-actions";
+import { useT } from "@/components/i18n/LocaleProvider";
+import { LanguageToggle } from "@/components/i18n/LanguageToggle";
 
 const ACCENTS = ["#3F6EA5", "#2F8F5A", "#B4533F", "#7B5EA7", "#B4862F", "#3F8FA0"];
 
-const NOTIF_TYPES: { key: string; label: string }[] = [
-  { key: "key_missing", label: "Pas de porteur de clé pour un évènement à venir" },
-  { key: "new_announcement", label: "Nouvelle annonce du comité" },
-  { key: "added_to_event", label: "Ajouté·e à un évènement par un autre membre" },
+const NOTIF_TYPES: { key: string; labelKey: string }[] = [
+  { key: "key_missing", labelKey: "settings.notif.keyMissing" },
+  { key: "new_announcement", labelKey: "settings.notif.newAnnouncement" },
+  { key: "added_to_event", labelKey: "settings.notif.addedToEvent" },
 ];
 
 interface SettingsClientProps {
@@ -28,6 +30,7 @@ export function SettingsClient({
   admins,
   nonAdmins,
 }: SettingsClientProps) {
+  const { t } = useT();
   const [, startTransition] = useTransition();
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [accent, setAccent] = useState(ACCENTS[0]);
@@ -67,21 +70,21 @@ export function SettingsClient({
     <div className="page">
       <div className="subpage-back-row">
         <a href="/programme" className="subpage-back">
-          ‹ Retour
+          ‹ {t("common.back")}
         </a>
       </div>
 
-      <div className="section-subtitle">Apparence</div>
+      <div className="section-subtitle">{t("settings.appearance")}</div>
       <div className="section-card">
         <div className="segmented" style={{ marginBottom: 16 }}>
           <button type="button" className={theme === "light" ? "active" : ""} onClick={() => applyTheme("light")}>
-            Clair
+            {t("settings.light")}
           </button>
           <button type="button" className={theme === "dark" ? "active" : ""} onClick={() => applyTheme("dark")}>
-            Sombre
+            {t("settings.dark")}
           </button>
         </div>
-        <div className="form-label">Couleur d&apos;accent</div>
+        <div className="form-label">{t("settings.accentColor")}</div>
         <div className="accent-swatches">
           {ACCENTS.map((c) => (
             <button
@@ -96,47 +99,39 @@ export function SettingsClient({
         </div>
       </div>
 
-      <div className="section-subtitle">Application</div>
+      <div className="section-subtitle">{t("settings.application")}</div>
       <div className="section-card">
         <button type="button" className="modal-btn outline modal-btn-full" style={{ marginBottom: 14 }}>
-          Installer l&apos;application (mode web app)
+          {t("settings.installApp")}
         </button>
-        <div className="form-label">Langue</div>
-        <div className="segmented">
-          <button type="button" className="active">
-            Français
-          </button>
-          <button type="button">English</button>
-        </div>
-        <p className="field-note">
-          La traduction complète de l&apos;application sera ajoutée dans une prochaine itération.
-        </p>
+        <div className="form-label">{t("settings.language")}</div>
+        <LanguageToggle />
       </div>
 
-      <div className="section-subtitle">Notifications</div>
+      <div className="section-subtitle">{t("notifications.title")}</div>
       <div className="section-card">
         {NOTIF_TYPES.map((n) => (
           <div className="field-head" key={n.key} style={{ marginBottom: 12 }}>
-            <span>{n.label}</span>
+            <span>{t(n.labelKey)}</span>
             <ToggleSwitch on={prefs[n.key] ?? true} onChange={() => togglePref(n.key)} />
           </div>
         ))}
       </div>
 
-      <div className="section-subtitle">Compte</div>
+      <div className="section-subtitle">{t("settings.account")}</div>
       <div className="section-card">
         <DangerConfirmButton
           className="modal-btn danger modal-btn-full"
-          confirmLabel="Sûr ? Cette action est irréversible."
+          confirmLabel={t("settings.deleteAccountConfirm")}
           onConfirm={() => startTransition(() => deleteOwnAccount())}
         >
-          Supprimer mon compte
+          {t("settings.deleteAccount")}
         </DangerConfirmButton>
       </div>
 
       {isSuperAdmin && (
         <>
-          <div className="section-subtitle">Administrateurs</div>
+          <div className="section-subtitle">{t("settings.admins")}</div>
           <div className="section-card">
             <div className="admin-add-key-row">
               <div style={{ flex: 1 }}>
@@ -151,11 +146,11 @@ export function SettingsClient({
                   setNewAdmin([]);
                 }}
               >
-                Rendre admin
+                {t("settings.makeAdmin")}
               </button>
             </div>
             <div className="section-subtitle" style={{ fontSize: 12, marginTop: 12 }}>
-              Administrateurs actuels
+              {t("settings.currentAdmins")}
             </div>
             {admins.map((a) => (
               <div className="admin-row reverse" key={a.id}>
@@ -164,7 +159,7 @@ export function SettingsClient({
                   className="join-btn gray small"
                   onClick={() => startTransition(() => setAdminRole(a.id, false))}
                 >
-                  Retirer
+                  {t("common.remove")}
                 </button>
                 <span className="name">{a.displayName}</span>
               </div>

@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { voteOnPoll } from "@/lib/announcements-actions";
 import type { Poll } from "@/lib/announcements-types";
+import { useT } from "@/components/i18n/LocaleProvider";
 
 interface PollWidgetProps {
   poll: Poll;
@@ -13,6 +14,7 @@ interface PollWidgetProps {
 // évaluation 5 étoiles ; bouton "Voter" grisé tant que rien n'a changé
 // depuis le dernier vote ; résultats visibles des admins uniquement.
 export function PollWidget({ poll, isAdmin }: PollWidgetProps) {
+  const { t } = useT();
   const [pending, startTransition] = useTransition();
   const [selectedOptions, setSelectedOptions] = useState<string[]>(poll.myOptionIds);
   const [rating, setRating] = useState<number | null>(poll.myRating);
@@ -85,11 +87,11 @@ export function PollWidget({ poll, isAdmin }: PollWidgetProps) {
           }
           onClick={submitVote}
         >
-          Voter
+          {t("poll.vote")}
         </button>
         {isAdmin && (
           <button type="button" className="poll-results-btn" onClick={() => setShowResults((v) => !v)}>
-            Voir les résultats
+            {t("poll.viewResults")}
           </button>
         )}
       </div>

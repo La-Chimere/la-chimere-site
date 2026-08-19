@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { AvatarCircle } from "@/components/ui/AvatarCircle";
 import { BellIcon, LogoIcon } from "@/components/ui/icons";
 import { signOut } from "@/lib/auth-actions";
+import { useT } from "@/components/i18n/LocaleProvider";
 
 interface HeaderProps {
   displayName: string;
@@ -19,6 +20,7 @@ export function Header({ displayName, photoUrl, hasUnreadNotifications }: Header
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const { t } = useT();
 
   useEffect(() => {
     function onClick(e: MouseEvent) {
@@ -35,7 +37,7 @@ export function Header({ displayName, photoUrl, hasUnreadNotifications }: Header
       <button
         className="brand"
         type="button"
-        title="Retour au Programme"
+        title={t("header.backToProgramme")}
         onClick={() => router.push("/programme")}
       >
         <span className="logo-mark" aria-hidden="true">
@@ -44,7 +46,7 @@ export function Header({ displayName, photoUrl, hasUnreadNotifications }: Header
         <span className="brand-name">La Chimère</span>
       </button>
 
-      <Link href="/announcements" className="bell-btn" title="Annonces et notifications">
+      <Link href="/announcements" className="bell-btn" title={t("header.announcements")}>
         <BellIcon />
         <span className={`bell-dot ${hasUnreadNotifications ? "show" : ""}`} />
       </Link>
@@ -53,7 +55,7 @@ export function Header({ displayName, photoUrl, hasUnreadNotifications }: Header
         <button
           className="avatar-btn"
           onClick={() => setOpen((v) => !v)}
-          aria-label="Menu du compte"
+          aria-label={t("header.accountMenu")}
           style={
             photoUrl
               ? { backgroundImage: `url(${photoUrl})`, color: "transparent" }
@@ -70,24 +72,24 @@ export function Header({ displayName, photoUrl, hasUnreadNotifications }: Header
             </div>
           </div>
           <Link href="/profile" className="acc-item" onClick={() => setOpen(false)}>
-            Mon profil
+            {t("header.myProfile")}
           </Link>
           <Link href="/keys" className="acc-item" onClick={() => setOpen(false)}>
-            Les clés
+            {t("header.theKeys")}
           </Link>
           <Link href="/settings" className="acc-item" onClick={() => setOpen(false)}>
-            Paramètres
+            {t("header.settings")}
           </Link>
           <Link href="/faq" className="acc-item" onClick={() => setOpen(false)}>
-            FAQ
+            {t("header.faq")}
           </Link>
           <Link href="/cgu" className="acc-item" onClick={() => setOpen(false)}>
-            CGU
+            {t("header.terms")}
           </Link>
           <div className="acc-divider" />
           <form action={signOut}>
             <button type="submit" className="acc-item danger">
-              Se déconnecter
+              {t("header.logout")}
             </button>
           </form>
         </div>

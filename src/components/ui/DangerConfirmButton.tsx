@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useT } from "@/components/i18n/LocaleProvider";
 
 interface DangerConfirmButtonProps {
   onConfirm: () => void;
@@ -18,8 +19,10 @@ export function DangerConfirmButton({
   disabled,
   className = "",
   children,
-  confirmLabel = "Sûr ?",
+  confirmLabel,
 }: DangerConfirmButtonProps) {
+  const { t } = useT();
+  const resolvedConfirmLabel = confirmLabel ?? t("common.sure");
   const [armed, setArmed] = useState(false);
   const ref = useRef<HTMLButtonElement>(null);
 
@@ -47,7 +50,7 @@ export function DangerConfirmButton({
         }
       }}
     >
-      {armed ? confirmLabel : children}
+      {armed ? resolvedConfirmLabel : children}
     </button>
   );
 }

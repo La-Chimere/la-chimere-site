@@ -1,3 +1,5 @@
+import { LanguageToggle } from "@/components/i18n/LanguageToggle";
+
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div
@@ -12,7 +14,12 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         gap: 0,
       }}
     >
-      <div style={{ width: "100%", maxWidth: 380 }}>{children}</div>
+      <div style={{ width: "100%", maxWidth: 380 }}>
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 18 }}>
+          <LanguageToggle />
+        </div>
+        {children}
+      </div>
     </div>
   );
 }

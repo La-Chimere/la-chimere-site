@@ -4,6 +4,7 @@ import { Header } from "@/components/ui/Header";
 import { BottomNav } from "@/components/ui/BottomNav";
 import { AlertBanner } from "@/components/ui/AlertBanner";
 import { signOut } from "@/lib/auth-actions";
+import { serverT } from "@/lib/i18n/server";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -36,22 +37,26 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   ]);
 
   if (profile?.status === "pending") {
+    const [pendingTitle, pendingBody, logout] = await Promise.all([
+      serverT("appLayout.pendingTitle"),
+      serverT("appLayout.pendingBody"),
+      serverT("header.logout"),
+    ]);
     return (
       <div className="logout-screen">
         <div className="logout-icon">⏳</div>
-        <h1 className="page-title">En attente de validation</h1>
-        <p className="key-status">
-          Ton compte a bien été créé mais doit encore être validé par un membre du comité (CDC
-          section 3). Reviens un peu plus tard !
-        </p>
+        <h1 className="page-title">{pendingTitle}</h1>
+        <p className="key-status">{pendingBody}</p>
         <form action={signOut}>
           <button type="submit" className="modal-btn gray">
-            Se déconnecter
+            {logout}
           </button>
         </form>
       </div>
     );
   }
+
+  const defaultMemberName = await serverT("appLayout.defaultMemberName");
 
   const myCommunityIds = new Set((myCommunities ?? []).map((c) => c.community_id));
   const readIds = new Set((myReads ?? []).map((r) => r.announcement_id));
@@ -64,7 +69,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
       <Header
-        displayName={profile?.display_name ?? "Membre"}
+        displayName={profile?.display_name ?? defaultMemberName}
         photoUrl={profile?.avatar_url}
         hasUnreadNotifications={(unreadCount ?? 0) > 0 || unseenAnnouncements > 0}
       />

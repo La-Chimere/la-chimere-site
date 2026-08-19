@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { loginEmailFromSlug, slugify } from "@/lib/slug";
+import { serverT } from "@/lib/i18n/server";
 
 export async function signOut() {
   const supabase = await createClient();
@@ -27,7 +28,7 @@ export async function login(
   const password = String(formData.get("password") ?? "");
 
   if (!displayName || !password) {
-    return { error: "Pseudo et mot de passe requis." };
+    return { error: await serverT("auth.error.missingCredentials") };
   }
 
   const admin = createAdminClient();
@@ -38,7 +39,7 @@ export async function login(
     .maybeSingle();
 
   if (!profile?.login_slug) {
-    return { error: "Identifiants incorrects." };
+    return { error: await serverT("auth.error.invalidCredentials") };
   }
 
   const supabase = await createClient();
@@ -48,7 +49,7 @@ export async function login(
   });
 
   if (error) {
-    return { error: "Identifiants incorrects." };
+    return { error: await serverT("auth.error.invalidCredentials") };
   }
 
   redirect("/programme");
@@ -74,13 +75,13 @@ export interface SignupInput {
 export async function completeSignup(input: SignupInput): Promise<AuthActionState> {
   const displayName = input.displayName.trim();
   if (!displayName || !input.password) {
-    return { error: "Pseudo et mot de passe requis." };
+    return { error: await serverT("auth.error.missingCredentials") };
   }
 
   const admin = createAdminClient();
   const baseSlug = slugify(displayName);
   if (!baseSlug) {
-    return { error: "Pseudo invalide." };
+    return { error: await serverT("auth.error.invalidNickname") };
   }
 
   let finalSlug = baseSlug;
@@ -99,12 +100,12 @@ export async function completeSignup(input: SignupInput): Promise<AuthActionStat
       break;
     }
     if (error && !error.message.toLowerCase().includes("already")) {
-      return { error: "Impossible de créer le compte : " + error.message };
+      return { error: (await serverT("auth.error.createAccountFailed")) + " " + error.message };
     }
   }
 
   if (!userId) {
-    return { error: "Impossible de créer le compte, réessaie." };
+    return { error: await serverT("auth.error.createAccountRetry") };
   }
 
   const { error: profileError } = await admin.from("profiles").insert({
@@ -124,7 +125,7 @@ export async function completeSignup(input: SignupInput): Promise<AuthActionStat
 
   if (profileError) {
     await admin.auth.admin.deleteUser(userId);
-    return { error: "Impossible de créer le profil : " + profileError.message };
+    return { error: (await serverT("auth.error.createProfileFailed")) + " " + profileError.message };
   }
 
   if (input.communityIds.length > 0) {

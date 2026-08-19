@@ -5,7 +5,8 @@ import { toggleAnnouncementSeen } from "@/lib/announcements-actions";
 import { PollWidget } from "@/components/announcements/PollWidget";
 import type { Announcement } from "@/lib/announcements-types";
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { fr, enUS } from "date-fns/locale";
+import { useT } from "@/components/i18n/LocaleProvider";
 
 interface AnnouncementCardProps {
   announcement: Announcement;
@@ -14,14 +15,16 @@ interface AnnouncementCardProps {
 }
 
 export function AnnouncementCard({ announcement: a, isAdmin, onEdit }: AnnouncementCardProps) {
+  const { t, locale } = useT();
   const [pending, startTransition] = useTransition();
   const date = new Date(a.announcementDate);
+  const dfnsLocale = locale === "en" ? enUS : fr;
 
   return (
     <div className="ann-card section-card" onClick={isAdmin ? onEdit : undefined} style={isAdmin ? { cursor: "pointer" } : undefined}>
       <div className="ann-date">
         <span className="d">{format(date, "d")}</span>
-        <span className="m">{format(date, "MMM", { locale: fr }).replace(".", "")}</span>
+        <span className="m">{format(date, "MMM", { locale: dfnsLocale }).replace(".", "")}</span>
       </div>
       <div className="ann-body">
         <div className="t">
@@ -44,7 +47,7 @@ export function AnnouncementCard({ announcement: a, isAdmin, onEdit }: Announcem
           e.stopPropagation();
           startTransition(() => toggleAnnouncementSeen(a.id, !a.seen));
         }}
-        aria-label={a.seen ? "Marquer non lu" : "Marquer lu"}
+        aria-label={a.seen ? t("announcements.markUnread") : t("announcements.markRead")}
       />
     </div>
   );

@@ -21,6 +21,7 @@ import {
   previousWeek,
   weekRangeLabel,
 } from "@/lib/dates";
+import { useT } from "@/components/i18n/LocaleProvider";
 
 interface ProgrammeClientProps {
   reference: string; // ISO date de référence (semaine ou mois affiché)
@@ -42,6 +43,7 @@ export function ProgrammeClient({
   isAdmin,
 }: ProgrammeClientProps) {
   const router = useRouter();
+  const { t, locale } = useT();
   const [selectedCommunity, setSelectedCommunity] = useState<string | null>(null);
   const [openEventId, setOpenEventId] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
@@ -93,11 +95,13 @@ export function ProgrammeClient({
           <div className="toolbar-left">
             <div className="datenav-group">
               <div className="datenav">
-                <button type="button" onClick={() => navigate(-1)} aria-label="Précédent">
+                <button type="button" onClick={() => navigate(-1)} aria-label={t("common.previous")}>
                   ‹
                 </button>
-                <span id="navLabel">{calView ? monthLabel(referenceDate) : weekRangeLabel(referenceDate)}</span>
-                <button type="button" onClick={() => navigate(1)} aria-label="Suivant">
+                <span id="navLabel">
+                  {calView ? monthLabel(referenceDate, locale) : weekRangeLabel(referenceDate, locale)}
+                </span>
+                <button type="button" onClick={() => navigate(1)} aria-label={t("common.next")}>
                   ›
                 </button>
               </div>
@@ -105,7 +109,7 @@ export function ProgrammeClient({
                 type="button"
                 className={`view-toggle ${calView ? "active" : ""}`}
                 onClick={() => setCalView((v) => !v)}
-                aria-label="Vue calendrier"
+                aria-label={t("programme.calendarView")}
               >
                 📆
               </button>
@@ -119,7 +123,7 @@ export function ProgrammeClient({
         </div>
         <div className="filters h-scroll">
           <Chip variant="outline" active={!selectedCommunity} onClick={() => setSelectedCommunity(null)}>
-            Tous
+            {t("common.all")}
           </Chip>
           {communities.map((c) => (
             <Chip
@@ -149,11 +153,11 @@ export function ProgrammeClient({
               <div className={`day-unit ${isToday ? "today" : ""}`} key={day}>
                 <div className="day-head">
                   <div className="day-head-left">
-                    <span className="d1">{dayLabel(new Date(day))}</span>
+                    <span className="d1">{dayLabel(new Date(day), locale)}</span>
                   </div>
                 </div>
                 {dayEvents.length === 0 ? (
-                  <div className="agenda-empty">Rien de prévu.</div>
+                  <div className="agenda-empty">{t("programme.nothingPlanned")}</div>
                 ) : (
                   dayEvents.map((event) => (
                     <EventCard

@@ -4,7 +4,9 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Chip } from "@/components/ui/Chip";
 import { AvatarCircle } from "@/components/ui/AvatarCircle";
-import { relativeActivityLabel, shortDayLabel } from "@/lib/dates";
+import { relativeActivityDays, shortDayLabel } from "@/lib/dates";
+import { formatActivity } from "@/lib/i18n/format";
+import { useT } from "@/components/i18n/LocaleProvider";
 import type { CommunityOption } from "@/lib/events-types";
 import type {
   CommunityMember,
@@ -28,6 +30,7 @@ export function CommunitiesClient({
   upcomingEvents,
   participations,
 }: CommunitiesClientProps) {
+  const { t, locale } = useT();
   const [selected, setSelected] = useState<string[]>([]);
 
   function toggle(id: string) {
@@ -67,7 +70,7 @@ export function CommunitiesClient({
     <div className="page">
       <div className="filters h-scroll" id="communityFilters">
         <Chip variant="outline" active={selected.length === 0} onClick={() => setSelected([])}>
-          Tous
+          {t("common.all")}
         </Chip>
         {communities.map((c) => (
           <Chip
@@ -81,26 +84,26 @@ export function CommunitiesClient({
         ))}
       </div>
 
-      <div className="section-subtitle">Évènements à venir</div>
+      <div className="section-subtitle">{t("communities.upcomingEvents")}</div>
       <div className="section-card">
         {filteredEvents.length === 0 ? (
-          <p className="empty-hint">Rien de prévu pour l&apos;instant.</p>
+          <p className="empty-hint">{t("communities.nothingUpcoming")}</p>
         ) : (
           filteredEvents.map((e) => (
             <div className="commu-event-row" key={e.id}>
-              <span className="commu-event-day">{shortDayLabel(new Date(e.eventDate))}</span>
+              <span className="commu-event-day">{shortDayLabel(new Date(e.eventDate), locale)}</span>
               <span className="commu-event-title">
-                {e.title || e.communityLabels.join(", ") || "Partie"}
+                {e.title || e.communityLabels.join(", ") || t("event.defaultTitle")}
               </span>
             </div>
           ))
         )}
       </div>
 
-      <div className="section-subtitle">Membres</div>
+      <div className="section-subtitle">{t("communities.members")}</div>
       <div className="section-card">
         {filteredMembers.length === 0 ? (
-          <p className="empty-hint">Aucun membre dans cette sélection.</p>
+          <p className="empty-hint">{t("communities.noMembers")}</p>
         ) : (
           filteredMembers.map((m) => (
             <Link href={`/members/${m.profileId}`} className="member-card" key={m.profileId}>
@@ -111,7 +114,7 @@ export function CommunitiesClient({
                   {m.hasKey && <span className="member-key">🔑</span>}
                 </div>
                 <div className="member-activity">
-                  {relativeActivityLabel(lastActivityByMember.get(m.profileId) ?? null)}
+                  {formatActivity(t, relativeActivityDays(lastActivityByMember.get(m.profileId) ?? null))}
                 </div>
               </div>
             </Link>

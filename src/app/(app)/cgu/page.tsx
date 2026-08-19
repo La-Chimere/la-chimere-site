@@ -1,15 +1,18 @@
-export default function CguPage() {
+import { serverT } from "@/lib/i18n/server";
+
+export default async function CguPage() {
+  const [back, placeholder] = await Promise.all([
+    serverT("common.back"),
+    serverT("cgu.placeholder"),
+  ]);
   return (
     <div className="page">
       <div className="subpage-back-row">
         <a href="/programme" className="subpage-back">
-          ‹ Retour
+          ‹ {back}
         </a>
       </div>
-      <p className="empty-hint info-box-placeholder">
-        Le texte complet des conditions générales d&apos;utilisation sera ajouté avant la mise en
-        production (CDC 14.5).
-      </p>
+      <p className="empty-hint info-box-placeholder">{placeholder}</p>
     </div>
   );
 }

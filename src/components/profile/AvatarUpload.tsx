@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useT } from "@/components/i18n/LocaleProvider";
 
 interface AvatarUploadProps {
   userId: string;
@@ -19,6 +20,7 @@ function initials(name: string): string {
 // bucket Supabase Storage "avatars" (RLS : chaque membre n'écrit que dans
 // son propre dossier), puis mise à jour de profiles.avatar_url.
 export function AvatarUpload({ userId, currentUrl, displayName, onUploaded }: AvatarUploadProps) {
+  const { t } = useT();
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(currentUrl);
@@ -68,7 +70,7 @@ export function AvatarUpload({ userId, currentUrl, displayName, onUploaded }: Av
         }}
       />
       <button type="button" className="avatar-upload-label" onClick={() => inputRef.current?.click()}>
-        {uploading ? "Envoi…" : "Changer la photo"}
+        {uploading ? t("profile.avatar.uploading") : t("profile.avatar.change")}
       </button>
       {error && <p className="field-error">{error}</p>}
     </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { type ReactNode } from "react";
+import { useT } from "@/components/i18n/LocaleProvider";
 
 interface ModalProps {
   open: boolean;
@@ -11,6 +12,7 @@ interface ModalProps {
 // Bottom-sheet sur mobile, dialog centré >=640px (CDC 12.1/12.4). Fermeture
 // via le clic sur le fond, ou le bouton "X" fourni par l'appelant.
 export function Modal({ open, onClose, children }: ModalProps) {
+  const { t } = useT();
   if (!open) return null;
 
   return (
@@ -24,7 +26,7 @@ export function Modal({ open, onClose, children }: ModalProps) {
         <button
           type="button"
           className="modal-close"
-          aria-label="Fermer"
+          aria-label={t("common.close")}
           onClick={onClose}
         >
           ×

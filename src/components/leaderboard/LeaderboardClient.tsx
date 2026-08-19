@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Chip } from "@/components/ui/Chip";
 import { AvatarCircle } from "@/components/ui/AvatarCircle";
+import { useT } from "@/components/i18n/LocaleProvider";
 import type { CommunityOption } from "@/lib/events-types";
 import type { LeaderboardData } from "@/lib/leaderboard-types";
 
@@ -23,6 +24,7 @@ function dash(n: number): string {
 // colonnes V/E/D masquées si la communauté sélectionnée n'est pas
 // compétitive, liste plafonnée à 10 membres.
 export function LeaderboardClient({ communities, dataByFilter }: LeaderboardClientProps) {
+  const { t } = useT();
   const [filter, setFilter] = useState<string>("tous");
   const [sortKey, setSortKey] = useState<SortKey>("games");
 
@@ -42,7 +44,7 @@ export function LeaderboardClient({ communities, dataByFilter }: LeaderboardClie
     <div className="page">
       <div className="filters h-scroll">
         <Chip variant="outline" active={filter === "tous"} onClick={() => setFilter("tous")}>
-          Tous
+          {t("common.all")}
         </Chip>
         {communities.map((c) => (
           <Chip
@@ -56,16 +58,16 @@ export function LeaderboardClient({ communities, dataByFilter }: LeaderboardClie
         ))}
       </div>
 
-      <h1 className="page-title">Classement</h1>
+      <h1 className="page-title">{t("leaderboard.title")}</h1>
 
       <div className="admin-stats">
         <div className="section-card admin-stat">
           <span className="n">{data.membersThisWeek}</span>
-          <span className="l">membres passés au local cette semaine</span>
+          <span className="l">{t("leaderboard.membersThisWeek")}</span>
         </div>
         <div className="section-card admin-stat">
           <span className="n">{data.eventsThisWeek}</span>
-          <span className="l">parties ou évènements cette semaine</span>
+          <span className="l">{t("leaderboard.eventsThisWeek")}</span>
         </div>
       </div>
 
@@ -77,9 +79,9 @@ export function LeaderboardClient({ communities, dataByFilter }: LeaderboardClie
             className={`lb-col-label ${sortKey === "games" ? "active" : ""}`}
             onClick={() => setSortKey("games")}
           >
-            Parties
+            {t("leaderboard.gamesPlayedLine1")}
             <br />
-            jouées
+            {t("leaderboard.gamesPlayedLine2")}
           </button>
           {data.competitive && (
             <button
@@ -87,13 +89,13 @@ export function LeaderboardClient({ communities, dataByFilter }: LeaderboardClie
               className={`lb-col-label wdl ${sortKey === "wdl" ? "active" : ""}`}
               onClick={() => setSortKey("wdl")}
             >
-              V / E / D
+              {t("leaderboard.wtl")}
             </button>
           )}
         </div>
 
         {sortedRows.length === 0 ? (
-          <p className="empty-hint">Aucune partie enregistrée pour l&apos;instant.</p>
+          <p className="empty-hint">{t("leaderboard.noGames")}</p>
         ) : (
           sortedRows.map((row, i) => (
             <div className="lb-row" key={row.profileId}>

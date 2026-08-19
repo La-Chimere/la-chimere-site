@@ -7,6 +7,7 @@ import { Chip } from "@/components/ui/Chip";
 import { Button } from "@/components/ui/Button";
 import { changePassword, updateProfile } from "@/lib/profile-actions";
 import type { CommunityOption } from "@/lib/events-types";
+import { useT } from "@/components/i18n/LocaleProvider";
 
 interface ProfileData {
   displayName: string;
@@ -28,6 +29,7 @@ interface ProfileClientProps {
 }
 
 export function ProfileClient({ userId, profile, communities, myCommunityIds }: ProfileClientProps) {
+  const { t } = useT();
   const [pending, startTransition] = useTransition();
   const [displayName, setDisplayName] = useState(profile.displayName);
   const [avatarUrl, setAvatarUrl] = useState(profile.avatarUrl);
@@ -97,7 +99,7 @@ export function ProfileClient({ userId, profile, communities, myCommunityIds }: 
     <div className="page">
       <div className="subpage-back-row">
         <a href="/programme" className="subpage-back">
-          ‹ Retour
+          ‹ {t("common.back")}
         </a>
       </div>
 
@@ -109,15 +111,15 @@ export function ProfileClient({ userId, profile, communities, myCommunityIds }: 
       />
 
       <div className="form-field">
-        <label className="form-label">Prénom ou pseudo</label>
+        <label className="form-label">{t("signup.step1.nickname")}</label>
         <input className="form-input" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
       </div>
 
       <div className="form-field">
         <div className="field-head">
-          <label className="form-label">Mail</label>
+          <label className="form-label">{t("signup.step1.email")}</label>
           <div className="visibility-switch">
-            <span className="txt">Visible</span>
+            <span className="txt">{t("signup.step1.visible")}</span>
             <ToggleSwitch on={emailVisible} onChange={setEmailVisible} />
           </div>
         </div>
@@ -126,9 +128,9 @@ export function ProfileClient({ userId, profile, communities, myCommunityIds }: 
 
       <div className="form-field">
         <div className="field-head">
-          <label className="form-label">Téléphone</label>
+          <label className="form-label">{t("signup.step1.phone")}</label>
           <div className="visibility-switch">
-            <span className="txt">Visible</span>
+            <span className="txt">{t("signup.step1.visible")}</span>
             <ToggleSwitch on={phoneVisible} onChange={setPhoneVisible} />
           </div>
         </div>
@@ -137,9 +139,9 @@ export function ProfileClient({ userId, profile, communities, myCommunityIds }: 
 
       <div className="form-field">
         <div className="field-head">
-          <label className="form-label">Localisation</label>
+          <label className="form-label">{t("signup.step1.location")}</label>
           <div className="visibility-switch">
-            <span className="txt">Visible</span>
+            <span className="txt">{t("signup.step1.visible")}</span>
             <ToggleSwitch on={locationVisible} onChange={setLocationVisible} />
           </div>
         </div>
@@ -147,11 +149,11 @@ export function ProfileClient({ userId, profile, communities, myCommunityIds }: 
       </div>
 
       <div className="form-field">
-        <label className="form-label">Présentation</label>
+        <label className="form-label">{t("profile.bio")}</label>
         <textarea className="form-input form-textarea" value={bio} onChange={(e) => setBio(e.target.value)} />
       </div>
 
-      <div className="section-subtitle">Mes communautés</div>
+      <div className="section-subtitle">{t("profile.myCommunities")}</div>
       <div className="filters h-scroll" id="profCommuFilters" style={{ marginBottom: 20 }}>
         {communities.map((c) => (
           <Chip
@@ -165,9 +167,9 @@ export function ProfileClient({ userId, profile, communities, myCommunityIds }: 
         ))}
       </div>
 
-      <div className="section-subtitle">Changer le mot de passe</div>
+      <div className="section-subtitle">{t("profile.changePassword")}</div>
       <div className="form-field">
-        <label className="form-label">Mot de passe actuel</label>
+        <label className="form-label">{t("profile.currentPassword")}</label>
         <input
           type="password"
           className="form-input"
@@ -176,7 +178,7 @@ export function ProfileClient({ userId, profile, communities, myCommunityIds }: 
         />
       </div>
       <div className="form-field">
-        <label className="form-label">Nouveau mot de passe</label>
+        <label className="form-label">{t("profile.newPassword")}</label>
         <input
           type="password"
           className="form-input"
@@ -185,7 +187,7 @@ export function ProfileClient({ userId, profile, communities, myCommunityIds }: 
         />
       </div>
       <div className="form-field">
-        <label className="form-label">Confirmer le nouveau mot de passe</label>
+        <label className="form-label">{t("profile.confirmNewPassword")}</label>
         <input
           type="password"
           className="form-input"
@@ -193,14 +195,14 @@ export function ProfileClient({ userId, profile, communities, myCommunityIds }: 
           onChange={(e) => setConfirmPassword(e.target.value)}
         />
         {passwordTouched && newPassword !== confirmPassword && (
-          <p className="field-error">Les mots de passe ne correspondent pas.</p>
+          <p className="field-error">{t("signup.step1.passwordMismatch")}</p>
         )}
       </div>
 
       {error && <p className="field-error">{error}</p>}
 
       <Button variant="primary" full onClick={save} disabled={pending || !passwordValid}>
-        {saved ? "Modifications enregistrées ✓" : "Enregistrer les modifications"}
+        {saved ? t("profile.saved") : t("profile.saveChanges")}
       </Button>
     </div>
   );

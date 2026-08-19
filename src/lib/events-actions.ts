@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { serverT } from "@/lib/i18n/server";
 
 async function requireUserId() {
   const supabase = await createClient();
@@ -97,7 +98,7 @@ export async function createEvent(input: CreateEventInput) {
     .single();
 
   if (error || !event) {
-    return { error: error?.message ?? "Impossible de créer l'événement." };
+    return { error: error?.message ?? (await serverT("event.error.createFailed")) };
   }
 
   if (input.communityIds.length > 0) {

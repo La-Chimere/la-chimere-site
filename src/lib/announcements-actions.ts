@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/admin-guard";
 import type { createAdminClient } from "@/lib/supabase/admin";
+import { serverT } from "@/lib/i18n/server";
 
 async function requireUser() {
   const supabase = await createClient();
@@ -75,7 +76,7 @@ export async function createAnnouncement(input: AnnouncementInput) {
     .single();
 
   if (error || !announcement) {
-    return { error: error?.message ?? "Impossible de créer l'annonce." };
+    return { error: error?.message ?? (await serverT("announcements.error.createFailed")) };
   }
 
   if (input.banner) {

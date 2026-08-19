@@ -13,6 +13,7 @@ import {
 import { isoDate } from "@/lib/dates";
 import type { CommunityOption } from "@/lib/events-types";
 import type { Announcement, PollType } from "@/lib/announcements-types";
+import { useT } from "@/components/i18n/LocaleProvider";
 
 interface AnnouncementFormProps {
   open: boolean;
@@ -21,13 +22,14 @@ interface AnnouncementFormProps {
   editing: Announcement | null;
 }
 
-const POLL_TYPE_LABELS: Record<PollType, string> = {
-  unique: "Réponse unique",
-  multiple: "Réponse multiple",
-  rating: "Évaluation",
+const POLL_TYPE_KEYS: Record<PollType, string> = {
+  unique: "announcementForm.pollType.unique",
+  multiple: "announcementForm.pollType.multiple",
+  rating: "announcementForm.pollType.rating",
 };
 
 export function AnnouncementForm({ open, onClose, communities, editing }: AnnouncementFormProps) {
+  const { t } = useT();
   const [pending, startTransition] = useTransition();
   const [title, setTitle] = useState(editing?.title ?? "");
   const [description, setDescription] = useState(editing?.description ?? "");
@@ -100,21 +102,23 @@ export function AnnouncementForm({ open, onClose, communities, editing }: Announ
   return (
     <Modal open={open} onClose={onClose}>
       <div className="af-header">
-        <div className="af-header-label">{editing ? "Modifier l'annonce" : "Nouvelle annonce"}</div>
+        <div className="af-header-label">
+          {editing ? t("announcementForm.editTitle") : t("announcementForm.newTitle")}
+        </div>
       </div>
 
       <div className="form-field">
         <label className="form-label">
-          Titre <span className="required-star">*</span>
+          {t("announcementForm.titleLabel")} <span className="required-star">*</span>
         </label>
         <input className="form-input" value={title} onChange={(e) => setTitle(e.target.value)} />
       </div>
 
       <div className="form-field">
-        <label className="form-label">Pour</label>
+        <label className="form-label">{t("announcementForm.for")}</label>
         <div className="filters h-scroll">
           <Chip active={!targetCommunityId} onClick={() => setTargetCommunityId(null)}>
-            Tous
+            {t("common.all")}
           </Chip>
           {communities.map((c) => (
             <Chip
@@ -130,7 +134,7 @@ export function AnnouncementForm({ open, onClose, communities, editing }: Announ
 
       <div className="form-field">
         <label className="form-label">
-          Description <span className="required-star">*</span>
+          {t("announcementForm.description")} <span className="required-star">*</span>
         </label>
         <textarea
           className="form-input form-textarea"
@@ -141,7 +145,7 @@ export function AnnouncementForm({ open, onClose, communities, editing }: Announ
 
       <div className="form-field">
         <label className="form-label">
-          Date <span className="required-star">*</span>
+          {t("event.form.date")} <span className="required-star">*</span>
         </label>
         <input
           type="date"
@@ -153,7 +157,7 @@ export function AnnouncementForm({ open, onClose, communities, editing }: Announ
 
       <div className="form-field af-switch-row">
         <label className="form-label" style={{ marginBottom: 0 }}>
-          Afficher dans le bandeau d&apos;alerte ?
+          {t("announcementForm.showInBanner")}
         </label>
         <ToggleSwitch on={banner} onChange={setBanner} />
       </div>
@@ -161,7 +165,7 @@ export function AnnouncementForm({ open, onClose, communities, editing }: Announ
       {banner && (
         <div className="form-field">
           <label className="form-label">
-            Texte du bandeau <span className="required-star">*</span>
+            {t("announcementForm.bannerText")} <span className="required-star">*</span>
           </label>
           <textarea
             className="form-input form-textarea"
@@ -173,11 +177,11 @@ export function AnnouncementForm({ open, onClose, communities, editing }: Announ
 
       {!pollOpen ? (
         <button type="button" className="af-add-option" onClick={() => setPollOpen(true)}>
-          + Créer un sondage
+          + {t("announcementForm.createPoll")}
         </button>
       ) : (
         <div className="form-field">
-          <label className="form-label">Question du sondage</label>
+          <label className="form-label">{t("announcementForm.pollQuestion")}</label>
           <textarea
             id="afPollQuestion"
             className="form-input form-textarea"
@@ -189,9 +193,9 @@ export function AnnouncementForm({ open, onClose, communities, editing }: Announ
             value={pollType}
             onChange={(e) => setPollType(e.target.value as PollType)}
           >
-            {Object.entries(POLL_TYPE_LABELS).map(([value, label]) => (
+            {Object.entries(POLL_TYPE_KEYS).map(([value, key]) => (
               <option key={value} value={value}>
-                {label}
+                {t(key)}
               </option>
             ))}
           </select>
@@ -205,7 +209,7 @@ export function AnnouncementForm({ open, onClose, communities, editing }: Announ
                   onChange={(e) =>
                     setPollOptions((prev) => prev.map((o, j) => (j === i ? e.target.value : o)))
                   }
-                  placeholder={`Option ${i + 1}`}
+                  placeholder={`${t("announcementForm.option")} ${i + 1}`}
                 />
                 <button
                   type="button"
@@ -222,7 +226,7 @@ export function AnnouncementForm({ open, onClose, communities, editing }: Announ
               className="af-add-option"
               onClick={() => setPollOptions((prev) => [...prev, ""])}
             >
-              + Ajouter une option
+              + {t("announcementForm.addOption")}
             </button>
           )}
         </div>
@@ -237,10 +241,10 @@ export function AnnouncementForm({ open, onClose, communities, editing }: Announ
           onClick={editing ? remove : onClose}
           disabled={pending}
         >
-          {editing ? "Supprimer" : "Annuler"}
+          {editing ? t("common.delete") : t("common.cancel")}
         </button>
         <button type="button" className="modal-btn primary" onClick={submit} disabled={!valid || pending}>
-          Publier
+          {t("announcementForm.publish")}
         </button>
       </div>
     </Modal>

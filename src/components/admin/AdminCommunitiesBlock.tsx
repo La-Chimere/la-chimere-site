@@ -8,6 +8,7 @@ import {
   setCommunityHidden,
   updateCommunityLabel,
 } from "@/lib/admin-actions";
+import { useT } from "@/components/i18n/LocaleProvider";
 import type { AdminCommunity } from "@/lib/admin-types";
 
 interface AdminCommunitiesBlockProps {
@@ -15,6 +16,7 @@ interface AdminCommunitiesBlockProps {
 }
 
 export function AdminCommunitiesBlock({ communities }: AdminCommunitiesBlockProps) {
+  const { t } = useT();
   const [, startTransition] = useTransition();
   const [editing, setEditing] = useState<AdminCommunity | "new" | null>(null);
   const [nameInput, setNameInput] = useState("");
@@ -50,9 +52,9 @@ export function AdminCommunitiesBlock({ communities }: AdminCommunitiesBlockProp
 
   return (
     <div className="section-card">
-      <div className="section-subtitle">Communautés</div>
+      <div className="section-subtitle">{t("admin.communities.title")}</div>
       <button type="button" className="join-btn small" onClick={openNew} style={{ marginBottom: 10 }}>
-        + Ajouter une communauté
+        + {t("admin.communities.add")}
       </button>
 
       <div className="admin-scroll-list">
@@ -63,7 +65,7 @@ export function AdminCommunitiesBlock({ communities }: AdminCommunitiesBlockProp
               <button
                 type="button"
                 className={`admin-eye-btn ${c.competitive ? "active" : ""}`}
-                title="Volet compétitif"
+                title={t("admin.communities.competitiveToggle")}
                 onClick={() =>
                   startTransition(() => setCommunityCompetitive(c.id, !c.competitive))
                 }
@@ -73,13 +75,13 @@ export function AdminCommunitiesBlock({ communities }: AdminCommunitiesBlockProp
               <button
                 type="button"
                 className={`admin-eye-btn ${!c.hidden ? "active" : ""}`}
-                title={c.hidden ? "Communauté masquée" : "Communauté visible"}
+                title={c.hidden ? t("admin.communities.hidden") : t("admin.communities.visible")}
                 onClick={() => startTransition(() => setCommunityHidden(c.id, !c.hidden))}
               >
                 {c.hidden ? "🙈" : "👁"}
               </button>
               <button type="button" className="join-btn gray small" onClick={() => openEdit(c)}>
-                Modifier
+                {t("common.edit")}
               </button>
             </span>
           </div>
@@ -87,18 +89,18 @@ export function AdminCommunitiesBlock({ communities }: AdminCommunitiesBlockProp
       </div>
 
       <Modal open={!!editing} onClose={() => setEditing(null)}>
-        <h3>{editing === "new" ? "Ajouter une communauté" : "Modifier la communauté"}</h3>
+        <h3>{editing === "new" ? t("admin.communities.add") : t("admin.communities.editTitle")}</h3>
         <div className="form-field">
-          <label className="form-label">Nom de la communauté</label>
+          <label className="form-label">{t("admin.communities.name")}</label>
           <input className="form-input" value={nameInput} onChange={(e) => setNameInput(e.target.value)} />
         </div>
         {error && <p className="field-error">{error}</p>}
         <div className="modal-btn-row">
           <button type="button" className="modal-btn gray" onClick={() => setEditing(null)}>
-            Annuler
+            {t("common.cancel")}
           </button>
           <button type="button" className="modal-btn primary" disabled={!nameInput.trim()} onClick={save}>
-            Enregistrer
+            {t("common.save")}
           </button>
         </div>
       </Modal>

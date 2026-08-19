@@ -4,6 +4,7 @@ import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { EventItem } from "@/lib/events-types";
 import { joinEvent, leaveEvent } from "@/lib/events-actions";
+import { useT } from "@/components/i18n/LocaleProvider";
 
 interface EventCardProps {
   event: EventItem;
@@ -14,6 +15,7 @@ interface EventCardProps {
 export function EventCard({ event, currentUserId, onOpen }: EventCardProps) {
   const [pending, startTransition] = useTransition();
   const router = useRouter();
+  const { t } = useT();
   const isAvailability = event.type === "dispo";
   const isParticipant = event.participants.some((p) => p.profileId === currentUserId);
   const soleParticipant = isParticipant && event.participants.length === 1;
@@ -35,11 +37,11 @@ export function EventCard({ event, currentUserId, onOpen }: EventCardProps) {
   }
 
   const time = event.startTime.slice(0, 5);
-  const title = event.title || event.communities.map((c) => c.label).join(", ") || "Partie";
+  const title = event.title || event.communities.map((c) => c.label).join(", ") || t("event.defaultTitle");
   const who =
     event.participants.length > 0
       ? event.participants.map((p) => p.displayName).join(", ")
-      : "Aucun participant";
+      : t("event.noParticipant");
 
   return (
     <div className={`event-card ${isAvailability ? "avail-card" : ""}`} onClick={onOpen}>
@@ -63,7 +65,7 @@ export function EventCard({ event, currentUserId, onOpen }: EventCardProps) {
         <span className="who">{who}</span>
         {isAvailability ? (
           <button type="button" className="join-btn gray" onClick={toggleJoin}>
-            Contacter
+            {t("event.contact")}
           </button>
         ) : (
           <button
@@ -72,7 +74,7 @@ export function EventCard({ event, currentUserId, onOpen }: EventCardProps) {
             onClick={toggleJoin}
             disabled={pending || soleParticipant}
           >
-            {isParticipant ? "Rejoint ✓" : "Rejoindre"}
+            {isParticipant ? t("event.joined") : t("event.join")}
           </button>
         )}
       </div>

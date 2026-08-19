@@ -3,6 +3,7 @@
 import { format } from "date-fns";
 import { isSameMonth, isToday, isoDate, monthGridDays } from "@/lib/dates";
 import type { EventItem } from "@/lib/events-types";
+import { useT } from "@/components/i18n/LocaleProvider";
 
 interface MonthGridProps {
   reference: Date;
@@ -10,10 +11,19 @@ interface MonthGridProps {
   onOpenEvent: (eventId: string) => void;
 }
 
-const WEEKDAY_LABELS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
 const MAX_TAGS_PER_CELL = 3;
 
 export function MonthGrid({ reference, events, onOpenEvent }: MonthGridProps) {
+  const { t } = useT();
+  const weekdayKeys = [
+    "date.mon",
+    "date.tue",
+    "date.wed",
+    "date.thu",
+    "date.fri",
+    "date.sat",
+    "date.sun",
+  ];
   const days = monthGridDays(reference);
 
   const eventsByDay = new Map<string, EventItem[]>();
@@ -26,9 +36,9 @@ export function MonthGrid({ reference, events, onOpenEvent }: MonthGridProps) {
   return (
     <div className="month-grid">
       <div className="month-grid-header">
-        {WEEKDAY_LABELS.map((d) => (
-          <div className="mgh-cell" key={d}>
-            {d}
+        {weekdayKeys.map((key) => (
+          <div className="mgh-cell" key={key}>
+            {t(key)}
           </div>
         ))}
       </div>
@@ -53,7 +63,7 @@ export function MonthGrid({ reference, events, onOpenEvent }: MonthGridProps) {
                       const label =
                         event.communities.length > 0
                           ? event.communities.map((c) => c.label).join(", ")
-                          : event.title || "Évènement";
+                          : event.title || t("event.genericEvent");
                       const hasKeyHolder = event.participants.some((p) => p.hasKey);
                       return (
                         <span

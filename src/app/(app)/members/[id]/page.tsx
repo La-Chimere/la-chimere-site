@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { AvatarCircle } from "@/components/ui/AvatarCircle";
+import { serverT } from "@/lib/i18n/server";
 
 // Fiche membre en lecture seule (CDC 12.11) — version simple pour cette
 // session ; "Dernière activité" et la section Communautés détaillée
@@ -16,29 +17,39 @@ export default async function MemberProfilePage(props: PageProps<"/members/[id]"
     .eq("id", id)
     .single();
 
+  const back = await serverT("common.back");
+
   if (!profile) {
     return (
       <div className="page">
         <div className="subpage-back-row">
           <a href="/programme" className="subpage-back">
-            ‹ Retour
+            ‹ {back}
           </a>
         </div>
-        <p className="empty-hint">Membre introuvable.</p>
+        <p className="empty-hint">{await serverT("member.notFound")}</p>
       </div>
     );
   }
 
+  const [phoneLabel, locationLabel, joinedSince, contactTitle, noContact] = await Promise.all([
+    serverT("member.phone"),
+    serverT("member.location"),
+    serverT("member.joinedSince", { year: profile.joined_year ?? "" }),
+    serverT("member.contact"),
+    serverT("member.noContact"),
+  ]);
+
   const contactLines = [
-    profile.phone_visible && profile.phone ? `Téléphone : ${profile.phone}` : null,
-    profile.location_visible && profile.location ? `Localisation : ${profile.location}` : null,
+    profile.phone_visible && profile.phone ? `${phoneLabel} : ${profile.phone}` : null,
+    profile.location_visible && profile.location ? `${locationLabel} : ${profile.location}` : null,
   ].filter(Boolean);
 
   return (
     <div className="page">
       <div className="subpage-back-row">
         <a href="/programme" className="subpage-back">
-          ‹ Retour
+          ‹ {back}
         </a>
       </div>
       <div className="member-profile-head">
@@ -47,22 +58,17 @@ export default async function MemberProfilePage(props: PageProps<"/members/[id]"
           {profile.display_name}
           {profile.has_key ? " 🔑" : ""}
         </div>
-        {profile.joined_year && (
-          <div className="member-profile-joined">Au club depuis {profile.joined_year}</div>
-        )}
+        {profile.joined_year && <div className="member-profile-joined">{joinedSince}</div>}
       </div>
 
       {profile.bio && <p className="field-note">{profile.bio}</p>}
 
       <div className="section-card">
-        <div className="section-subtitle">Contact</div>
+        <div className="section-subtitle">{contactTitle}</div>
         {contactLines.length > 0 ? (
           contactLines.map((line) => <p key={line} className="field-note">{line}</p>)
         ) : (
-          <p className="field-note">
-            Ce membre n&apos;a pas indiqué ses coordonnées. Postez un message sur le groupe
-            WhatsApp pour le retrouver !
-          </p>
+          <p className="field-note">{noContact}</p>
         )}
       </div>
     </div>

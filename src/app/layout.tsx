@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeInit } from "@/components/ui/ThemeInit";
+import { LocaleProvider } from "@/components/i18n/LocaleProvider";
+import { getLocale } from "@/lib/i18n/server";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -14,12 +16,14 @@ export const metadata: Metadata = {
   description: "Site web du club La Chimère — programme, clés et communauté",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const locale = await getLocale();
+
   return (
-    <html lang="fr" data-theme="light" className={inter.variable}>
+    <html lang={locale} data-theme="light" className={inter.variable}>
       <body style={{ fontFamily: "var(--font-inter), system-ui, -apple-system, Segoe UI, Roboto, sans-serif" }}>
         <ThemeInit />
-        {children}
+        <LocaleProvider locale={locale}>{children}</LocaleProvider>
       </body>
     </html>
   );

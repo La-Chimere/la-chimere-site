@@ -13,6 +13,7 @@ import {
   transformToEvent,
 } from "@/lib/events-actions";
 import { dayLabel } from "@/lib/dates";
+import { useT } from "@/components/i18n/LocaleProvider";
 
 interface EventModalProps {
   event: EventItem | null;
@@ -21,11 +22,13 @@ interface EventModalProps {
   onClose: () => void;
 }
 
-const RESULT_LABELS = { victoire: "v", egalite: "e", defaite: "d" } as const;
+const RESULT_CLASS = { victoire: "v", egalite: "e", defaite: "d" } as const;
+const RESULT_KEYS = { victoire: "event.result.win", egalite: "event.result.tie", defaite: "event.result.loss" } as const;
 
 export function EventModal({ event, currentUserId, isAdmin, onClose }: EventModalProps) {
   const [pending, startTransition] = useTransition();
   const router = useRouter();
+  const { t, locale } = useT();
 
   if (!event) return null;
 
@@ -74,13 +77,13 @@ export function EventModal({ event, currentUserId, isAdmin, onClose }: EventModa
     router.push(`/members/${event!.createdBy}`);
   }
 
-  const title = event.title || event.communities.map((c) => c.label).join(", ") || "Partie";
+  const title = event.title || event.communities.map((c) => c.label).join(", ") || t("event.defaultTitle");
 
   return (
     <Modal open={!!event} onClose={onClose}>
       <h3>{title}</h3>
       <div className="modal-meta">
-        <span>{dayLabel(new Date(event.eventDate))}</span>
+        <span>{dayLabel(new Date(event.eventDate), locale)}</span>
         <span>
           {event.startTime.slice(0, 5)}–{event.endTime.slice(0, 5)}
         </span>
@@ -95,14 +98,14 @@ export function EventModal({ event, currentUserId, isAdmin, onClose }: EventModa
 
       {isAvailability ? (
         <>
-          <div className="modal-section-label">Indiqué par</div>
+          <div className="modal-section-label">{t("event.indicatedBy")}</div>
           <Link href={`/members/${event.createdBy}`} className="mp-name" data-member onClick={onClose}>
-            {creator?.displayName ?? "Membre"}
+            {creator?.displayName ?? t("event.member")}
           </Link>
         </>
       ) : (
         <>
-          <div className="modal-section-label">Participants</div>
+          <div className="modal-section-label">{t("event.participants")}</div>
           <ul className="modal-participants">
             {event.participants.map((p) => (
               <li key={p.profileId}>
@@ -112,15 +115,15 @@ export function EventModal({ event, currentUserId, isAdmin, onClose }: EventModa
                 </Link>
                 {competitive && (
                   <span className="ved-group">
-                    {(Object.keys(RESULT_LABELS) as Array<keyof typeof RESULT_LABELS>).map((key) => (
+                    {(Object.keys(RESULT_CLASS) as Array<keyof typeof RESULT_CLASS>).map((key) => (
                       <button
                         key={key}
                         type="button"
-                        className={`ved-btn ${RESULT_LABELS[key]} ${p.result === key ? "active" : ""}`}
+                        className={`ved-btn ${RESULT_CLASS[key]} ${p.result === key ? "active" : ""}`}
                         onClick={() => onResultClick(p.profileId, p.result, key)}
                         disabled={pending || (p.profileId !== currentUserId && !isAdmin)}
                       >
-                        {RESULT_LABELS[key].toUpperCase()}
+                        {t(RESULT_KEYS[key])}
                       </button>
                     ))}
                   </span>
@@ -134,7 +137,7 @@ export function EventModal({ event, currentUserId, isAdmin, onClose }: EventModa
       <div className="modal-btn-row">
         {isAvailability ? (
           <button type="button" className="modal-btn gray" onClick={onContact}>
-            Contacter
+            {t("event.contact")}
           </button>
         ) : (
           <button
@@ -143,18 +146,18 @@ export function EventModal({ event, currentUserId, isAdmin, onClose }: EventModa
             onClick={toggleJoin}
             disabled={pending || soleParticipant}
           >
-            {isParticipant ? "Se désinscrire" : "Rejoindre"}
+            {isParticipant ? t("event.leave") : t("event.join")}
           </button>
         )}
         {canManage && (
           <button type="button" className="modal-btn danger" onClick={onDelete} disabled={pending}>
-            Supprimer
+            {t("common.delete")}
           </button>
         )}
       </div>
       {isAvailability && canManage && (
         <button type="button" className="modal-btn outline modal-btn-full" onClick={onTransform} disabled={pending}>
-          Transformer en évènement
+          {t("event.transformToEvent")}
         </button>
       )}
     </Modal>

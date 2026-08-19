@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { MemberPicker, type PickableMember } from "@/components/ui/MemberPicker";
 import { borrowExitKey, reportLostKey, transferKey } from "@/lib/keys-actions";
+import { useT } from "@/components/i18n/LocaleProvider";
 
 interface KeysClientProps {
   hasKey: boolean;
@@ -13,6 +14,7 @@ interface KeysClientProps {
 }
 
 export function KeysClient({ hasKey, hasExitKey, buildingCode, otherMembers }: KeysClientProps) {
+  const { t } = useT();
   const [pending, startTransition] = useTransition();
   const [transferOpen, setTransferOpen] = useState(false);
   const [lostOpen, setLostOpen] = useState(false);
@@ -23,35 +25,32 @@ export function KeysClient({ hasKey, hasExitKey, buildingCode, otherMembers }: K
     <div className="page">
       <div className="subpage-back-row">
         <a href="/programme" className="subpage-back">
-          ‹ Retour
+          ‹ {t("common.back")}
         </a>
       </div>
-      <h1 className="page-title">Les clés</h1>
+      <h1 className="page-title">{t("header.theKeys")}</h1>
 
       <div className="section-card">
         <p className="key-code">{buildingCode ?? "—"}</p>
-        <p className="key-status">Code d&apos;entrée de l&apos;immeuble.</p>
+        <p className="key-status">{t("keys.buildingCode")}</p>
 
         {hasKey ? (
           <>
-            <p className="key-status">Tu es porteur d&apos;une clé du local.</p>
+            <p className="key-status">{t("keys.iHaveKey")}</p>
             <div className="modal-btn-row">
               <button type="button" className="modal-btn outline" onClick={() => setTransferOpen(true)}>
-                Donner mes clés
+                {t("keys.giveMyKeys")}
               </button>
               <button type="button" className="modal-btn danger" onClick={() => setLostOpen(true)}>
-                J&apos;ai perdu mes clés
+                {t("keys.iLostMyKeys")}
               </button>
             </div>
           </>
         ) : hasExitKey ? (
-          <p className="key-status">
-            Tu as actuellement emprunté les clés pour sortir — pense à les rapporter avant ta
-            prochaine sortie du local.
-          </p>
+          <p className="key-status">{t("keys.currentlyBorrowed")}</p>
         ) : (
           <>
-            <p className="key-status">Tu n&apos;es pas porteur de clé.</p>
+            <p className="key-status">{t("keys.iDontHaveKey")}</p>
             <button
               type="button"
               className="modal-btn primary modal-btn-full"
@@ -63,7 +62,7 @@ export function KeysClient({ hasKey, hasExitKey, buildingCode, otherMembers }: K
                 })
               }
             >
-              J&apos;ai emprunté les clés pour sortir
+              {t("keys.iBorrowedExitKeys")}
             </button>
             {error && <p className="field-error">{error}</p>}
           </>
@@ -71,7 +70,7 @@ export function KeysClient({ hasKey, hasExitKey, buildingCode, otherMembers }: K
       </div>
 
       <Modal open={transferOpen} onClose={() => setTransferOpen(false)}>
-        <h3>Donner mes clés à un autre membre</h3>
+        <h3>{t("keys.giveToAnotherMember")}</h3>
         <div className="form-field">
           <MemberPicker members={otherMembers} selected={recipient} onChange={setRecipient} />
         </div>
@@ -91,18 +90,16 @@ export function KeysClient({ hasKey, hasExitKey, buildingCode, otherMembers }: K
             })
           }
         >
-          Confirmer le transfert
+          {t("keys.confirmTransfer")}
         </button>
       </Modal>
 
       <Modal open={lostOpen} onClose={() => setLostOpen(false)}>
-        <h3>J&apos;ai perdu mes clés</h3>
-        <p className="field-note">
-          Ton statut de porteur de clé sera retiré immédiatement et le comité sera prévenu.
-        </p>
+        <h3>{t("keys.iLostMyKeys")}</h3>
+        <p className="field-note">{t("keys.lostKeyNote")}</p>
         <div className="modal-btn-row">
           <button type="button" className="modal-btn gray" onClick={() => setLostOpen(false)}>
-            Annuler
+            {t("common.cancel")}
           </button>
           <button
             type="button"
@@ -112,7 +109,7 @@ export function KeysClient({ hasKey, hasExitKey, buildingCode, otherMembers }: K
               setLostOpen(false);
             }}
           >
-            Confirmer
+            {t("common.confirm")}
           </button>
         </div>
       </Modal>

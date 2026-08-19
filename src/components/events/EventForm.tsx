@@ -8,6 +8,7 @@ import { MemberPicker, type PickableMember } from "@/components/ui/MemberPicker"
 import { createEvent } from "@/lib/events-actions";
 import { isoDate } from "@/lib/dates";
 import type { CommunityOption } from "@/lib/events-types";
+import { useT } from "@/components/i18n/LocaleProvider";
 
 interface EventFormProps {
   open: boolean;
@@ -32,6 +33,7 @@ export function EventForm({
   defaultDate,
   isAvailability = false,
 }: EventFormProps) {
+  const { t } = useT();
   const [pending, startTransition] = useTransition();
   const [date, setDate] = useState(isoDate(defaultDate));
   const [time, setTime] = useState("19:00");
@@ -93,11 +95,11 @@ export function EventForm({
         onClose();
       }}
     >
-      <h3>{isAvailability ? "Indiquer ma disponibilité" : "Nouvelle partie"}</h3>
+      <h3>{isAvailability ? t("event.form.titleAvailability") : t("event.form.titleEvent")}</h3>
       <div className="form-row-2">
         <div className="form-field">
           <label className="form-label" htmlFor="ev-date">
-            Date <span className="required-star">*</span>
+            {t("event.form.date")} <span className="required-star">*</span>
           </label>
           <input
             id="ev-date"
@@ -109,7 +111,7 @@ export function EventForm({
         </div>
         <div className="form-field">
           <label className="form-label" htmlFor="ev-time">
-            Heure <span className="required-star">*</span>
+            {t("event.form.time")} <span className="required-star">*</span>
           </label>
           <input
             id="ev-time"
@@ -128,12 +130,12 @@ export function EventForm({
             checked={repeatsWeekly}
             onChange={(e) => setRepeatsWeekly(e.target.checked)}
           />
-          Se répète toutes les semaines
+          {t("event.form.repeatsWeekly")}
         </label>
       )}
 
       <div className="form-field">
-        <label className="form-label">Étiquette</label>
+        <label className="form-label">{t("event.form.tag")}</label>
         <div className="filters h-scroll">
           {communities.map((c) => (
             <Chip key={c.id} active={tagIds.includes(c.id)} onClick={() => toggleTag(c.id)}>
@@ -145,21 +147,21 @@ export function EventForm({
 
       <div className="form-field">
         <label className="form-label" htmlFor="ev-title">
-          Titre {!hasTag && <span className="required-star">*</span>}
+          {t("event.form.title")} {!hasTag && <span className="required-star">*</span>}
         </label>
         <input
           id="ev-title"
           className="form-input"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder={hasTag ? communities.filter((c) => tagIds.includes(c.id)).map((c) => c.label).join(", ") : "Titre de la partie"}
+          placeholder={hasTag ? communities.filter((c) => tagIds.includes(c.id)).map((c) => c.label).join(", ") : t("event.form.titlePlaceholder")}
         />
       </div>
 
       {!isAvailability && (
         <div className="form-field">
           <label className="form-label">
-            Participants <span className="required-star">*</span>
+            {t("event.form.participants")} <span className="required-star">*</span>
           </label>
           <MemberPicker
             members={members}
@@ -172,7 +174,7 @@ export function EventForm({
 
       <div className="form-field">
         <label className="form-label" htmlFor="ev-desc">
-          Description
+          {t("event.form.description")}
         </label>
         <textarea
           id="ev-desc"
@@ -185,7 +187,7 @@ export function EventForm({
       {error && <p className="field-error">{error}</p>}
 
       <Button variant="primary" full onClick={submit} disabled={!valid || pending}>
-        {pending ? "Création…" : "Créer"}
+        {pending ? t("event.form.creating") : t("common.create")}
       </Button>
     </Modal>
   );
