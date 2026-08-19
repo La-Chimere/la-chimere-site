@@ -10,6 +10,7 @@ import {
   updateKeyTotal,
 } from "@/lib/admin-actions";
 import { useT } from "@/components/i18n/LocaleProvider";
+import { PencilIcon } from "@/components/ui/icons";
 import type { AdminMember, ClubSettings } from "@/lib/admin-types";
 
 interface AdminKeysBlockProps {
@@ -81,14 +82,15 @@ export function AdminKeysBlock({ members, settings }: AdminKeysBlockProps) {
         </span>
         <button
           type="button"
-          className="join-btn gray small"
+          className="admin-eye-btn"
+          title={t("admin.keys.editTotal")}
           onClick={() => {
             setTotalInput(String(settings.totalKeys));
             setEditingTotal("total_keys");
             setTotalError(null);
           }}
         >
-          {t("admin.keys.editTotal")}
+          <PencilIcon />
         </button>
       </div>
 
