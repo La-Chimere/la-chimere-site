@@ -171,6 +171,20 @@ export function BackArrowIcon() {
   );
 }
 
+export function PencilIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M14.6 4.4L19.6 9.4M3 21L3.6 17.7C3.7 17.2 3.9 16.8 4.3 16.4L15.6 5.1C16.4 4.3 17.7 4.3 18.5 5.1L18.9 5.5C19.7 6.3 19.7 7.6 18.9 8.4L7.6 19.7C7.2 20.1 6.8 20.3 6.3 20.4L3 21Z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function AdminIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
