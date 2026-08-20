@@ -26,8 +26,26 @@ export async function requireAdmin() {
   };
 }
 
+// Indépendant de requireAdmin() : le super-administrateur garde ce rôle même
+// quand is_admin est désactivé sur son propre compte (utile pour tester
+// l'expérience "membre normal" tout en gardant la capacité de repasser admin).
 export async function requireSuperAdmin() {
-  const ctx = await requireAdmin();
-  if (!ctx.isSuperAdmin) throw new Error("Réservé au super-administrateur.");
-  return ctx;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non connecté.");
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("is_super_admin")
+    .eq("id", user.id)
+    .single();
+  if (!profile?.is_super_admin) throw new Error("Réservé au super-administrateur.");
+
+  return {
+    userId: user.id,
+    isSuperAdmin: true,
+    admin: createAdminClient(),
+  };
 }

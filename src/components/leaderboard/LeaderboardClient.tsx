@@ -29,16 +29,17 @@ export function LeaderboardClient({ communities, dataByFilter }: LeaderboardClie
   const [sortKey, setSortKey] = useState<SortKey>("games");
 
   const data = dataByFilter[filter] ?? dataByFilter.tous;
+  const effectiveSortKey = data.competitive ? sortKey : "games";
 
   const sortedRows = useMemo(() => {
     const rows = [...data.rows];
-    if (sortKey === "games") {
+    if (effectiveSortKey === "games") {
       rows.sort((a, b) => b.games - a.games);
     } else {
       rows.sort((a, b) => b.wins - a.wins || b.ties - a.ties || a.losses - b.losses);
     }
     return rows.slice(0, 10);
-  }, [data.rows, sortKey]);
+  }, [data.rows, effectiveSortKey]);
 
   return (
     <div className="page">
@@ -58,8 +59,6 @@ export function LeaderboardClient({ communities, dataByFilter }: LeaderboardClie
         ))}
       </div>
 
-      <h1 className="page-title">{t("leaderboard.title")}</h1>
-
       <div className="admin-stats">
         <div className="section-card admin-stat">
           <span className="n">{data.membersThisWeek}</span>
@@ -71,22 +70,22 @@ export function LeaderboardClient({ communities, dataByFilter }: LeaderboardClie
         </div>
       </div>
 
+      <h1 className="page-title">{t("leaderboard.title")}</h1>
+
       <div className="section-card">
         <div className="lb-header">
           <div className="lb-header-spacer" />
           <button
             type="button"
-            className={`lb-col-label ${sortKey === "games" ? "active" : ""}`}
+            className={`lb-col-label ${effectiveSortKey === "games" ? "active" : ""}`}
             onClick={() => setSortKey("games")}
           >
-            {t("leaderboard.gamesPlayedLine1")}
-            <br />
-            {t("leaderboard.gamesPlayedLine2")}
+            {t("leaderboard.gamesPlayed")}
           </button>
           {data.competitive && (
             <button
               type="button"
-              className={`lb-col-label wdl ${sortKey === "wdl" ? "active" : ""}`}
+              className={`lb-col-label wdl ${effectiveSortKey === "wdl" ? "active" : ""}`}
               onClick={() => setSortKey("wdl")}
             >
               {t("leaderboard.wtl")}
@@ -106,6 +105,7 @@ export function LeaderboardClient({ communities, dataByFilter }: LeaderboardClie
               </div>
               <div className="lb-stats">
                 <span className="n">{row.games}</span>
+                <span className="l">{t("leaderboard.sessionsShort")}</span>
               </div>
               {data.competitive && (
                 <div className="lb-wdl">

@@ -50,6 +50,7 @@ export function AnnouncementsClient({
               startTransition(() => markAllAnnouncementsSeen(announcements.map((a) => a.id)))
             }
             aria-label={t("announcements.markAllSeen")}
+            title={t("announcements.markAllSeen")}
           >
             <CheckCircleIcon />
           </button>
@@ -81,6 +82,7 @@ export function AnnouncementsClient({
             disabled={!hasUnreadNotifications}
             onClick={() => startTransition(() => markAllNotificationsRead())}
             aria-label={t("notifications.markAllRead")}
+            title={t("notifications.markAllRead")}
           >
             <CheckCircleIcon />
           </button>
@@ -88,6 +90,7 @@ export function AnnouncementsClient({
             className="icon-btn danger"
             disabled={notifications.length === 0}
             onConfirm={() => startTransition(() => deleteAllNotifications())}
+            title={t("notifications.clearAll")}
           >
             <TrashIcon />
           </DangerConfirmButton>
@@ -107,6 +110,7 @@ export function AnnouncementsClient({
             setEditing(null);
             setFormOpen(true);
           }}
+          title={t("announcementForm.fabTitle")}
         />
       )}
 

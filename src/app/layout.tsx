@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeInit } from "@/components/ui/ThemeInit";
@@ -14,6 +14,12 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "La Chimère",
   description: "Site web du club La Chimère — programme, clés et communauté",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {

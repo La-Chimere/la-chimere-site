@@ -23,7 +23,6 @@ export function AdminClient({
 }: AdminClientProps) {
   return (
     <div className="page">
-      <h1 className="page-title">Admin</h1>
       <AdminKeysBlock members={keyHolders} settings={settings} />
       <AdminMembersBlock
         members={members}

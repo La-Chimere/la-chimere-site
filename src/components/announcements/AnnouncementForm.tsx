@@ -53,7 +53,7 @@ export function AnnouncementForm({ open, onClose, communities, editing }: Announ
     !pollOpen ||
     (pollType === "rating"
       ? pollQuestion.trim().length > 0
-      : pollQuestion.trim().length > 0 && pollOptions.filter((o) => o.trim()).length >= 2);
+      : pollQuestion.trim().length > 0 && pollOptions.length >= 2 && pollOptions.every((o) => o.trim()));
 
   const valid =
     title.trim() &&
@@ -111,7 +111,12 @@ export function AnnouncementForm({ open, onClose, communities, editing }: Announ
         <label className="form-label">
           {t("announcementForm.titleLabel")} <span className="required-star">*</span>
         </label>
-        <input className="form-input" value={title} onChange={(e) => setTitle(e.target.value)} />
+        <input
+          className="form-input"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder={t("announcementForm.titlePlaceholder")}
+        />
       </div>
 
       <div className="form-field">
@@ -140,6 +145,7 @@ export function AnnouncementForm({ open, onClose, communities, editing }: Announ
           className="form-input form-textarea"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
+          placeholder={t("announcementForm.descriptionPlaceholder")}
         />
       </div>
 
@@ -171,6 +177,7 @@ export function AnnouncementForm({ open, onClose, communities, editing }: Announ
             className="form-input form-textarea"
             value={bannerText}
             onChange={(e) => setBannerText(e.target.value)}
+            placeholder={t("announcementForm.bannerTextPlaceholder")}
           />
         </div>
       )}
@@ -181,12 +188,16 @@ export function AnnouncementForm({ open, onClose, communities, editing }: Announ
         </button>
       ) : (
         <div className="form-field">
+          <button type="button" className="af-add-option" onClick={() => setPollOpen(false)}>
+            − {t("announcementForm.removePoll")}
+          </button>
           <label className="form-label">{t("announcementForm.pollQuestion")}</label>
           <textarea
             id="afPollQuestion"
             className="form-input form-textarea"
             value={pollQuestion}
             onChange={(e) => setPollQuestion(e.target.value)}
+            placeholder={t("announcementForm.pollQuestionPlaceholder")}
           />
           <select
             className="form-input af-poll-type-select"
@@ -211,13 +222,14 @@ export function AnnouncementForm({ open, onClose, communities, editing }: Announ
                   }
                   placeholder={`${t("announcementForm.option")} ${i + 1}`}
                 />
-                <button
-                  type="button"
-                  onClick={() => setPollOptions((prev) => prev.filter((_, j) => j !== i))}
-                  disabled={pollOptions.length <= 2}
-                >
-                  ×
-                </button>
+                {pollOptions.length > 2 && (
+                  <button
+                    type="button"
+                    onClick={() => setPollOptions((prev) => prev.filter((_, j) => j !== i))}
+                  >
+                    ×
+                  </button>
+                )}
               </div>
             ))}
           {pollType !== "rating" && pollOptions.length < 5 && (

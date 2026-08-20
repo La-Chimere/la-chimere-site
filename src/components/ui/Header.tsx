@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { AvatarCircle } from "@/components/ui/AvatarCircle";
 import { BellIcon, LogoIcon } from "@/components/ui/icons";
 import { signOut } from "@/lib/auth-actions";
@@ -20,7 +20,9 @@ export function Header({ displayName, photoUrl, hasUnreadNotifications }: Header
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const pathname = usePathname();
   const { t } = useT();
+  const onAnnouncements = pathname?.startsWith("/announcements");
 
   useEffect(() => {
     function onClick(e: MouseEvent) {
@@ -46,7 +48,11 @@ export function Header({ displayName, photoUrl, hasUnreadNotifications }: Header
         <span className="brand-name">La Chimère</span>
       </button>
 
-      <Link href="/announcements" className="bell-btn" title={t("header.announcements")}>
+      <Link
+        href="/announcements"
+        className={`bell-btn ${onAnnouncements ? "active" : ""}`}
+        title={t("header.announcements")}
+      >
         <BellIcon />
         <span className={`bell-dot ${hasUnreadNotifications ? "show" : ""}`} />
       </Link>

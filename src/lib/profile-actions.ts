@@ -98,6 +98,14 @@ export async function changePassword(currentPassword: string, newPassword: strin
   return { error: null };
 }
 
+// Fixe l'avatar de son propre profil (utilisé juste après l'inscription,
+// une fois le compte réellement créé — l'upload ne peut pas se faire avant,
+// cf. CDC 13.3, l'étape 2 du parcours n'a pas encore d'utilisateur Auth).
+export async function setOwnAvatarUrl(avatarUrl: string) {
+  const { supabase, userId } = await requireUser();
+  await supabase.from("profiles").update({ avatar_url: avatarUrl }).eq("id", userId);
+}
+
 export async function updateNotificationPrefs(prefs: Record<string, boolean>) {
   const { supabase, userId } = await requireUser();
   await supabase.from("profiles").update({ notification_prefs: prefs }).eq("id", userId);

@@ -19,7 +19,6 @@ export function EventCard({ event, currentUserId, onOpen }: EventCardProps) {
   const isAvailability = event.type === "dispo";
   const isParticipant = event.participants.some((p) => p.profileId === currentUserId);
   const soleParticipant = isParticipant && event.participants.length === 1;
-  const hasKeyHolder = event.participants.some((p) => p.hasKey);
 
   function toggleJoin(e: React.MouseEvent) {
     e.stopPropagation();
@@ -39,20 +38,17 @@ export function EventCard({ event, currentUserId, onOpen }: EventCardProps) {
   const time = event.startTime.slice(0, 5);
   const title = event.title || event.communities.map((c) => c.label).join(", ") || t("event.defaultTitle");
   const who =
-    event.participants.length > 0
-      ? event.participants.map((p) => p.displayName).join(", ")
-      : t("event.noParticipant");
+    event.participants.length === 0
+      ? t("event.noParticipant")
+      : event.participants.length > 2
+        ? t("event.participantCount", { n: event.participants.length })
+        : event.participants.map((p) => p.displayName).join(` ${t("common.and")} `);
 
   return (
     <div className={`event-card ${isAvailability ? "avail-card" : ""}`} onClick={onOpen}>
       <div className="top">
         <div className="top-left">
           <span className="time">{time}</span>
-          {!isAvailability && (
-            <span className={`tag ${hasKeyHolder ? "ok" : "warn"}`}>
-              {hasKeyHolder ? "🔑" : "⚠"}
-            </span>
-          )}
           {event.communities.map((c) => (
             <span className="tag genre" key={c.id}>
               {c.label}
@@ -64,7 +60,7 @@ export function EventCard({ event, currentUserId, onOpen }: EventCardProps) {
       <div className="bottom">
         <span className="who">{who}</span>
         {isAvailability ? (
-          <button type="button" className="join-btn gray" onClick={toggleJoin}>
+          <button type="button" className="join-btn" onClick={toggleJoin}>
             {t("event.contact")}
           </button>
         ) : (

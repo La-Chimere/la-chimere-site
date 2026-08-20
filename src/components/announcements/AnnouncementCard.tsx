@@ -48,6 +48,7 @@ export function AnnouncementCard({ announcement: a, isAdmin, onEdit }: Announcem
           startTransition(() => toggleAnnouncementSeen(a.id, !a.seen));
         }}
         aria-label={a.seen ? t("announcements.markUnread") : t("announcements.markRead")}
+        title={a.seen ? t("announcements.markUnread") : t("announcements.markRead")}
       />
     </div>
   );

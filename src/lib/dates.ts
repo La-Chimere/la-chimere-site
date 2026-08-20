@@ -82,10 +82,23 @@ export function dayLabel(date: Date, locale: Locale = "fr"): string {
   return label.charAt(0).toUpperCase() + label.slice(1);
 }
 
+// Format court "Mardi 18" pour l'en-tête de chaque jour dans la liste Programme
+// (le mois est déjà donné par l'en-tête de semaine juste au-dessus, cf. CDC 12.10).
+export function dayHeaderLabel(date: Date, locale: Locale = "fr"): string {
+  const label = format(date, "EEEE d", { locale: dfnsLocale(locale) });
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
 // Format compact "Mer. 19 août" / "Wed 19 Aug" pour les listes d'évènements
 // condensées (CDC 12.8 : liste des évènements à venir par communauté).
 export function shortDayLabel(date: Date, locale: Locale = "fr"): string {
   const label = format(date, "EEE d MMM", { locale: dfnsLocale(locale) }).replace(/\./g, "");
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
+// Jour abrégé seul, ex. "Mer" (CDC 12.8 : liste des évènements à venir par communauté).
+export function shortWeekday(date: Date, locale: Locale = "fr"): string {
+  const label = format(date, "EEE", { locale: dfnsLocale(locale) }).replace(/\.$/, "");
   return label.charAt(0).toUpperCase() + label.slice(1);
 }
 

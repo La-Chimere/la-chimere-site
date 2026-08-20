@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Modal } from "@/components/ui/Modal";
 import { MemberPicker, type PickableMember } from "@/components/ui/MemberPicker";
 import { borrowExitKey, reportLostKey, transferKey } from "@/lib/keys-actions";
 import { useT } from "@/components/i18n/LocaleProvider";
@@ -18,7 +17,6 @@ export function KeysClient({ hasKey, hasExitKey, buildingCode, otherMembers }: K
   const { t } = useT();
   const [pending, startTransition] = useTransition();
   const [transferOpen, setTransferOpen] = useState(false);
-  const [lostOpen, setLostOpen] = useState(false);
   const [recipient, setRecipient] = useState<PickableMember[]>([]);
   const [error, setError] = useState<string | null>(null);
 
@@ -38,17 +36,26 @@ export function KeysClient({ hasKey, hasExitKey, buildingCode, otherMembers }: K
         {hasKey ? (
           <>
             <p className="key-status">{t("keys.iHaveKey")}</p>
-            <div className="modal-btn-row">
-              <button type="button" className="modal-btn outline" onClick={() => setTransferOpen(true)}>
-                {t("keys.giveMyKeys")}
-              </button>
-              <button type="button" className="modal-btn danger" onClick={() => setLostOpen(true)}>
-                {t("keys.iLostMyKeys")}
-              </button>
-            </div>
+            {!transferOpen && (
+              <>
+                <button type="button" className="modal-join" onClick={() => setTransferOpen(true)}>
+                  {t("keys.giveMyKeys")}
+                </button>
+                <button
+                  type="button"
+                  className="modal-btn danger modal-btn-full"
+                  onClick={() => startTransition(() => reportLostKey())}
+                >
+                  {t("keys.iLostMyKeys")}
+                </button>
+              </>
+            )}
           </>
         ) : hasExitKey ? (
-          <p className="key-status">{t("keys.currentlyBorrowed")}</p>
+          <>
+            <div className="modal-section-label">{t("keys.statusLabel")}</div>
+            <p className="key-status">{t("keys.currentlyBorrowed")}</p>
+          </>
         ) : (
           <>
             <p className="key-status">{t("keys.iDontHaveKey")}</p>
@@ -65,55 +72,48 @@ export function KeysClient({ hasKey, hasExitKey, buildingCode, otherMembers }: K
             >
               {t("keys.iBorrowedExitKeys")}
             </button>
+            <p className="field-note">{t("keys.exitKeyNote")}</p>
             {error && <p className="field-error">{error}</p>}
           </>
         )}
+
+        {transferOpen && (
+          <div className="form-field" style={{ marginTop: 14 }}>
+            <label className="form-label">{t("keys.giveToAnotherMember")}</label>
+            <MemberPicker members={otherMembers} selected={recipient} onChange={setRecipient} />
+            <div className="modal-btn-row">
+              <button
+                type="button"
+                className="modal-btn gray"
+                onClick={() => {
+                  setTransferOpen(false);
+                  setRecipient([]);
+                }}
+              >
+                {t("common.cancel")}
+              </button>
+              <button
+                type="button"
+                className="modal-btn primary"
+                disabled={recipient.length === 0 || pending}
+                onClick={() =>
+                  startTransition(async () => {
+                    const result = await transferKey(recipient[0].id);
+                    if (result.error) {
+                      setError(result.error);
+                      return;
+                    }
+                    setTransferOpen(false);
+                    setRecipient([]);
+                  })
+                }
+              >
+                {t("keys.confirmTransfer")}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
-
-      <Modal open={transferOpen} onClose={() => setTransferOpen(false)}>
-        <h3>{t("keys.giveToAnotherMember")}</h3>
-        <div className="form-field">
-          <MemberPicker members={otherMembers} selected={recipient} onChange={setRecipient} />
-        </div>
-        <button
-          type="button"
-          className="modal-btn primary modal-btn-full"
-          disabled={recipient.length === 0 || pending}
-          onClick={() =>
-            startTransition(async () => {
-              const result = await transferKey(recipient[0].id);
-              if (result.error) {
-                setError(result.error);
-                return;
-              }
-              setTransferOpen(false);
-              setRecipient([]);
-            })
-          }
-        >
-          {t("keys.confirmTransfer")}
-        </button>
-      </Modal>
-
-      <Modal open={lostOpen} onClose={() => setLostOpen(false)}>
-        <h3>{t("keys.iLostMyKeys")}</h3>
-        <p className="field-note">{t("keys.lostKeyNote")}</p>
-        <div className="modal-btn-row">
-          <button type="button" className="modal-btn gray" onClick={() => setLostOpen(false)}>
-            {t("common.cancel")}
-          </button>
-          <button
-            type="button"
-            className="modal-btn danger"
-            onClick={() => {
-              startTransition(() => reportLostKey());
-              setLostOpen(false);
-            }}
-          >
-            {t("common.confirm")}
-          </button>
-        </div>
-      </Modal>
     </div>
   );
 }

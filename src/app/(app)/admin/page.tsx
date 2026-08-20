@@ -87,7 +87,7 @@ export default async function AdminPage() {
       communities={communities}
       settings={settings}
       activeMembersThisMonth={activeThisMonth.size}
-      totalMembers={membersExcludingSelf.length}
+      totalMembers={allMembers.length}
     />
   );
 }

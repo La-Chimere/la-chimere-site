@@ -3,6 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 import { ToggleSwitch } from "@/components/ui/ToggleSwitch";
 import { DangerConfirmButton } from "@/components/ui/DangerConfirmButton";
+import { Chip } from "@/components/ui/Chip";
 import { MemberPicker, type PickableMember } from "@/components/ui/MemberPicker";
 import { deleteOwnAccount, updateNotificationPrefs } from "@/lib/profile-actions";
 import { setAdminRole } from "@/lib/admin-actions";
@@ -77,13 +78,16 @@ export function SettingsClient({
 
       <div className="section-subtitle">{t("settings.appearance")}</div>
       <div className="section-card">
-        <div className="segmented" style={{ marginBottom: 16 }}>
-          <button type="button" className={theme === "light" ? "active" : ""} onClick={() => applyTheme("light")}>
-            {t("settings.light")}
-          </button>
-          <button type="button" className={theme === "dark" ? "active" : ""} onClick={() => applyTheme("dark")}>
-            {t("settings.dark")}
-          </button>
+        <div className="form-field">
+          <span className="form-label">{t("settings.themeLabel")}</span>
+          <div className="filters">
+            <Chip active={theme === "light"} onClick={() => applyTheme("light")}>
+              {t("settings.light")}
+            </Chip>
+            <Chip active={theme === "dark"} onClick={() => applyTheme("dark")}>
+              {t("settings.dark")}
+            </Chip>
+          </div>
         </div>
         <div className="form-label">{t("settings.accentColor")}</div>
         <div className="accent-swatches">
@@ -102,7 +106,7 @@ export function SettingsClient({
 
       <div className="section-subtitle">{t("settings.application")}</div>
       <div className="section-card">
-        <button type="button" className="modal-btn outline modal-btn-full" style={{ marginBottom: 14 }}>
+        <button type="button" className="modal-join" style={{ marginTop: 0, marginBottom: 14 }}>
           {t("settings.installApp")}
         </button>
         <div className="form-label">{t("settings.language")}</div>
@@ -112,8 +116,8 @@ export function SettingsClient({
       <div className="section-subtitle">{t("notifications.title")}</div>
       <div className="section-card">
         {NOTIF_TYPES.map((n) => (
-          <div className="field-head" key={n.key} style={{ marginBottom: 12 }}>
-            <span>{t(n.labelKey)}</span>
+          <div className="admin-row" key={n.key}>
+            <span className="name">{t(n.labelKey)}</span>
             <ToggleSwitch on={prefs[n.key] ?? true} onChange={() => togglePref(n.key)} />
           </div>
         ))}
@@ -134,9 +138,17 @@ export function SettingsClient({
         <>
           <div className="section-subtitle">{t("settings.admins")}</div>
           <div className="section-card">
+            <MemberPicker members={nonAdmins} selected={newAdmin} onChange={setNewAdmin} hideSelectedChips />
             <div className="admin-add-key-row">
-              <div style={{ flex: 1 }}>
-                <MemberPicker members={nonAdmins} selected={newAdmin} onChange={setNewAdmin} />
+              <div className="ce-participants" style={{ flex: 1 }}>
+                {newAdmin.map((a) => (
+                  <span className="ce-chip" key={a.id}>
+                    {a.displayName}
+                    <button type="button" onClick={() => setNewAdmin([])} aria-label={t("common.remove")}>
+                      ×
+                    </button>
+                  </span>
+                ))}
               </div>
               <button
                 type="button"
@@ -150,21 +162,23 @@ export function SettingsClient({
                 {t("settings.makeAdmin")}
               </button>
             </div>
-            <div className="section-subtitle" style={{ fontSize: 12, marginTop: 12 }}>
+            <div className="modal-section-label" style={{ marginTop: 14 }}>
               {t("settings.currentAdmins")}
             </div>
-            {admins.map((a) => (
-              <div className="admin-row reverse" key={a.id}>
-                <button
-                  type="button"
-                  className="join-btn gray small"
-                  onClick={() => startTransition(() => setAdminRole(a.id, false))}
-                >
-                  {t("common.remove")}
-                </button>
-                <span className="name">{a.displayName}</span>
-              </div>
-            ))}
+            <div className="admin-scroll-list">
+              {admins.map((a) => (
+                <div className="admin-row" key={a.id}>
+                  <span className="name">{a.displayName}</span>
+                  <button
+                    type="button"
+                    className="join-btn gray small"
+                    onClick={() => startTransition(() => setAdminRole(a.id, false))}
+                  >
+                    {t("common.remove")}
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         </>
       )}

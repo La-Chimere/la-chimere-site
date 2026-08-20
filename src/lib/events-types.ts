@@ -9,6 +9,7 @@ export interface EventParticipant {
   profileId: string;
   displayName: string;
   hasKey: boolean;
+  avatarUrl: string | null;
   result: "victoire" | "egalite" | "defaite" | null;
 }
 
@@ -21,6 +22,7 @@ export interface EventItem {
   startTime: string; // HH:mm:ss
   endTime: string;
   createdBy: string;
+  repeatsWeekly: boolean;
   communities: EventCommunity[];
   participants: EventParticipant[];
 }

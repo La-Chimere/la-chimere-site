@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Chip } from "@/components/ui/Chip";
 import { AvatarCircle } from "@/components/ui/AvatarCircle";
-import { relativeActivityDays, shortDayLabel } from "@/lib/dates";
+import { relativeActivityDays, shortWeekday } from "@/lib/dates";
 import { formatActivity } from "@/lib/i18n/format";
 import { useT } from "@/components/i18n/LocaleProvider";
 import type { CommunityOption } from "@/lib/events-types";
@@ -68,6 +68,7 @@ export function CommunitiesClient({
 
   return (
     <div className="page">
+      <h1 className="page-title">{t("communities.title")}</h1>
       <div className="filters h-scroll" id="communityFilters">
         <Chip variant="outline" active={selected.length === 0} onClick={() => setSelected([])}>
           {t("common.all")}
@@ -84,14 +85,16 @@ export function CommunitiesClient({
         ))}
       </div>
 
-      <div className="section-subtitle">{t("communities.upcomingEvents")}</div>
       <div className="section-card">
+        <h2 className="section-subtitle">{t("communities.upcomingEvents")}</h2>
         {filteredEvents.length === 0 ? (
           <p className="empty-hint">{t("communities.nothingUpcoming")}</p>
         ) : (
           filteredEvents.map((e) => (
             <div className="commu-event-row" key={e.id}>
-              <span className="commu-event-day">{shortDayLabel(new Date(e.eventDate), locale)}</span>
+              <span className="commu-event-day">
+                {shortWeekday(new Date(e.eventDate), locale)} {parseInt(e.startTime, 10)}h
+              </span>
               <span className="commu-event-title">
                 {e.title || e.communityLabels.join(", ") || t("event.defaultTitle")}
               </span>
@@ -100,8 +103,8 @@ export function CommunitiesClient({
         )}
       </div>
 
-      <div className="section-subtitle">{t("communities.members")}</div>
       <div className="section-card">
+        <h2 className="section-subtitle">{t("communities.members")}</h2>
         {filteredMembers.length === 0 ? (
           <p className="empty-hint">{t("communities.noMembers")}</p>
         ) : (
@@ -111,7 +114,11 @@ export function CommunitiesClient({
               <div className="member-info">
                 <div className="member-name">
                   {m.displayName}
-                  {m.hasKey && <span className="member-key">🔑</span>}
+                  {m.hasKey && (
+                    <span className="member-key" title={t("communities.keyHolder")}>
+                      🔑
+                    </span>
+                  )}
                 </div>
                 <div className="member-activity">
                   {formatActivity(t, relativeActivityDays(lastActivityByMember.get(m.profileId) ?? null))}

@@ -67,7 +67,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   ).length;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+    <div className="app-shell">
       <Header
         displayName={profile?.display_name ?? defaultMemberName}
         photoUrl={profile?.avatar_url}

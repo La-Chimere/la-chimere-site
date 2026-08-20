@@ -19,6 +19,7 @@ const fr: Record<string, string> = {
   "common.optional": "Facultatif",
   "common.previous": "Précédent",
   "common.all": "Tous",
+  "common.and": "et",
 
   // Dates
   "date.mon": "Lun",
@@ -38,11 +39,19 @@ const fr: Record<string, string> = {
   // Programme (CDC 4.2/12.10)
   "programme.calendarView": "Vue calendrier",
   "programme.nothingPlanned": "Rien de prévu.",
+  "programme.keyFromHour": "à partir de {hour}h",
+  "programme.noKey": "Pas de clé",
+  "programme.sendAlert": "Envoyer l'alerte",
+  "programme.alertCopied": "Message copié ✓",
+  "programme.keyAlertMessage": "Personne n'a de clé du local pour {day}. Qui peut passer ?",
+  "programme.modalKeyOpenFrom": "club ouvert dès {hour}h",
+  "programme.modalNoKeyConfirmed": "Pas de porteur de clé confirmé",
 
   // Évènements (CDC 12.3/12.4)
   "event.genericEvent": "Évènement",
   "event.defaultTitle": "Partie",
   "event.noParticipant": "Aucun participant",
+  "event.participantCount": "{n} participants",
   "event.contact": "Contacter",
   "event.joined": "Rejoint ✓",
   "event.join": "Rejoindre",
@@ -54,17 +63,20 @@ const fr: Record<string, string> = {
   "event.result.tie": "E",
   "event.result.loss": "D",
   "event.transformToEvent": "Transformer en évènement",
-  "event.form.titleAvailability": "Indiquer ma disponibilité",
-  "event.form.titleEvent": "Nouvelle partie",
+  "event.form.titleAvailability": "Indiquer une disponibilité",
+  "event.form.titleEvent": "Nouvel événement",
   "event.form.date": "Date",
   "event.form.time": "Heure",
   "event.form.repeatsWeekly": "Se répète toutes les semaines",
   "event.form.tag": "Étiquette",
   "event.form.title": "Titre",
-  "event.form.titlePlaceholder": "Titre de la partie",
+  "event.form.titlePlaceholder": "Ex : Soirée jeux de société",
+  "event.form.titleDefault": "Par défaut : \"{tags}\"",
   "event.form.participants": "Participants",
   "event.form.description": "Description",
   "event.form.creating": "Création…",
+  "event.form.validate": "Valider",
+  "event.form.fabTitle": "J'organise une partie",
 
   // Disponibilités (CDC 12.12)
   "availability.menuButton": "Dispos",
@@ -77,19 +89,21 @@ const fr: Record<string, string> = {
     "Toutes les disponibilités que vous avez indiquées vont être supprimées du calendrier.",
 
   // Communautés (CDC 12.8)
+  "communities.title": "Communautés",
   "communities.upcomingEvents": "Évènements à venir",
-  "communities.nothingUpcoming": "Rien de prévu pour l'instant.",
+  "communities.nothingUpcoming": "Aucun évènement à venir dans cette sélection.",
   "communities.members": "Membres",
   "communities.noMembers": "Aucun membre dans cette sélection.",
+  "communities.keyHolder": "Porteur de clé",
 
   // Classement (CDC 4.4/12.7)
   "leaderboard.title": "Classement",
   "leaderboard.membersThisWeek": "membres passés au local cette semaine",
   "leaderboard.eventsThisWeek": "parties ou évènements cette semaine",
-  "leaderboard.gamesPlayedLine1": "Parties",
-  "leaderboard.gamesPlayedLine2": "jouées",
+  "leaderboard.gamesPlayed": "Sessions",
+  "leaderboard.sessionsShort": "sessions",
   "leaderboard.wtl": "V / E / D",
-  "leaderboard.noGames": "Aucune partie enregistrée pour l'instant.",
+  "leaderboard.noGames": "Aucune session enregistrée pour l'instant.",
 
   // Admin (CDC 12.9)
   "admin.members.title": "Membres",
@@ -97,30 +111,43 @@ const fr: Record<string, string> = {
   "admin.members.total": "membres au total",
   "admin.members.pending": "En attente de validation",
   "admin.members.validate": "Valider",
+  "admin.members.searchPlaceholder": "Rechercher un membre…",
+  "admin.members.noMatch": "Aucun membre trouvé.",
   "admin.members.deleteConfirmTitle": "Supprimer ce membre ?",
   "admin.members.deleteConfirmBody":
     "Attention, toutes les informations de ce membre seront supprimées et il ne pourra plus accéder à l'app.",
   "admin.keys.title": "Clés",
-  "admin.keys.buildingCode": "Code d'entrée de l'immeuble",
+  "admin.keys.buildingCode": "Code de l'immeuble",
   "admin.keys.editTotal": "Modifier le nombre de clés",
-  "admin.keys.maxReached": "Nombre maximal de clés déjà atteint.",
-  "admin.keys.exitKeys": "Clés de sortie ({current} / {total})",
+  "admin.keys.editTotalTitle": "Nombre total de clés",
+  "admin.keys.editExitTotalTitle": "Nombre total de clés de sortie",
+  "admin.keys.totalLabel": "Total ({n} actuellement en circulation)",
+  "admin.keys.suffix": "clés du local",
+  "admin.keys.exitKeysSuffix": "clés de sortie disponibles",
+  "admin.keys.giveKey": "Donner une clé",
+  "admin.keys.holdersTitle": "Détenteurs de clé",
+  "admin.keys.noKeyHolders": "Aucun détenteur de clé actuellement.",
+  "admin.keys.exitHoldersTitle": "Détenteurs de clés de sortie",
+  "admin.keys.maxReached": "Nombre maximal de clés atteint — augmente le total pour en donner une nouvelle.",
   "admin.keys.noExitKeyHolders": "Personne n'a actuellement emprunté de clé de sortie.",
   "admin.communities.title": "Communautés",
   "admin.communities.add": "Ajouter une communauté",
   "admin.communities.editTitle": "Modifier la communauté",
   "admin.communities.name": "Nom de la communauté",
+  "admin.communities.namePlaceholder": "Ex : Jeux de rôle",
+  "admin.communities.hiddenSubLabel": "Masquée aux membres",
   "admin.communities.competitiveToggle": "Volet compétitif",
   "admin.communities.hidden": "Communauté masquée",
   "admin.communities.visible": "Communauté visible",
   "admin.error.maxKeysReached": "Nombre maximal de clés déjà atteint.",
   "admin.error.totalBelowHolders":
-    "Le nouveau total ne peut pas être inférieur au nombre de porteurs actuels.",
+    "Le total ne peut pas être inférieur au nombre de porteurs actuels ({n}).",
 
   // Sélecteur de membre (CDC 12.3/12.9)
   "memberPicker.searchPlaceholder": "Rechercher un membre…",
   "memberPicker.remove": "Retirer {name}",
   "memberPicker.noResults": "Aucun membre trouvé.",
+  "memberPicker.me": "(moi)",
 
   // Nav (CDC 12.2)
   "nav.programme": "Programme",
@@ -133,8 +160,9 @@ const fr: Record<string, string> = {
   "login.welcomeLine2": "La Chimère !",
   "login.createAccount": "Créer mon compte",
   "login.logIn": "Me connecter",
-  "login.nickname": "Pseudo",
-  "login.nicknamePlaceholder": "Ton pseudo",
+  "login.submit": "Se connecter",
+  "login.nickname": "Pseudo ou e-mail",
+  "login.nicknamePlaceholder": "Ton pseudo ou ton e-mail",
   "login.password": "Mot de passe",
   "login.loggingIn": "Connexion…",
   "auth.error.missingCredentials": "Pseudo et mot de passe requis.",
@@ -154,9 +182,9 @@ const fr: Record<string, string> = {
   "signup.step1.visible": "Visible",
   "signup.step1.phone": "Téléphone",
   "signup.step1.location": "Localisation",
-  "signup.step1.locationPlaceholder": "Ex : Plainpalais à 15 min du local",
+  "signup.step1.locationPlaceholder": "Facultatif — ex : Plainpalais à 15 min du local",
   "signup.step1.locationNote":
-    "Ces informations restent visibles uniquement par toi et l'administrateur technique, sauf si tu choisis de les partager (voir étape 3 pour la gestion de tes données).",
+    "Toutes ces données sont visibles uniquement par vous et par l'administrateur technique du site, sauf si vous autorisez le partage. La gestion des données personnelles est décrite plus en détail à l'étape 3.",
   "signup.step1.password": "Mot de passe",
   "signup.step1.confirmPassword": "Confirmer le mot de passe",
   "signup.step1.passwordMismatch": "Les mots de passe ne correspondent pas.",
@@ -164,15 +192,20 @@ const fr: Record<string, string> = {
     "L'appartenance au Club La Chimère inclut <strong>une participation financière mensuelle</strong> et d'avoir <strong>rencontré au moins un des membres du comité</strong>. Je confirme en avoir connaissance et m'en être acquitté.",
   "signup.step2.title": "Bienvenue ! À quoi tu joues ?",
   "signup.step2.subtitle": "Sélectionne tes communautés ! Tu pourras modifier ça quand tu veux.",
+  "signup.step2.addPhoto": "Ajouter une photo de profil",
+  "signup.step2.changePhoto": "Changer la photo",
+  "signup.step2.memberCount": "{n} membres",
   "signup.step2.joinedYear": "T'es depuis combien de temps au club ?",
   "signup.step2.bio": "Tu veux te présenter ?",
   "signup.step2.bioPlaceholder": "Dire quel jeu tu préfères ? Quelle armée tu joues ? Éclate-toi !",
-  "signup.step2.bioNote": "Tu pourras ajouter une photo de profil juste après, depuis Mon profil.",
+  "signup.step2.bioNote": "Tu pourras aussi modifier ta photo et ta présentation plus tard, depuis Mon profil.",
   "signup.step3.title": "Bon à savoir",
+  "signup.step3.subtitle": "Deux dernières choses avant de rejoindre le club.",
   "signup.step3.rulesTitle": "Règlement du club",
-  "signup.step3.rulesPlaceholder": "Le texte complet du règlement sera ajouté avant la mise en production.",
+  "signup.step3.rulesPlaceholder":
+    "Contenu à venir — le règlement définitif du club (vie associative, matériel, respect des lieux…) sera ajouté ici avant la mise en production.",
   "signup.step3.termsTitle": "Conditions générales d'utilisation",
-  "signup.step3.termsPlaceholder": "Le texte complet des CGU sera ajouté avant la mise en production.",
+  "signup.step3.termsPlaceholder": "Contenu à venir — le résumé des CGU du site sera ajouté ici avant la mise en production.",
   "signup.step3.consent":
     "J'atteste avoir lu et accepté le règlement du club et les conditions générales d'utilisation.",
   "signup.step3.join": "Rejoindre",
@@ -183,23 +216,30 @@ const fr: Record<string, string> = {
   // Annonces (CDC 12.5)
   "announcements.title": "Annonces",
   "announcements.markAllSeen": "Tout marquer comme vu",
-  "announcements.none": "Aucune annonce.",
+  "announcements.none": "Aucune annonce pour l'instant.",
   "announcements.markUnread": "Marquer non lu",
   "announcements.markRead": "Marquer lu",
 
   // Notifications (CDC 12.6)
   "notifications.title": "Notifications",
   "notifications.markAllRead": "Tout marquer comme lu",
-  "notifications.none": "Aucune notification.",
+  "notifications.none": "Aucune notification pour l'instant.",
+  "notifications.clearAll": "Tout supprimer",
 
   // Sondage
   "poll.vote": "Voter",
   "poll.viewResults": "Voir les résultats",
+  "poll.hideResults": "Masquer les résultats",
 
   // Formulaire d'annonce
   "announcementForm.editTitle": "Modifier l'annonce",
   "announcementForm.newTitle": "Nouvelle annonce",
   "announcementForm.titleLabel": "Titre",
+  "announcementForm.titlePlaceholder": "Ex : Assemblée générale",
+  "announcementForm.descriptionPlaceholder": "Détails de l'annonce",
+  "announcementForm.bannerTextPlaceholder": "Ce texte s'affichera dans le bandeau d'alerte",
+  "announcementForm.pollQuestionPlaceholder": "Poser une question…",
+  "announcementForm.removePoll": "Retirer le sondage",
   "announcementForm.for": "Pour",
   "announcementForm.description": "Description",
   "announcementForm.showInBanner": "Afficher dans le bandeau d'alerte ?",
@@ -209,6 +249,7 @@ const fr: Record<string, string> = {
   "announcementForm.option": "Option",
   "announcementForm.addOption": "Ajouter une option",
   "announcementForm.publish": "Publier",
+  "announcementForm.fabTitle": "Nouvelle annonce",
   "announcementForm.pollType.unique": "Réponse unique",
   "announcementForm.pollType.multiple": "Réponse multiple",
   "announcementForm.pollType.rating": "Évaluation",
@@ -240,6 +281,9 @@ const fr: Record<string, string> = {
   "keys.giveToAnotherMember": "Donner mes clés à un autre membre",
   "keys.confirmTransfer": "Confirmer le transfert",
   "keys.lostKeyNote": "Ton statut de porteur de clé sera retiré immédiatement et le comité sera prévenu.",
+  "keys.statusLabel": "Statut",
+  "keys.exitKeyNote":
+    "Ces clés ne font pas de toi un porteur de clé : elles servent uniquement à fermer la porte en partant. Les administrateurs en sont informés.",
   "keys.aMember": "Un membre",
   "keys.error.noKeyToGive": "Tu ne possèdes pas de clé à transmettre.",
   "keys.error.memberNotFound": "Membre introuvable.",
@@ -252,6 +296,7 @@ const fr: Record<string, string> = {
 
   // Paramètres
   "settings.appearance": "Apparence",
+  "settings.themeLabel": "Thème",
   "settings.light": "Clair",
   "settings.dark": "Sombre",
   "settings.accentColor": "Couleur d'accent",
@@ -269,12 +314,19 @@ const fr: Record<string, string> = {
   "settings.notif.addedToEvent": "Ajouté·e à un évènement par un autre membre",
 
   // FAQ / CGU
+  "faq.title": "FAQ",
   "faq.placeholder": "Réponse à venir — ce contenu sera complété par le comité.",
+  "faq.q1": "Comment devenir porteur de clé ?",
+  "faq.q2": "Comment annuler ma participation à un évènement ?",
+  "faq.q3": "Comment rejoindre ou quitter une communauté ?",
+  "faq.q4": "Qui contacter en cas de problème ?",
+  "cgu.title": "Conditions générales d'utilisation",
   "cgu.placeholder":
-    "Le texte complet des conditions générales d'utilisation sera ajouté avant la mise en production.",
+    "Contenu à venir — le texte complet des conditions générales d'utilisation du site sera ajouté ici avant la mise en production.",
 
   // Fiche membre
   "member.notFound": "Membre introuvable.",
+  "member.email": "Mail",
   "member.phone": "Téléphone",
   "member.location": "Localisation",
   "member.joinedSince": "Au club depuis {year}",

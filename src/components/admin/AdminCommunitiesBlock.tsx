@@ -52,17 +52,21 @@ export function AdminCommunitiesBlock({ communities }: AdminCommunitiesBlockProp
   }
 
   return (
-    <div className="section-card">
-      <div className="section-subtitle">{t("admin.communities.title")}</div>
-      <button type="button" className="join-btn small" onClick={openNew} style={{ marginBottom: 10 }}>
-        + {t("admin.communities.add")}
-      </button>
+    <>
+      <h1 className="page-title">{t("admin.communities.title")}</h1>
+      <div className="section-card">
+        <button type="button" className="modal-join" onClick={openNew} style={{ marginBottom: 10 }}>
+          + {t("admin.communities.add")}
+        </button>
 
-      <div className="admin-scroll-list">
-        {communities.map((c) => (
-          <div className={`admin-row ${c.hidden ? "hidden-commu" : ""}`} key={c.id}>
-            <span className="name">{c.label}</span>
-            <span className="admin-row-actions">
+        <div className="admin-scroll-list">
+          {communities.map((c) => (
+            <div className={`admin-row ${c.hidden ? "hidden-commu" : ""}`} key={c.id}>
+              <span className="name">
+                {c.label}
+                {c.hidden && <span className="sub">{t("admin.communities.hiddenSubLabel")}</span>}
+              </span>
+              <span className="admin-row-actions">
               <button
                 type="button"
                 className={`admin-eye-btn ${c.competitive ? "active" : ""}`}
@@ -84,16 +88,24 @@ export function AdminCommunitiesBlock({ communities }: AdminCommunitiesBlockProp
               <button type="button" className="join-btn gray small" onClick={() => openEdit(c)}>
                 {t("common.edit")}
               </button>
-            </span>
-          </div>
-        ))}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
 
       <Modal open={!!editing} onClose={() => setEditing(null)}>
         <h3>{editing === "new" ? t("admin.communities.add") : t("admin.communities.editTitle")}</h3>
         <div className="form-field">
-          <label className="form-label">{t("admin.communities.name")}</label>
-          <input className="form-input" value={nameInput} onChange={(e) => setNameInput(e.target.value)} />
+          <label className="form-label">
+            {t("admin.communities.name")} <span className="required-star">*</span>
+          </label>
+          <input
+            className="form-input"
+            value={nameInput}
+            onChange={(e) => setNameInput(e.target.value)}
+            placeholder={t("admin.communities.namePlaceholder")}
+          />
         </div>
         {error && <p className="field-error">{error}</p>}
         <div className="modal-btn-row">
@@ -105,6 +117,6 @@ export function AdminCommunitiesBlock({ communities }: AdminCommunitiesBlockProp
           </button>
         </div>
       </Modal>
-    </div>
+    </>
   );
 }

@@ -104,100 +104,108 @@ export function ProfileClient({ userId, profile, communities, myCommunityIds }: 
         </a>
       </div>
 
-      <AvatarUpload
-        userId={userId}
-        currentUrl={avatarUrl}
-        displayName={displayName}
-        onUploaded={setAvatarUrl}
-      />
-
-      <div className="form-field">
-        <label className="form-label">{t("signup.step1.nickname")}</label>
-        <input className="form-input" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
-      </div>
-
-      <div className="form-field">
-        <div className="field-head">
-          <label className="form-label">{t("signup.step1.email")}</label>
-          <div className="visibility-switch">
-            <span className="txt">{t("signup.step1.visible")}</span>
-            <ToggleSwitch on={emailVisible} onChange={setEmailVisible} />
-          </div>
-        </div>
-        <input className="form-input" value={email} onChange={(e) => setEmail(e.target.value)} />
-      </div>
-
-      <div className="form-field">
-        <div className="field-head">
-          <label className="form-label">{t("signup.step1.phone")}</label>
-          <div className="visibility-switch">
-            <span className="txt">{t("signup.step1.visible")}</span>
-            <ToggleSwitch on={phoneVisible} onChange={setPhoneVisible} />
-          </div>
-        </div>
-        <input className="form-input" value={phone} onChange={(e) => setPhone(e.target.value)} />
-      </div>
-
-      <div className="form-field">
-        <div className="field-head">
-          <label className="form-label">{t("signup.step1.location")}</label>
-          <div className="visibility-switch">
-            <span className="txt">{t("signup.step1.visible")}</span>
-            <ToggleSwitch on={locationVisible} onChange={setLocationVisible} />
-          </div>
-        </div>
-        <input className="form-input" value={location} onChange={(e) => setLocation(e.target.value)} />
-      </div>
-
-      <div className="form-field">
-        <label className="form-label">{t("profile.bio")}</label>
-        <textarea className="form-input form-textarea" value={bio} onChange={(e) => setBio(e.target.value)} />
-      </div>
-
-      <div className="section-subtitle">{t("profile.myCommunities")}</div>
-      <div className="filters h-scroll" id="profCommuFilters" style={{ marginBottom: 20 }}>
-        {communities.map((c) => (
-          <Chip
-            key={c.id}
-            variant="outline"
-            active={selectedCommunities.includes(c.id)}
-            onClick={() => toggleCommunity(c.id)}
-          >
-            {c.label}
-          </Chip>
-        ))}
-      </div>
-
-      <div className="section-subtitle">{t("profile.changePassword")}</div>
-      <div className="form-field">
-        <label className="form-label">{t("profile.currentPassword")}</label>
-        <input
-          type="password"
-          className="form-input"
-          value={currentPassword}
-          onChange={(e) => setCurrentPassword(e.target.value)}
+      <div className="section-card">
+        <AvatarUpload
+          userId={userId}
+          currentUrl={avatarUrl}
+          displayName={displayName}
+          onUploaded={setAvatarUrl}
         />
       </div>
-      <div className="form-field">
-        <label className="form-label">{t("profile.newPassword")}</label>
-        <input
-          type="password"
-          className="form-input"
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
-        />
+
+      <div className="section-card">
+        <div className="form-field">
+          <label className="form-label">{t("signup.step1.nickname")}</label>
+          <input className="form-input" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
+        </div>
+
+        <div className="form-field">
+          <div className="field-head">
+            <label className="form-label">{t("signup.step1.email")}</label>
+            <div className="visibility-switch">
+              <span className="txt">{t("signup.step1.visible")}</span>
+              <ToggleSwitch on={emailVisible} onChange={setEmailVisible} />
+            </div>
+          </div>
+          <input className="form-input" value={email} onChange={(e) => setEmail(e.target.value)} />
+        </div>
+
+        <div className="form-field">
+          <div className="field-head">
+            <label className="form-label">{t("signup.step1.phone")}</label>
+            <div className="visibility-switch">
+              <span className="txt">{t("signup.step1.visible")}</span>
+              <ToggleSwitch on={phoneVisible} onChange={setPhoneVisible} />
+            </div>
+          </div>
+          <input className="form-input" value={phone} onChange={(e) => setPhone(e.target.value)} />
+        </div>
+
+        <div className="form-field">
+          <div className="field-head">
+            <label className="form-label">{t("signup.step1.location")}</label>
+            <div className="visibility-switch">
+              <span className="txt">{t("signup.step1.visible")}</span>
+              <ToggleSwitch on={locationVisible} onChange={setLocationVisible} />
+            </div>
+          </div>
+          <input className="form-input" value={location} onChange={(e) => setLocation(e.target.value)} />
+        </div>
+
+        <div className="form-field">
+          <label className="form-label">{t("profile.bio")}</label>
+          <textarea className="form-input form-textarea" value={bio} onChange={(e) => setBio(e.target.value)} />
+        </div>
       </div>
-      <div className="form-field">
-        <label className="form-label">{t("profile.confirmNewPassword")}</label>
-        <input
-          type="password"
-          className="form-input"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-        />
-        {passwordTouched && newPassword !== confirmPassword && (
-          <p className="field-error">{t("signup.step1.passwordMismatch")}</p>
-        )}
+
+      <h1 className="page-title">{t("profile.myCommunities")}</h1>
+      <div className="section-card">
+        <div className="filters h-scroll" id="profCommuFilters">
+          {communities.map((c) => (
+            <Chip
+              key={c.id}
+              variant="outline"
+              active={selectedCommunities.includes(c.id)}
+              onClick={() => toggleCommunity(c.id)}
+            >
+              {c.label}
+            </Chip>
+          ))}
+        </div>
+      </div>
+
+      <h1 className="page-title">{t("profile.changePassword")}</h1>
+      <div className="section-card">
+        <div className="form-field">
+          <label className="form-label">{t("profile.currentPassword")}</label>
+          <input
+            type="password"
+            className="form-input"
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+          />
+        </div>
+        <div className="form-field">
+          <label className="form-label">{t("profile.newPassword")}</label>
+          <input
+            type="password"
+            className="form-input"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+          />
+        </div>
+        <div className="form-field">
+          <label className="form-label">{t("profile.confirmNewPassword")}</label>
+          <input
+            type="password"
+            className="form-input"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+          />
+          {passwordTouched && newPassword !== confirmPassword && (
+            <p className="field-error">{t("signup.step1.passwordMismatch")}</p>
+          )}
+        </div>
       </div>
 
       {error && <p className="field-error">{error}</p>}

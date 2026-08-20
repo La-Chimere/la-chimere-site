@@ -34,7 +34,7 @@ export async function updateKeyTotal(field: "total_keys" | "total_exit_keys", va
     .eq(holderField, true);
 
   if (value < (count ?? 0)) {
-    return { error: await serverT("admin.error.totalBelowHolders") };
+    return { error: await serverT("admin.error.totalBelowHolders", { n: count ?? 0 }) };
   }
 
   await admin.from("club_settings").update({ [field]: value }).eq("id", 1);

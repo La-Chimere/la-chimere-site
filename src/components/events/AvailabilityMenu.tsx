@@ -35,10 +35,10 @@ export function AvailabilityMenu({ showAvailabilities, onToggleShow, onIndicate 
         className={`avail-btn ${showAvailabilities ? "active" : ""}`}
         onClick={() => setOpen((v) => !v)}
       >
+        {t("availability.menuButton")}
         <span className="avail-eye">
           <EyeIcon crossed={!showAvailabilities} />
         </span>
-        {t("availability.menuButton")}
       </button>
       <div className={`dropdown avail-dropdown ${open ? "open" : ""}`}>
         <button
@@ -77,7 +77,7 @@ export function AvailabilityMenu({ showAvailabilities, onToggleShow, onIndicate 
         <h3>{t("availability.deleteConfirmTitle")}</h3>
         <p className="field-note">{t("availability.deleteConfirmBody")}</p>
         <div className="modal-btn-row">
-          <button type="button" className="modal-btn gray" onClick={() => setConfirmOpen(false)}>
+          <button type="button" className="modal-btn outline" onClick={() => setConfirmOpen(false)}>
             {t("common.cancel")}
           </button>
           <button

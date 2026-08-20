@@ -91,7 +91,7 @@ export function PollWidget({ poll, isAdmin }: PollWidgetProps) {
         </button>
         {isAdmin && (
           <button type="button" className="poll-results-btn" onClick={() => setShowResults((v) => !v)}>
-            {t("poll.viewResults")}
+            {showResults ? t("poll.hideResults") : t("poll.viewResults")}
           </button>
         )}
       </div>

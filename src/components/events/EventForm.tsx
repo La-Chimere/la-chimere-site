@@ -3,7 +3,6 @@
 import { useState, useTransition } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Chip } from "@/components/ui/Chip";
-import { Button } from "@/components/ui/Button";
 import { MemberPicker, type PickableMember } from "@/components/ui/MemberPicker";
 import { createEvent } from "@/lib/events-actions";
 import { isoDate } from "@/lib/dates";
@@ -154,7 +153,13 @@ export function EventForm({
           className="form-input"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder={hasTag ? communities.filter((c) => tagIds.includes(c.id)).map((c) => c.label).join(", ") : t("event.form.titlePlaceholder")}
+          placeholder={
+            hasTag
+              ? t("event.form.titleDefault", {
+                  tags: communities.filter((c) => tagIds.includes(c.id)).map((c) => c.label).join(" + "),
+                })
+              : t("event.form.titlePlaceholder")
+          }
         />
       </div>
 
@@ -168,6 +173,7 @@ export function EventForm({
             selected={participants}
             onChange={setParticipants}
             disallowRemovingLast
+            currentUserId={currentUser.id}
           />
         </div>
       )}
@@ -181,14 +187,27 @@ export function EventForm({
           className="form-input form-textarea"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
+          placeholder={t("common.optional")}
         />
       </div>
 
       {error && <p className="field-error">{error}</p>}
 
-      <Button variant="primary" full onClick={submit} disabled={!valid || pending}>
-        {pending ? t("event.form.creating") : t("common.create")}
-      </Button>
+      <div className="modal-btn-row">
+        <button
+          type="button"
+          className="modal-btn danger"
+          onClick={() => {
+            reset();
+            onClose();
+          }}
+        >
+          {t("common.cancel")}
+        </button>
+        <button type="button" className="modal-btn primary" onClick={submit} disabled={!valid || pending}>
+          {pending ? t("event.form.creating") : t("event.form.validate")}
+        </button>
+      </div>
     </Modal>
   );
 }

@@ -43,9 +43,9 @@ export default async function ProgrammePage(props: PageProps<"/programme">) {
       supabase
         .from("events")
         .select(
-          `id, type, title, description, event_date, start_time, end_time, created_by,
+          `id, type, title, description, event_date, start_time, end_time, created_by, repeats_weekly,
           event_communities(communities(id, key, label, competitive)),
-          event_participants(profile_id, result, profiles(display_name, has_key))`,
+          event_participants(profile_id, result, profiles(display_name, has_key, avatar_url))`,
         )
         .gte("event_date", rangeStart)
         .lte("event_date", rangeEnd)
@@ -69,6 +69,7 @@ export default async function ProgrammePage(props: PageProps<"/programme">) {
     startTime: e.start_time,
     endTime: e.end_time,
     createdBy: e.created_by,
+    repeatsWeekly: e.repeats_weekly,
     communities: (e.event_communities ?? [])
       .map((ec) => oneOrFirst(ec.communities))
       .filter((c): c is NonNullable<typeof c> => !!c)
@@ -80,6 +81,7 @@ export default async function ProgrammePage(props: PageProps<"/programme">) {
         profileId: p.profile_id,
         displayName: p.profiles!.display_name,
         hasKey: p.profiles!.has_key,
+        avatarUrl: p.profiles!.avatar_url,
         result: p.result as EventItem["participants"][number]["result"],
       })),
   }));

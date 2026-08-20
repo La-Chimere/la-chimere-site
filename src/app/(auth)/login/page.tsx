@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/Button";
 import { LogoIcon } from "@/components/ui/icons";
 import { useT } from "@/components/i18n/LocaleProvider";
 import { LanguageToggle } from "@/components/i18n/LanguageToggle";
-import { BackArrowIcon } from "@/components/ui/icons";
 
 const initialState: AuthActionState = {};
 
@@ -26,32 +25,27 @@ export default function LoginPage() {
       <div style={{ width: 96, height: 96, color: "var(--accent)", margin: "0 auto 22px" }}>
         <LogoIcon />
       </div>
-      <h1 style={{ fontSize: 24, fontWeight: 800, marginBottom: 28 }}>
+      <h1 className="landing-title">
         {t("login.welcomeLine1")}
         <br />
         {t("login.welcomeLine2")}
       </h1>
 
       {!showForm ? (
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <div className="landing-actions">
           <Link href="/signup" style={{ textDecoration: "none" }}>
             <Button variant="primary" full type="button">
               {t("login.createAccount")}
             </Button>
           </Link>
-          <Button variant="outline" full type="button" onClick={() => setShowForm(true)}>
+          <Button variant="ghost" full type="button" onClick={() => setShowForm(true)}>
             {t("login.logIn")}
           </Button>
         </div>
       ) : (
         <form action={formAction} style={{ textAlign: "left" }}>
-          <button
-            type="button"
-            className="subpage-back"
-            style={{ marginBottom: 16 }}
-            onClick={() => setShowForm(false)}
-          >
-            <BackArrowIcon /> {t("common.back")}
+          <button type="button" className="login-back" onClick={() => setShowForm(false)}>
+            ‹ {t("common.back")}
           </button>
           <div className="form-field">
             <label className="form-label" htmlFor="displayName">
@@ -81,7 +75,7 @@ export default function LoginPage() {
           </div>
           {state.error && <p className="field-error">{state.error}</p>}
           <Button variant="primary" full type="submit" disabled={pending}>
-            {pending ? t("login.loggingIn") : t("login.logIn")}
+            {pending ? t("login.loggingIn") : t("login.submit")}
           </Button>
         </form>
       )}

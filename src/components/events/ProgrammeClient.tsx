@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Chip } from "@/components/ui/Chip";
 import { Fab } from "@/components/ui/Fab";
@@ -12,7 +12,7 @@ import { AvailabilityMenu } from "@/components/events/AvailabilityMenu";
 import type { PickableMember } from "@/components/ui/MemberPicker";
 import type { CommunityOption, EventItem } from "@/lib/events-types";
 import {
-  dayLabel,
+  dayHeaderLabel,
   isoDate,
   monthLabel,
   nextMonth,
@@ -43,6 +43,7 @@ export function ProgrammeClient({
   isAdmin,
 }: ProgrammeClientProps) {
   const router = useRouter();
+  const [navPending, startNavTransition] = useTransition();
   const { t, locale } = useT();
   const [selectedCommunity, setSelectedCommunity] = useState<string | null>(null);
   const [openEventId, setOpenEventId] = useState<string | null>(null);
@@ -50,11 +51,42 @@ export function ProgrammeClient({
   const [availFormOpen, setAvailFormOpen] = useState(false);
   const [calView, setCalView] = useState(false);
   const [showAvailabilities, setShowAvailabilities] = useState(false);
+  const [copiedAlertDay, setCopiedAlertDay] = useState<string | null>(null);
 
   const referenceDate = new Date(reference);
 
   const realEvents = useMemo(() => events.filter((e) => e.type !== "dispo"), [events]);
   const availabilities = useMemo(() => events.filter((e) => e.type === "dispo"), [events]);
+
+  // Statut "porteur de clé" par jour (CDC 12.10) : calculé sur TOUTES les
+  // parties/évènements confirmés du jour, indépendamment du filtre communauté
+  // affiché (savoir si quelqu'un a une clé ne dépend pas du filtre en cours).
+  const keyStatusByDay = useMemo(() => {
+    const map = new Map<string, { ok: boolean; from?: string }>();
+    const allDays = new Set(realEvents.map((e) => e.eventDate));
+    for (const day of allDays) {
+      const dayRealEvents = realEvents.filter((e) => e.eventDate === day);
+      if (dayRealEvents.length === 0) continue;
+      const covered = dayRealEvents.filter((e) => e.participants.some((p) => p.hasKey));
+      if (covered.length === 0) {
+        map.set(day, { ok: false });
+        continue;
+      }
+      const from = covered.reduce(
+        (min, e) => (e.startTime < min ? e.startTime : min),
+        covered[0].startTime,
+      );
+      map.set(day, { ok: true, from });
+    }
+    return map;
+  }, [realEvents]);
+
+  function sendKeyAlert(day: string) {
+    const message = t("programme.keyAlertMessage", { day: dayHeaderLabel(new Date(day), locale) });
+    navigator.clipboard?.writeText(message);
+    setCopiedAlertDay(day);
+    setTimeout(() => setCopiedAlertDay((current) => (current === day ? null : current)), 2000);
+  }
 
   const communityFiltered = useMemo(() => {
     if (!selectedCommunity) return realEvents;
@@ -82,7 +114,9 @@ export function ProgrammeClient({
 
   function navigate(delta: number) {
     const d = calView ? (delta > 0 ? nextMonth(referenceDate) : previousMonth(referenceDate)) : (delta > 0 ? nextWeek(referenceDate) : previousWeek(referenceDate));
-    router.push(`/programme?week=${isoDate(d)}`);
+    startNavTransition(() => {
+      router.push(`/programme?week=${isoDate(d)}`);
+    });
   }
 
   const allFilteredForModal = [...realEvents, ...availabilities];
@@ -139,6 +173,11 @@ export function ProgrammeClient({
       </div>
 
       <div className={`events-list-scroll ${calView ? "cal-mode" : ""}`}>
+        {navPending && (
+          <div className="loading-overlay">
+            <div className="spinner" />
+          </div>
+        )}
         {calView ? (
           <MonthGrid
             reference={referenceDate}
@@ -149,12 +188,27 @@ export function ProgrammeClient({
           days.map((day) => {
             const dayEvents = eventsByDay.get(day) ?? [];
             const isToday = day === isoDate(new Date());
+            const keyStatus = keyStatusByDay.get(day);
             return (
               <div className={`day-unit ${isToday ? "today" : ""}`} key={day}>
                 <div className="day-head">
                   <div className="day-head-left">
-                    <span className="d1">{dayLabel(new Date(day), locale)}</span>
+                    <span className="d1">{dayHeaderLabel(new Date(day), locale)}</span>
+                    {isToday && <span className="d2">{t("date.today")}</span>}
+                    {keyStatus &&
+                      (keyStatus.ok ? (
+                        <span className="tag ok">
+                          🔑 {t("programme.keyFromHour", { hour: parseInt(keyStatus.from!, 10) })}
+                        </span>
+                      ) : (
+                        <span className="tag warn">⚠ {t("programme.noKey")}</span>
+                      ))}
                   </div>
+                  {keyStatus && !keyStatus.ok && (
+                    <button type="button" className="cta-mini" onClick={() => sendKeyAlert(day)}>
+                      {copiedAlertDay === day ? t("programme.alertCopied") : t("programme.sendAlert")}
+                    </button>
+                  )}
                 </div>
                 {dayEvents.length === 0 ? (
                   <div className="agenda-empty">{t("programme.nothingPlanned")}</div>
@@ -174,9 +228,10 @@ export function ProgrammeClient({
         )}
       </div>
 
-      <Fab onClick={() => setFormOpen(true)} />
+      <Fab onClick={() => setFormOpen(true)} title={t("event.form.fabTitle")} />
       <EventModal
         event={openEvent}
+        keyStatus={openEvent ? (keyStatusByDay.get(openEvent.eventDate) ?? null) : null}
         currentUserId={currentUser.id}
         isAdmin={isAdmin}
         onClose={() => setOpenEventId(null)}

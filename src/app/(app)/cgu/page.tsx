@@ -2,8 +2,9 @@ import { serverT } from "@/lib/i18n/server";
 import { BackArrowIcon } from "@/components/ui/icons";
 
 export default async function CguPage() {
-  const [back, placeholder] = await Promise.all([
+  const [back, title, placeholder] = await Promise.all([
     serverT("common.back"),
+    serverT("cgu.title"),
     serverT("cgu.placeholder"),
   ]);
   return (
@@ -13,7 +14,10 @@ export default async function CguPage() {
           <BackArrowIcon /> {back}
         </a>
       </div>
-      <p className="empty-hint info-box-placeholder">{placeholder}</p>
+      <h1 className="page-title">{title}</h1>
+      <div className="section-card">
+        <p className="info-box-text info-box-placeholder">{placeholder}</p>
+      </div>
     </div>
   );
 }

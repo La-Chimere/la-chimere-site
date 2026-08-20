@@ -24,19 +24,23 @@ export async function login(
   _prevState: AuthActionState,
   formData: FormData,
 ): Promise<AuthActionState> {
-  const displayName = String(formData.get("displayName") ?? "").trim();
+  const identifier = String(formData.get("displayName") ?? "").trim();
   const password = String(formData.get("password") ?? "");
 
-  if (!displayName || !password) {
+  if (!identifier || !password) {
     return { error: await serverT("auth.error.missingCredentials") };
   }
 
   const admin = createAdminClient();
-  const { data: profile } = await admin
+  const { data: byName } = await admin
     .from("profiles")
     .select("login_slug")
-    .ilike("display_name", displayName)
+    .ilike("display_name", identifier)
     .maybeSingle();
+  const { data: byEmail } = byName
+    ? { data: null }
+    : await admin.from("profiles").select("login_slug").ilike("email", identifier).maybeSingle();
+  const profile = byName ?? byEmail;
 
   if (!profile?.login_slug) {
     return { error: await serverT("auth.error.invalidCredentials") };

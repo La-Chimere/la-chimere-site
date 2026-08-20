@@ -21,6 +21,7 @@ export function NotificationCard({ notification: n }: NotificationCardProps) {
         disabled={pending}
         onClick={() => startTransition(() => deleteNotification(n.id))}
         aria-label={t("common.delete")}
+        title={t("common.delete")}
       >
         ×
       </button>
@@ -31,6 +32,7 @@ export function NotificationCard({ notification: n }: NotificationCardProps) {
         disabled={pending}
         onClick={() => startTransition(() => markNotificationRead(n.id, !n.read))}
         aria-label={n.read ? t("announcements.markUnread") : t("announcements.markRead")}
+        title={n.read ? t("announcements.markUnread") : t("announcements.markRead")}
       />
     </div>
   );

@@ -9,6 +9,7 @@ interface DangerConfirmButtonProps {
   className?: string;
   children: ReactNode;
   confirmLabel?: string;
+  title?: string;
 }
 
 // Pattern "Sûr ?" à deux clics (CDC 12.5/14.4) : le premier clic arme la
@@ -20,6 +21,7 @@ export function DangerConfirmButton({
   className = "",
   children,
   confirmLabel,
+  title,
 }: DangerConfirmButtonProps) {
   const { t } = useT();
   const resolvedConfirmLabel = confirmLabel ?? t("common.sure");
@@ -41,6 +43,7 @@ export function DangerConfirmButton({
       type="button"
       className={`${className} ${armed ? "confirm" : ""}`}
       disabled={disabled}
+      title={armed ? undefined : title}
       onClick={() => {
         if (armed) {
           onConfirm();

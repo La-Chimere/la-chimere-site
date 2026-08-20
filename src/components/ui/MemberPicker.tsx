@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useT } from "@/components/i18n/LocaleProvider";
+import { SearchIcon } from "@/components/ui/icons";
 
 export interface PickableMember {
   id: string;
@@ -15,6 +16,10 @@ interface MemberPickerProps {
   placeholder?: string;
   /** Un participant ne peut pas être retiré s'il est le seul restant (CDC 12.4). */
   disallowRemovingLast?: boolean;
+  /** Affiche "(moi)" sur le chip correspondant à ce profil (CDC 12.3). */
+  currentUserId?: string;
+  /** Le chip de sélection est rendu séparément par l'appelant (CDC 12.9 : recherche seule puis ligne dédiée chip + bouton). */
+  hideSelectedChips?: boolean;
 }
 
 // Recherche + ajout par chip, réutilisé pour les participants d'un
@@ -26,6 +31,8 @@ export function MemberPicker({
   onChange,
   placeholder,
   disallowRemovingLast = false,
+  currentUserId,
+  hideSelectedChips = false,
 }: MemberPickerProps) {
   const { t } = useT();
   const resolvedPlaceholder = placeholder ?? t("memberPicker.searchPlaceholder");
@@ -37,7 +44,7 @@ export function MemberPicker({
     const q = query.trim().toLowerCase();
     return members
       .filter((m) => !selectedIds.has(m.id) && m.displayName.toLowerCase().includes(q))
-      .slice(0, 8);
+      .slice(0, 6);
   }, [members, selected, query]);
 
   function add(member: PickableMember) {
@@ -52,11 +59,12 @@ export function MemberPicker({
 
   return (
     <div>
-      {selected.length > 0 && (
+      {!hideSelectedChips && selected.length > 0 && (
         <div className="ce-participants">
           {selected.map((m) => (
             <span className="ce-chip" key={m.id}>
               {m.displayName}
+              {m.id === currentUserId ? ` ${t("memberPicker.me")}` : ""}
               <button
                 type="button"
                 onClick={() => remove(m.id)}
@@ -70,24 +78,26 @@ export function MemberPicker({
         </div>
       )}
       <div className="ce-search-wrap">
-        <span className="ce-search-icon">🔍</span>
+        <span className="ce-search-icon">
+          <SearchIcon />
+        </span>
         <input
           className="form-input"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={resolvedPlaceholder}
         />
-        <div className={`ce-member-results ${results.length ? "open" : ""}`}>
-          {results.length === 0 && query.trim() ? (
-            <div className="ce-member-empty">{t("memberPicker.noResults")}</div>
-          ) : (
-            results.map((m) => (
-              <div className="ce-member-row" key={m.id} onClick={() => add(m)}>
-                {m.displayName}
-              </div>
-            ))
-          )}
-        </div>
+      </div>
+      <div className={`ce-member-results ${query.trim() ? "open" : ""}`}>
+        {results.length === 0 && query.trim() ? (
+          <div className="ce-member-empty">{t("memberPicker.noResults")}</div>
+        ) : (
+          results.map((m) => (
+            <div className="ce-member-row" key={m.id} onClick={() => add(m)}>
+              {m.displayName}
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
