@@ -11,6 +11,12 @@ export async function validateMember(profileId: string) {
   revalidatePath("/admin");
 }
 
+export async function setSignupValidationRequired(value: boolean) {
+  const { admin } = await requireAdmin();
+  await admin.from("club_settings").update({ require_signup_validation: value }).eq("id", 1);
+  revalidatePath("/admin");
+}
+
 export async function deleteMember(profileId: string) {
   const { admin } = await requireAdmin();
   await admin.auth.admin.deleteUser(profileId);

@@ -589,6 +589,11 @@ main {
   cursor: pointer;
   white-space: nowrap;
 }
+.cta-mini:disabled {
+  opacity: 0.6;
+  cursor: default;
+  filter: none;
+}
 .join-btn {
   background: var(--accent);
   border: none;
@@ -1185,6 +1190,20 @@ main {
   color: #fff;
   background: var(--danger);
   border-color: var(--danger);
+}
+.icon-btn.approve {
+  width: 30px;
+  height: 30px;
+  border: none;
+  color: #fff;
+  background: var(--success);
+}
+.icon-btn.approve svg {
+  width: 15px;
+  height: 15px;
+}
+.icon-btn.approve:hover {
+  filter: brightness(1.05);
 }
 .empty-hint {
   font-size: 13.5px;

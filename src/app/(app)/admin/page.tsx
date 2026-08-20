@@ -31,7 +31,11 @@ export default async function AdminPage() {
     { data: communitiesData },
     { data: activityData },
   ] = await Promise.all([
-    supabase.from("club_settings").select("building_code, total_keys, total_exit_keys").eq("id", 1).single(),
+    supabase
+      .from("club_settings")
+      .select("building_code, total_keys, total_exit_keys, require_signup_validation")
+      .eq("id", 1)
+      .single(),
     // Toujours TOUS les profils (y compris l'admin connecté) : les compteurs
     // et listes de porteurs de clé du bloc Clés doivent inclure l'admin
     // lui-même, seul le bloc Membres l'exclut de sa propre liste (CDC 12.9).
@@ -78,6 +82,7 @@ export default async function AdminPage() {
     buildingCode: settingsData?.building_code ?? null,
     totalKeys: settingsData?.total_keys ?? 0,
     totalExitKeys: settingsData?.total_exit_keys ?? 0,
+    requireSignupValidation: settingsData?.require_signup_validation ?? false,
   };
 
   return (

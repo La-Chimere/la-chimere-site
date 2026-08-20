@@ -9,6 +9,7 @@ import { EventModal } from "@/components/events/EventModal";
 import { EventForm } from "@/components/events/EventForm";
 import { MonthGrid } from "@/components/events/MonthGrid";
 import { AvailabilityMenu } from "@/components/events/AvailabilityMenu";
+import { sendKeyAlertClick } from "@/lib/key-alert-actions";
 import type { PickableMember } from "@/components/ui/MemberPicker";
 import type { CommunityOption, EventItem } from "@/lib/events-types";
 import {
@@ -32,6 +33,7 @@ interface ProgrammeClientProps {
   members: PickableMember[];
   currentUser: PickableMember;
   isAdmin: boolean;
+  alertCounts: Record<string, number>;
 }
 
 export function ProgrammeClient({
@@ -42,9 +44,11 @@ export function ProgrammeClient({
   members,
   currentUser,
   isAdmin,
+  alertCounts,
 }: ProgrammeClientProps) {
   const router = useRouter();
   const [navPending, startNavTransition] = useTransition();
+  const [alertPending, startAlertTransition] = useTransition();
   const { t, locale } = useT();
   const [selectedCommunity, setSelectedCommunity] = useState<string | null>(null);
   const [openEventId, setOpenEventId] = useState<string | null>(null);
@@ -52,7 +56,7 @@ export function ProgrammeClient({
   const [availFormOpen, setAvailFormOpen] = useState(false);
   const [calView, setCalView] = useState(false);
   const [showAvailabilities, setShowAvailabilities] = useState(false);
-  const [copiedAlertDay, setCopiedAlertDay] = useState<string | null>(null);
+  const [optimisticAlertCounts, setOptimisticAlertCounts] = useState<Record<string, number>>({});
 
   const referenceDate = new Date(reference);
 
@@ -86,16 +90,38 @@ export function ProgrammeClient({
     return map;
   }, [realEvents]);
 
+  // Visible seulement aux participants des évènements du jour et aux admins
+  // (évite de solliciter tout le monde) — calculé sur tous les évènements
+  // réels du jour, indépendamment du filtre communauté affiché.
+  const isParticipantByDay = useMemo(() => {
+    const map = new Map<string, boolean>();
+    const allDays = new Set(realEvents.map((e) => e.eventDate));
+    for (const day of allDays) {
+      const dayRealEvents = realEvents.filter((e) => e.eventDate === day);
+      map.set(
+        day,
+        dayRealEvents.some((e) => e.participants.some((p) => p.profileId === currentUser.id)),
+      );
+    }
+    return map;
+  }, [realEvents, currentUser.id]);
+
   // Ouvre WhatsApp avec le message pré-rempli et le sélecteur de contacts/groupes
   // (format sans numéro : l'utilisateur choisit lui-même le groupe "Organisation").
+  // Plafonné à 2 envois/jour au total (compteur partagé côté serveur) pour
+  // éviter de spammer le groupe.
   function sendKeyAlert(day: string, hour: string) {
-    const message = t("programme.keyAlertMessage", {
-      day: dayHeaderLabel(new Date(day), locale),
-      hour: formatHour(hour),
+    startAlertTransition(async () => {
+      const result = await sendKeyAlertClick(day);
+      setOptimisticAlertCounts((current) => ({ ...current, [day]: result.count }));
+      if (result.sent) {
+        const message = t("programme.keyAlertMessage", {
+          day: dayHeaderLabel(new Date(day), locale),
+          hour: formatHour(hour),
+        });
+        window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
+      }
     });
-    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
-    setCopiedAlertDay(day);
-    setTimeout(() => setCopiedAlertDay((current) => (current === day ? null : current)), 2000);
   }
 
   const communityFiltered = useMemo(() => {
@@ -214,15 +240,26 @@ export function ProgrammeClient({
                         <span className="tag warn">⚠ {t("programme.noKey")}</span>
                       ))}
                   </div>
-                  {keyStatus && !keyStatus.ok && (
-                    <button
-                      type="button"
-                      className="cta-mini"
-                      onClick={() => sendKeyAlert(day, keyStatus.from)}
-                    >
-                      {copiedAlertDay === day ? t("programme.alertSent") : t("programme.sendAlert")}
-                    </button>
-                  )}
+                  {keyStatus &&
+                    !keyStatus.ok &&
+                    (isAdmin || isParticipantByDay.get(day)) &&
+                    (() => {
+                      const count = optimisticAlertCounts[day] ?? alertCounts[day] ?? 0;
+                      return (
+                        <button
+                          type="button"
+                          className="cta-mini"
+                          disabled={alertPending || count >= 2}
+                          onClick={() => sendKeyAlert(day, keyStatus.from)}
+                        >
+                          {count === 0
+                            ? t("programme.sendAlert1")
+                            : count === 1
+                              ? t("programme.sendAlert2")
+                              : t("programme.alertsSent")}
+                        </button>
+                      );
+                    })()}
                 </div>
                 {dayEvents.length === 0 ? (
                   <div className="agenda-empty">{t("programme.nothingPlanned")}</div>

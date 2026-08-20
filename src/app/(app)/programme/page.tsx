@@ -32,26 +32,36 @@ export default async function ProgrammePage(props: PageProps<"/programme">) {
     return null; // le layout parent redirige déjà vers /login
   }
 
-  const [{ data: profile }, { data: communitiesData }, { data: eventsData }, { data: membersData }] =
-    await Promise.all([
-      supabase.from("profiles").select("display_name, is_admin").eq("id", user.id).single(),
-      supabase
-        .from("communities")
-        .select("id, key, label, competitive")
-        .eq("hidden", false)
-        .order("label"),
-      supabase
-        .from("events")
-        .select(
-          `id, type, title, description, event_date, start_time, end_time, created_by, repeats_weekly,
-          event_communities(communities(id, key, label, competitive)),
-          event_participants(profile_id, result, profiles(display_name, has_key, avatar_url))`,
-        )
-        .gte("event_date", rangeStart)
-        .lte("event_date", rangeEnd)
-        .order("start_time"),
-      supabase.from("profiles").select("id, display_name").order("display_name"),
-    ]);
+  const [
+    { data: profile },
+    { data: communitiesData },
+    { data: eventsData },
+    { data: membersData },
+    { data: alertData },
+  ] = await Promise.all([
+    supabase.from("profiles").select("display_name, is_admin").eq("id", user.id).single(),
+    supabase
+      .from("communities")
+      .select("id, key, label, competitive")
+      .eq("hidden", false)
+      .order("label"),
+    supabase
+      .from("events")
+      .select(
+        `id, type, title, description, event_date, start_time, end_time, created_by, repeats_weekly,
+        event_communities(communities(id, key, label, competitive)),
+        event_participants(profile_id, result, profiles(display_name, has_key, avatar_url))`,
+      )
+      .gte("event_date", rangeStart)
+      .lte("event_date", rangeEnd)
+      .order("start_time"),
+    supabase.from("profiles").select("id, display_name").order("display_name"),
+    supabase
+      .from("key_alert_sends")
+      .select("event_date, click_count")
+      .gte("event_date", rangeStart)
+      .lte("event_date", rangeEnd),
+  ]);
 
   const communities: CommunityOption[] = (communitiesData ?? []).map((c) => ({
     id: c.id,
@@ -89,6 +99,11 @@ export default async function ProgrammePage(props: PageProps<"/programme">) {
   const members = (membersData ?? []).map((m) => ({ id: m.id, displayName: m.display_name }));
   const currentUser = { id: user.id, displayName: profile?.display_name ?? "Moi" };
 
+  const alertCounts: Record<string, number> = {};
+  for (const row of alertData ?? []) {
+    alertCounts[row.event_date] = row.click_count;
+  }
+
   return (
     <ProgrammeClient
       reference={isoDate(reference)}
@@ -98,6 +113,7 @@ export default async function ProgrammePage(props: PageProps<"/programme">) {
       members={members}
       currentUser={currentUser}
       isAdmin={profile?.is_admin ?? false}
+      alertCounts={alertCounts}
     />
   );
 }

@@ -20,4 +20,5 @@ export interface ClubSettings {
   buildingCode: string | null;
   totalKeys: number;
   totalExitKeys: number;
+  requireSignupValidation: boolean;
 }

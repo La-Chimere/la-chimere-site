@@ -28,6 +28,7 @@ export function AdminClient({
         members={members}
         activeThisMonth={activeMembersThisMonth}
         totalMembers={totalMembers}
+        requireSignupValidation={settings.requireSignupValidation}
       />
       <AdminCommunitiesBlock communities={communities} />
     </div>

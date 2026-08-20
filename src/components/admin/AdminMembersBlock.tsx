@@ -2,20 +2,27 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { Modal } from "@/components/ui/Modal";
-import { deleteMember, validateMember } from "@/lib/admin-actions";
+import { ToggleSwitch } from "@/components/ui/ToggleSwitch";
+import { deleteMember, setSignupValidationRequired, validateMember } from "@/lib/admin-actions";
 import { relativeActivityDays } from "@/lib/dates";
 import { formatActivity } from "@/lib/i18n/format";
 import { useT } from "@/components/i18n/LocaleProvider";
-import { SearchIcon } from "@/components/ui/icons";
+import { CheckIcon, SearchIcon } from "@/components/ui/icons";
 import type { AdminMember } from "@/lib/admin-types";
 
 interface AdminMembersBlockProps {
   members: AdminMember[];
   activeThisMonth: number;
   totalMembers: number;
+  requireSignupValidation: boolean;
 }
 
-export function AdminMembersBlock({ members, activeThisMonth, totalMembers }: AdminMembersBlockProps) {
+export function AdminMembersBlock({
+  members,
+  activeThisMonth,
+  totalMembers,
+  requireSignupValidation,
+}: AdminMembersBlockProps) {
   const { t } = useT();
   const [, startTransition] = useTransition();
   const [toDelete, setToDelete] = useState<AdminMember | null>(null);
@@ -53,6 +60,15 @@ export function AdminMembersBlock({ members, activeThisMonth, totalMembers }: Ad
           </div>
         </div>
 
+        <div className="admin-row">
+          <span className="name">{t("admin.members.requireValidation")}</span>
+          <ToggleSwitch
+            on={requireSignupValidation}
+            onChange={(value) => startTransition(() => setSignupValidationRequired(value))}
+            label={t("admin.members.requireValidation")}
+          />
+        </div>
+
         <div className="ce-search-wrap" style={{ marginBottom: 10 }}>
           <span className="ce-search-icon">
             <SearchIcon />
@@ -82,10 +98,12 @@ export function AdminMembersBlock({ members, activeThisMonth, totalMembers }: Ad
                   {m.status === "pending" && (
                     <button
                       type="button"
-                      className="join-btn small"
+                      className="icon-btn approve"
                       onClick={() => startTransition(() => validateMember(m.profileId))}
+                      aria-label={t("admin.members.validate")}
+                      title={t("admin.members.validate")}
                     >
-                      {t("admin.members.validate")}
+                      <CheckIcon />
                     </button>
                   )}
                   <button type="button" className="join-btn danger small" onClick={() => setToDelete(m)}>

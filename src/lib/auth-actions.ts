@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { loginEmailFromSlug, slugify } from "@/lib/slug";
+import { notifyAdmins } from "@/lib/notify-admins";
 import { serverT } from "@/lib/i18n/server";
 
 export async function signOut() {
@@ -74,8 +75,10 @@ export interface SignupInput {
 }
 
 // Inscription complète (CDC 4.1/13.2-13.5) : crée le compte Auth (email
-// synthétique) + la ligne profiles en statut "pending" (validation admin
-// requise, cf. CDC 3) + les communautés choisies à l'étape 2.
+// synthétique) + la ligne profiles + les communautés choisies à l'étape 2.
+// Le statut (actif tout de suite, ou "pending" en attente de validation admin)
+// dépend du réglage club_settings.require_signup_validation, désactivé par
+// défaut — un admin peut l'activer sur la page Admin (bloc Membres).
 export async function completeSignup(input: SignupInput): Promise<AuthActionState> {
   const displayName = input.displayName.trim();
   if (!displayName || !input.password) {
@@ -121,11 +124,18 @@ export async function completeSignup(input: SignupInput): Promise<AuthActionStat
     return { error: await serverT("auth.error.createAccountRetry") };
   }
 
+  const { data: clubSettings } = await admin
+    .from("club_settings")
+    .select("require_signup_validation")
+    .eq("id", 1)
+    .single();
+  const requiresValidation = clubSettings?.require_signup_validation ?? false;
+
   const { error: profileError } = await admin.from("profiles").insert({
     id: userId,
     display_name: displayName,
     login_slug: finalSlug,
-    status: "pending",
+    status: requiresValidation ? "pending" : "active",
     email: input.email || null,
     email_visible: input.emailVisible,
     phone: input.phone || null,
@@ -145,6 +155,14 @@ export async function completeSignup(input: SignupInput): Promise<AuthActionStat
     await admin
       .from("profile_communities")
       .insert(input.communityIds.map((community_id) => ({ profile_id: userId, community_id })));
+  }
+
+  if (requiresValidation) {
+    await notifyAdmins(
+      admin,
+      await serverT("admin.notif.pendingSignup", { name: displayName }),
+      "signup",
+    );
   }
 
   const supabase = await createClient();

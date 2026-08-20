@@ -41,8 +41,9 @@ const fr: Record<string, string> = {
   "programme.nothingPlanned": "Rien de prévu.",
   "programme.keyFromHour": "à partir de {hour}h",
   "programme.noKey": "Pas de clé",
-  "programme.sendAlert": "Envoyer l'alerte",
-  "programme.alertSent": "WhatsApp ouvert ✓",
+  "programme.sendAlert1": "Envoyer 1er Whatsapp",
+  "programme.sendAlert2": "Envoyer 2e Whatsapp",
+  "programme.alertsSent": "2 whatsapp envoyés",
   "programme.keyAlertMessage": "Salut, on a pas de clé du local pour {day} à {hour}. Qui peut passer ? Merci !",
   "programme.modalKeyOpenFrom": "club ouvert dès {hour}h",
   "programme.modalNoKeyConfirmed": "Pas de porteur de clé confirmé",
@@ -111,6 +112,7 @@ const fr: Record<string, string> = {
   "admin.members.total": "membres au total",
   "admin.members.pending": "En attente de validation",
   "admin.members.validate": "Valider",
+  "admin.members.requireValidation": "Validation des nouvelles inscriptions par un admin",
   "admin.members.searchPlaceholder": "Rechercher un membre…",
   "admin.members.noMatch": "Aucun membre trouvé.",
   "admin.members.deleteConfirmTitle": "Supprimer ce membre ?",
@@ -293,6 +295,7 @@ const fr: Record<string, string> = {
   "keys.notif.lostKey": "{name} a perdu sa clé du local.",
   "keys.notif.borrowedExitKeys": "{name} a emprunté les clés pour sortir.",
   "keys.notif.returnReminder": "N'oublie pas de rapporter les clés de sortie avant ta prochaine sortie du local.",
+  "admin.notif.pendingSignup": "{name} a créé un compte et attend une validation.",
 
   // Paramètres
   "settings.appearance": "Apparence",

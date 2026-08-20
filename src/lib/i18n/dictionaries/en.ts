@@ -41,8 +41,9 @@ const en: Record<string, string> = {
   "programme.nothingPlanned": "Nothing planned.",
   "programme.keyFromHour": "From {hour}h",
   "programme.noKey": "No key",
-  "programme.sendAlert": "Send the alert",
-  "programme.alertSent": "WhatsApp opened ✓",
+  "programme.sendAlert1": "Send 1st WhatsApp",
+  "programme.sendAlert2": "Send 2nd WhatsApp",
+  "programme.alertsSent": "2 WhatsApp sent",
   "programme.keyAlertMessage": "Hey, we don't have a key to the venue for {day} at {hour}. Who can come by? Thanks!",
   "programme.modalKeyOpenFrom": "venue open from {hour}h",
   "programme.modalNoKeyConfirmed": "No confirmed key holder",
@@ -111,6 +112,7 @@ const en: Record<string, string> = {
   "admin.members.total": "members in total",
   "admin.members.pending": "Awaiting validation",
   "admin.members.validate": "Validate",
+  "admin.members.requireValidation": "Admin validation for new sign-ups",
   "admin.members.searchPlaceholder": "Search for a member…",
   "admin.members.noMatch": "No member found.",
   "admin.members.deleteConfirmTitle": "Delete this member?",
@@ -293,6 +295,7 @@ const en: Record<string, string> = {
   "keys.notif.lostKey": "{name} lost their key to the venue.",
   "keys.notif.borrowedExitKeys": "{name} borrowed the exit keys.",
   "keys.notif.returnReminder": "Don't forget to return the exit keys before your next time out of the venue.",
+  "admin.notif.pendingSignup": "{name} created an account and is awaiting validation.",
 
   // Settings
   "settings.appearance": "Appearance",

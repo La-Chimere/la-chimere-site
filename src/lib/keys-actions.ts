@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { notifyAdmins } from "@/lib/notify-admins";
 import { serverT } from "@/lib/i18n/server";
 
 async function requireUser() {
@@ -12,16 +13,6 @@ async function requireUser() {
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Non connecté.");
   return { supabase, userId: user.id, admin: createAdminClient() };
-}
-
-async function notifyAdmins(admin: ReturnType<typeof createAdminClient>, message: string, exceptProfileId?: string) {
-  let query = admin.from("profiles").select("id").eq("is_admin", true);
-  if (exceptProfileId) query = query.neq("id", exceptProfileId);
-  const { data: admins } = await query;
-  if (!admins || admins.length === 0) return;
-  await admin.from("notifications").insert(
-    admins.map((a) => ({ profile_id: a.id, type: "key", message })),
-  );
 }
 
 // Un membre porteur de clé la transfère à un autre membre (CDC 14.3).
@@ -45,6 +36,7 @@ export async function transferKey(toProfileId: string) {
   await notifyAdmins(
     admin,
     await serverT("keys.notif.transferredKey", { from: me.display_name, to: recipient.display_name }),
+    "key",
   );
 
   revalidatePath("/keys");
@@ -58,6 +50,7 @@ export async function reportLostKey() {
   await notifyAdmins(
     admin,
     await serverT("keys.notif.lostKey", { name: me?.display_name ?? (await serverT("keys.aMember")) }),
+    "key",
   );
   revalidatePath("/keys");
 }
@@ -78,6 +71,7 @@ export async function borrowExitKey() {
   await notifyAdmins(
     admin,
     await serverT("keys.notif.borrowedExitKeys", { name: me?.display_name ?? (await serverT("keys.aMember")) }),
+    "key",
   );
   await admin.from("notifications").insert({
     profile_id: userId,
