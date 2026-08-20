@@ -13,6 +13,7 @@ import type { PickableMember } from "@/components/ui/MemberPicker";
 import type { CommunityOption, EventItem } from "@/lib/events-types";
 import {
   dayHeaderLabel,
+  formatHour,
   isoDate,
   monthLabel,
   nextMonth,
@@ -62,14 +63,18 @@ export function ProgrammeClient({
   // parties/évènements confirmés du jour, indépendamment du filtre communauté
   // affiché (savoir si quelqu'un a une clé ne dépend pas du filtre en cours).
   const keyStatusByDay = useMemo(() => {
-    const map = new Map<string, { ok: boolean; from?: string }>();
+    const map = new Map<string, { ok: boolean; from: string }>();
     const allDays = new Set(realEvents.map((e) => e.eventDate));
     for (const day of allDays) {
       const dayRealEvents = realEvents.filter((e) => e.eventDate === day);
       if (dayRealEvents.length === 0) continue;
+      const earliest = dayRealEvents.reduce(
+        (min, e) => (e.startTime < min ? e.startTime : min),
+        dayRealEvents[0].startTime,
+      );
       const covered = dayRealEvents.filter((e) => e.participants.some((p) => p.hasKey));
       if (covered.length === 0) {
-        map.set(day, { ok: false });
+        map.set(day, { ok: false, from: earliest });
         continue;
       }
       const from = covered.reduce(
@@ -81,9 +86,14 @@ export function ProgrammeClient({
     return map;
   }, [realEvents]);
 
-  function sendKeyAlert(day: string) {
-    const message = t("programme.keyAlertMessage", { day: dayHeaderLabel(new Date(day), locale) });
-    navigator.clipboard?.writeText(message);
+  // Ouvre WhatsApp avec le message pré-rempli et le sélecteur de contacts/groupes
+  // (format sans numéro : l'utilisateur choisit lui-même le groupe "Organisation").
+  function sendKeyAlert(day: string, hour: string) {
+    const message = t("programme.keyAlertMessage", {
+      day: dayHeaderLabel(new Date(day), locale),
+      hour: formatHour(hour),
+    });
+    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
     setCopiedAlertDay(day);
     setTimeout(() => setCopiedAlertDay((current) => (current === day ? null : current)), 2000);
   }
@@ -205,8 +215,12 @@ export function ProgrammeClient({
                       ))}
                   </div>
                   {keyStatus && !keyStatus.ok && (
-                    <button type="button" className="cta-mini" onClick={() => sendKeyAlert(day)}>
-                      {copiedAlertDay === day ? t("programme.alertCopied") : t("programme.sendAlert")}
+                    <button
+                      type="button"
+                      className="cta-mini"
+                      onClick={() => sendKeyAlert(day, keyStatus.from)}
+                    >
+                      {copiedAlertDay === day ? t("programme.alertSent") : t("programme.sendAlert")}
                     </button>
                   )}
                 </div>

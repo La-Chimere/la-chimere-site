@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { completeSignup } from "@/lib/auth-actions";
 import { setOwnAvatarUrl } from "@/lib/profile-actions";
 import { createClient } from "@/lib/supabase/client";
+import { resizeImageFile } from "@/lib/image-resize";
 import { Button } from "@/components/ui/Button";
 import { ToggleSwitch } from "@/components/ui/ToggleSwitch";
 import { useT } from "@/components/i18n/LocaleProvider";
@@ -63,9 +64,10 @@ export function SignupWizard({ communities }: SignupWizardProps) {
     );
   }
 
-  function onPickAvatar(file: File) {
-    setAvatarFile(file);
-    setAvatarPreview(URL.createObjectURL(file));
+  async function onPickAvatar(file: File) {
+    const resized = await resizeImageFile(file);
+    setAvatarFile(resized);
+    setAvatarPreview(URL.createObjectURL(resized));
   }
 
   function submit() {
@@ -89,16 +91,15 @@ export function SignupWizard({ communities }: SignupWizardProps) {
         return;
       }
       if (avatarFile) {
-        const ext = avatarFile.name.split(".").pop() ?? "jpg";
         const supabase = createClient();
         const {
           data: { user },
         } = await supabase.auth.getUser();
         if (user) {
-          const path = `${user.id}/avatar.${ext}`;
+          const path = `${user.id}/avatar.jpg`;
           const { error: uploadError } = await supabase.storage
             .from("avatars")
-            .upload(path, avatarFile, { upsert: true, cacheControl: "3600" });
+            .upload(path, avatarFile, { upsert: true, cacheControl: "3600", contentType: "image/jpeg" });
           if (!uploadError) {
             const { data } = supabase.storage.from("avatars").getPublicUrl(path);
             await setOwnAvatarUrl(`${data.publicUrl}?t=${Date.now()}`);

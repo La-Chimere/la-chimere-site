@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { MemberPicker, type PickableMember } from "@/components/ui/MemberPicker";
 import { borrowExitKey, reportLostKey, transferKey } from "@/lib/keys-actions";
 import { useT } from "@/components/i18n/LocaleProvider";
-import { BackArrowIcon } from "@/components/ui/icons";
+import { BackButton } from "@/components/ui/BackButton";
 
 interface KeysClientProps {
   hasKey: boolean;
@@ -23,9 +23,7 @@ export function KeysClient({ hasKey, hasExitKey, buildingCode, otherMembers }: K
   return (
     <div className="page">
       <div className="subpage-back-row">
-        <a href="/programme" className="subpage-back">
-          <BackArrowIcon /> {t("common.back")}
-        </a>
+        <BackButton />
       </div>
       <h1 className="page-title">{t("header.theKeys")}</h1>
 

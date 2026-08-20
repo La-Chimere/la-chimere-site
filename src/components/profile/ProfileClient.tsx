@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { changePassword, updateProfile } from "@/lib/profile-actions";
 import type { CommunityOption } from "@/lib/events-types";
 import { useT } from "@/components/i18n/LocaleProvider";
-import { BackArrowIcon } from "@/components/ui/icons";
+import { BackButton } from "@/components/ui/BackButton";
 
 interface ProfileData {
   displayName: string;
@@ -99,9 +99,7 @@ export function ProfileClient({ userId, profile, communities, myCommunityIds }: 
   return (
     <div className="page">
       <div className="subpage-back-row">
-        <a href="/programme" className="subpage-back">
-          <BackArrowIcon /> {t("common.back")}
-        </a>
+        <BackButton />
       </div>
 
       <div className="section-card">

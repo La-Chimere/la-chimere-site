@@ -13,7 +13,7 @@ import {
   setEventResult,
   transformToEvent,
 } from "@/lib/events-actions";
-import { dayHeaderLabel } from "@/lib/dates";
+import { dayHeaderLabel, formatHour } from "@/lib/dates";
 import { useT } from "@/components/i18n/LocaleProvider";
 
 interface EventModalProps {
@@ -22,11 +22,6 @@ interface EventModalProps {
   currentUserId: string;
   isAdmin: boolean;
   onClose: () => void;
-}
-
-function formatHour(time: string): string {
-  const [h, m] = time.split(":");
-  return m === "00" ? `${Number(h)}h` : `${Number(h)}h${m}`;
 }
 
 const RESULT_CLASS = { victoire: "v", egalite: "e", defaite: "d" } as const;

@@ -19,21 +19,21 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const [
     { data: profile },
     { count: unreadCount },
-    { data: myCommunities },
-    { data: announcementAudiences },
+    { data: announcements },
     { data: myReads },
-    { data: bannerAnnouncement },
   ] = await Promise.all([
-    supabase.from("profiles").select("display_name, avatar_url, is_admin, status").eq("id", user.id).single(),
+    supabase
+      .from("profiles")
+      .select("display_name, avatar_url, is_admin, status, profile_communities(community_id)")
+      .eq("id", user.id)
+      .single(),
     supabase
       .from("notifications")
       .select("id", { count: "exact", head: true })
       .eq("profile_id", user.id)
       .eq("read", false),
-    supabase.from("profile_communities").select("community_id").eq("profile_id", user.id),
-    supabase.from("announcements").select("id, target_community_id"),
+    supabase.from("announcements").select("id, target_community_id, banner, banner_text"),
     supabase.from("announcement_reads").select("announcement_id").eq("profile_id", user.id),
-    supabase.from("announcements").select("banner_text").eq("banner", true).maybeSingle(),
   ]);
 
   if (profile?.status === "pending") {
@@ -58,13 +58,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   const defaultMemberName = await serverT("appLayout.defaultMemberName");
 
-  const myCommunityIds = new Set((myCommunities ?? []).map((c) => c.community_id));
+  const myCommunityIds = new Set((profile?.profile_communities ?? []).map((c) => c.community_id));
   const readIds = new Set((myReads ?? []).map((r) => r.announcement_id));
-  const unseenAnnouncements = (announcementAudiences ?? []).filter(
+  const unseenAnnouncements = (announcements ?? []).filter(
     (a) =>
       (!a.target_community_id || myCommunityIds.has(a.target_community_id)) &&
       !readIds.has(a.id),
   ).length;
+  const bannerText = (announcements ?? []).find((a) => a.banner)?.banner_text;
 
   return (
     <div className="app-shell">
@@ -73,7 +74,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         photoUrl={profile?.avatar_url}
         hasUnreadNotifications={(unreadCount ?? 0) > 0 || unseenAnnouncements > 0}
       />
-      {bannerAnnouncement?.banner_text && <AlertBanner text={bannerAnnouncement.banner_text} />}
+      {bannerText && <AlertBanner text={bannerText} />}
       <main>{children}</main>
       <BottomNav isAdmin={profile?.is_admin ?? false} />
     </div>

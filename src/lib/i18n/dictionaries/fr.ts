@@ -42,8 +42,8 @@ const fr: Record<string, string> = {
   "programme.keyFromHour": "à partir de {hour}h",
   "programme.noKey": "Pas de clé",
   "programme.sendAlert": "Envoyer l'alerte",
-  "programme.alertCopied": "Message copié ✓",
-  "programme.keyAlertMessage": "Personne n'a de clé du local pour {day}. Qui peut passer ?",
+  "programme.alertSent": "WhatsApp ouvert ✓",
+  "programme.keyAlertMessage": "Salut, on a pas de clé du local pour {day} à {hour}. Qui peut passer ? Merci !",
   "programme.modalKeyOpenFrom": "club ouvert dès {hour}h",
   "programme.modalNoKeyConfirmed": "Pas de porteur de clé confirmé",
 

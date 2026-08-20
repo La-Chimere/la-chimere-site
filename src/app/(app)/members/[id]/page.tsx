@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { AvatarCircle } from "@/components/ui/AvatarCircle";
 import { serverT } from "@/lib/i18n/server";
-import { BackArrowIcon } from "@/components/ui/icons";
+import { BackButton } from "@/components/ui/BackButton";
 
 // Fiche membre en lecture seule (CDC 12.11) — version simple pour cette
 // session ; "Dernière activité" et la section Communautés détaillée
@@ -18,15 +18,11 @@ export default async function MemberProfilePage(props: PageProps<"/members/[id]"
     .eq("id", id)
     .single();
 
-  const back = await serverT("common.back");
-
   if (!profile) {
     return (
       <div className="page">
         <div className="subpage-back-row">
-          <a href="/programme" className="subpage-back">
-            <BackArrowIcon /> {back}
-          </a>
+          <BackButton />
         </div>
         <p className="empty-hint">{await serverT("member.notFound")}</p>
       </div>
@@ -53,9 +49,7 @@ export default async function MemberProfilePage(props: PageProps<"/members/[id]"
   return (
     <div className="page">
       <div className="subpage-back-row">
-        <a href="/programme" className="subpage-back">
-          <BackArrowIcon /> {back}
-        </a>
+        <BackButton />
       </div>
       <div className="member-profile-head">
         <AvatarCircle name={profile.display_name} photoUrl={profile.avatar_url} size="lg" />

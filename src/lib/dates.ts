@@ -102,6 +102,12 @@ export function shortWeekday(date: Date, locale: Locale = "fr"): string {
   return label.charAt(0).toUpperCase() + label.slice(1);
 }
 
+// Heure compacte "18h" / "18h30" (CDC 12.4/12.10 : format d'affichage des horaires).
+export function formatHour(time: string): string {
+  const [h, m] = time.split(":");
+  return m === "00" ? `${Number(h)}h` : `${Number(h)}h${m}`;
+}
+
 export function isoDate(date: Date): string {
   return format(date, "yyyy-MM-dd");
 }

@@ -1,18 +1,15 @@
 import { serverT } from "@/lib/i18n/server";
-import { BackArrowIcon } from "@/components/ui/icons";
+import { BackButton } from "@/components/ui/BackButton";
 
 export default async function CguPage() {
-  const [back, title, placeholder] = await Promise.all([
-    serverT("common.back"),
+  const [title, placeholder] = await Promise.all([
     serverT("cgu.title"),
     serverT("cgu.placeholder"),
   ]);
   return (
     <div className="page">
       <div className="subpage-back-row">
-        <a href="/programme" className="subpage-back">
-          <BackArrowIcon /> {back}
-        </a>
+        <BackButton />
       </div>
       <h1 className="page-title">{title}</h1>
       <div className="section-card">

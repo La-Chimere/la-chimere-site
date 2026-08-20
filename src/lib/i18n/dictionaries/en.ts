@@ -42,8 +42,8 @@ const en: Record<string, string> = {
   "programme.keyFromHour": "From {hour}h",
   "programme.noKey": "No key",
   "programme.sendAlert": "Send the alert",
-  "programme.alertCopied": "Message copied ✓",
-  "programme.keyAlertMessage": "No one has a key to the venue for {day}. Who can come by?",
+  "programme.alertSent": "WhatsApp opened ✓",
+  "programme.keyAlertMessage": "Hey, we don't have a key to the venue for {day} at {hour}. Who can come by? Thanks!",
   "programme.modalKeyOpenFrom": "venue open from {hour}h",
   "programme.modalNoKeyConfirmed": "No confirmed key holder",
 

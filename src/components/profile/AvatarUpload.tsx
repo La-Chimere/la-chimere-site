@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useT } from "@/components/i18n/LocaleProvider";
+import { resizeImageFile } from "@/lib/image-resize";
 
 interface AvatarUploadProps {
   userId: string;
@@ -30,12 +31,12 @@ export function AvatarUpload({ userId, currentUrl, displayName, onUploaded }: Av
     setUploading(true);
     setError(null);
     try {
+      const resized = await resizeImageFile(file);
       const supabase = createClient();
-      const ext = file.name.split(".").pop() ?? "jpg";
-      const path = `${userId}/avatar.${ext}`;
+      const path = `${userId}/avatar.jpg`;
       const { error: uploadError } = await supabase.storage
         .from("avatars")
-        .upload(path, file, { upsert: true, cacheControl: "3600" });
+        .upload(path, resized, { upsert: true, cacheControl: "3600", contentType: "image/jpeg" });
       if (uploadError) {
         setError(uploadError.message);
         return;
