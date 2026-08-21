@@ -229,6 +229,7 @@ export function SignupWizard({ communities }: SignupWizardProps) {
                   onChange={(e) => setLocation(e.target.value)}
                   placeholder={t("signup.step1.locationPlaceholder")}
                 />
+                <p className="field-note">{t("signup.step1.contactInfoNote")}</p>
                 <p className="field-note">{t("signup.step1.locationNote")}</p>
               </div>
               <div className="form-field">

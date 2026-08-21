@@ -76,6 +76,14 @@ export async function updateProfile(input: ProfileInput) {
   return { error: null };
 }
 
+// Rejoindre une communauté depuis la page Communautés, sans avoir besoin
+// d'avoir participé à un évènement de cette communauté (CDC 12.8).
+export async function joinCommunity(communityId: string) {
+  const { supabase, userId } = await requireUser();
+  await supabase.from("profile_communities").insert({ profile_id: userId, community_id: communityId });
+  revalidatePath("/communities");
+}
+
 export async function changePassword(currentPassword: string, newPassword: string) {
   const { supabase, userId } = await requireUser();
 

@@ -1,11 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { Chip } from "@/components/ui/Chip";
+import { Button } from "@/components/ui/Button";
 import { AvatarCircle } from "@/components/ui/AvatarCircle";
 import { relativeActivityDays, shortWeekday } from "@/lib/dates";
 import { formatActivity } from "@/lib/i18n/format";
+import { joinCommunity } from "@/lib/profile-actions";
 import { useT } from "@/components/i18n/LocaleProvider";
 import type { CommunityOption } from "@/lib/events-types";
 import type {
@@ -19,6 +21,7 @@ interface CommunitiesClientProps {
   members: CommunityMember[];
   upcomingEvents: UpcomingCommunityEvent[];
   participations: ParticipationRecord[];
+  currentUserId: string | null;
 }
 
 // Communautés (CDC 12.8) : sélection multiple ("Tous" par défaut, mutuellement
@@ -29,9 +32,11 @@ export function CommunitiesClient({
   members,
   upcomingEvents,
   participations,
+  currentUserId,
 }: CommunitiesClientProps) {
   const { t, locale } = useT();
   const [selected, setSelected] = useState<string[]>([]);
+  const [, startTransition] = useTransition();
 
   function toggle(id: string) {
     setSelected((prev) =>
@@ -65,6 +70,22 @@ export function CommunitiesClient({
       return db.localeCompare(da);
     });
   }, [members, selected, lastActivityByMember]);
+
+  // Le bouton "Rejoindre" n'a de sens que sur une seule communauté à la fois,
+  // et seulement si l'utilisateur courant n'en fait pas déjà partie.
+  const singleSelectedId = selected.length === 1 ? selected[0] : null;
+  const alreadyMember =
+    !!currentUserId &&
+    !!singleSelectedId &&
+    (members.find((m) => m.profileId === currentUserId)?.communityIds.includes(singleSelectedId) ?? false);
+  const canJoin = !!currentUserId && !!singleSelectedId && !alreadyMember;
+
+  function join() {
+    if (!singleSelectedId) return;
+    startTransition(() => {
+      joinCommunity(singleSelectedId);
+    });
+  }
 
   return (
     <div className="page">
@@ -102,6 +123,12 @@ export function CommunitiesClient({
           ))
         )}
       </div>
+
+      {canJoin && (
+        <Button variant="primary" full onClick={join}>
+          {t("communities.join")}
+        </Button>
+      )}
 
       <div className="section-card">
         <h2 className="section-subtitle">{t("communities.members")}</h2>

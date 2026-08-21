@@ -96,6 +96,7 @@ const en: Record<string, string> = {
   "communities.members": "Members",
   "communities.noMembers": "No members in this selection.",
   "communities.keyHolder": "Key holder",
+  "communities.join": "Join",
 
   // Leaderboard
   "leaderboard.title": "Leaderboard",
@@ -185,6 +186,8 @@ const en: Record<string, string> = {
   "signup.step1.phone": "Phone",
   "signup.step1.location": "Location",
   "signup.step1.locationPlaceholder": "Optional — e.g.: Plainpalais, 15 min from the venue",
+  "signup.step1.contactInfoNote":
+    "This contact information is only used so other members can reach you. It is not required.",
   "signup.step1.locationNote":
     "All of this data is visible only to you and the site's technical administrator, unless you allow sharing it. Personal data handling is described in more detail at step 3.",
   "signup.step1.password": "Password",
@@ -332,6 +335,7 @@ const en: Record<string, string> = {
   "member.phone": "Phone",
   "member.location": "Location",
   "member.joinedSince": "In the club since {year}",
+  "member.activitiesTitle": "Recent activity",
   "member.contact": "Contact",
   "member.noContact": "This member hasn't provided their contact details. Post a message on the WhatsApp group to find them!",
   "event.error.createFailed": "Could not create the event.",

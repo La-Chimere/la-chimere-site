@@ -16,6 +16,9 @@ function oneOrFirst<T>(value: T | T[] | null): T | null {
 export default async function CommunitiesPage() {
   const supabase = await createClient();
   const today = isoDate(new Date());
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const [
     { data: communitiesData },
@@ -95,6 +98,7 @@ export default async function CommunitiesPage() {
       members={members}
       upcomingEvents={upcomingEvents}
       participations={participations}
+      currentUserId={user?.id ?? null}
     />
   );
 }

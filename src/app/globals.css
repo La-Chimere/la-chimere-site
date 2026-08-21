@@ -2298,3 +2298,8 @@ main {
   font-size: 13px;
   color: var(--text-muted);
 }
+.member-communities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

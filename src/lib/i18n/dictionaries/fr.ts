@@ -96,6 +96,7 @@ const fr: Record<string, string> = {
   "communities.members": "Membres",
   "communities.noMembers": "Aucun membre dans cette sélection.",
   "communities.keyHolder": "Porteur de clé",
+  "communities.join": "Rejoindre",
 
   // Classement (CDC 4.4/12.7)
   "leaderboard.title": "Classement",
@@ -185,6 +186,8 @@ const fr: Record<string, string> = {
   "signup.step1.phone": "Téléphone",
   "signup.step1.location": "Localisation",
   "signup.step1.locationPlaceholder": "Facultatif — ex : Plainpalais à 15 min du local",
+  "signup.step1.contactInfoNote":
+    "Ces informations de contacts servent uniquement pour que les autres membres puissent vous contacter. Elles ne sont pas obligatoires.",
   "signup.step1.locationNote":
     "Toutes ces données sont visibles uniquement par vous et par l'administrateur technique du site, sauf si vous autorisez le partage. La gestion des données personnelles est décrite plus en détail à l'étape 3.",
   "signup.step1.password": "Mot de passe",
@@ -333,6 +336,7 @@ const fr: Record<string, string> = {
   "member.phone": "Téléphone",
   "member.location": "Localisation",
   "member.joinedSince": "Au club depuis {year}",
+  "member.activitiesTitle": "Dernières activités",
   "member.contact": "Contact",
   "member.noContact":
     "Ce membre n'a pas indiqué ses coordonnées. Postez un message sur le groupe WhatsApp pour le retrouver !",
