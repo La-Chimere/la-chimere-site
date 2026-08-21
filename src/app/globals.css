@@ -547,6 +547,8 @@ main {
   height: 31px;
   border-radius: 50%;
   background: var(--surface-2);
+  background-size: cover;
+  background-position: center;
   display: flex;
   align-items: center;
   justify-content: center;

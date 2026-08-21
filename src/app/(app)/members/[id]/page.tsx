@@ -27,7 +27,7 @@ export default async function MemberProfilePage(props: PageProps<"/members/[id]"
     supabase.from("profile_communities").select("communities(id, label)").eq("profile_id", id),
     supabase
       .from("event_participants")
-      .select("events(id, type, title, event_date, start_time, event_communities(communities(label)))")
+      .select("events(id, type, title, event_date, start_time, event_communities(communities(id, label)))")
       .eq("profile_id", id),
   ]);
 
@@ -72,14 +72,28 @@ export default async function MemberProfilePage(props: PageProps<"/members/[id]"
     profile.location_visible && profile.location ? { label: locationLabel, value: profile.location } : null,
   ].filter((line): line is { label: string; value: string } => !!line);
 
-  const communities = (communitiesData ?? [])
-    .map((c) => oneOrFirst(c.communities))
-    .filter((c): c is NonNullable<typeof c> => !!c)
-    .sort((a, b) => a.label.localeCompare(b.label));
-
-  const recentActivities = (participationsData ?? [])
+  const participatedEvents = (participationsData ?? [])
     .map((p) => oneOrFirst(p.events))
-    .filter((e): e is NonNullable<typeof e> => !!e && e.type !== "dispo" && e.event_date <= today)
+    .filter((e): e is NonNullable<typeof e> => !!e);
+
+  // Communautés rejointes à l'inscription/via le bouton Rejoindre, ou
+  // simplement déduites d'avoir participé à un évènement de cette
+  // communauté (pas besoin de l'avoir rejointe explicitement).
+  const communitiesById = new Map<string, string>();
+  for (const c of (communitiesData ?? []).map((c) => oneOrFirst(c.communities))) {
+    if (c) communitiesById.set(c.id, c.label);
+  }
+  for (const e of participatedEvents) {
+    for (const c of (e.event_communities ?? []).map((ec) => oneOrFirst(ec.communities))) {
+      if (c) communitiesById.set(c.id, c.label);
+    }
+  }
+  const communities = Array.from(communitiesById, ([communityId, label]) => ({ id: communityId, label })).sort(
+    (a, b) => a.label.localeCompare(b.label),
+  );
+
+  const recentActivities = participatedEvents
+    .filter((e) => e.type !== "dispo" && e.event_date <= today)
     .map((e) => {
       const communityLabels = (e.event_communities ?? [])
         .map((ec) => oneOrFirst(ec.communities))
