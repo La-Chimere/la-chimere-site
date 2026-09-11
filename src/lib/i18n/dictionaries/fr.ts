@@ -330,17 +330,20 @@ const fr: Record<string, string> = {
   "faq.title": "FAQ",
   "faq.q1": "Comment devenir porteur de clé ?",
   "faq.a1":
-    "C'est le comité qui attribue les clés du local, selon le nombre de clés disponibles (visible sur la page Clés). Si ça t'intéresse, parles-en à un membre du comité — c'est lui qui décide. N'hésite pas à me contacter (Louis) sur WhatsApp, je t'expliquerai ça avec plaisir !",
+    "C'est le comité qui attribue les clés du local, selon le nombre de clés disponibles. Si ça t'intéresse, parles-en à un membre du comité. Un membre porteur de clé pourra aussi te passer les siennes : dans ce cas, il doit aller sur la page « Les clés » en cliquant sur son profil en haut à droite, et indiquer qu'il te les a données.",
   "faq.q2": "Comment annuler ma participation à un évènement ?",
   "faq.a2":
-    "Ouvre l'évènement depuis la page Programme et clique sur « Se désinscrire ». Si tu es la seule personne inscrite, l'évènement ne peut pas rester vide : supprime-le à la place, ou demande à un admin. N'hésite pas à me contacter (Louis) sur WhatsApp, je t'expliquerai ça avec plaisir !",
-  "faq.q3": "Comment rejoindre ou quitter une communauté ?",
+    "Ouvre l'évènement depuis la page Programme et clique sur « Se désinscrire ». Si tu es la seule personne inscrite, l'évènement ne peut pas rester vide : supprime-le à la place, ou demande à un admin.",
+  "faq.q3": "Comment dire que je suis disponible pour des parties ?",
   "faq.a3":
-    "Pour rejoindre : va sur la page Communautés, sélectionne un jeu puis clique sur « Rejoindre ». Pour quitter : rends-toi sur Mon profil, section « Mes communautés », et désélectionne le jeu. N'hésite pas à me contacter (Louis) sur WhatsApp, je t'expliquerai ça avec plaisir !",
-  "faq.q4": "Qui contacter en cas de problème ?",
-  "faq.a4": "Contacte-moi sur WhatsApp.",
+    "Sur la page Programme, clique sur « Dispos » puis « Indiquer ma dispo ». Les membres qui les affichent verront ta disponibilité. Tu peux même la faire se répéter toutes les semaines !",
+  "faq.q4": "Comment rejoindre ou quitter une communauté ?",
+  "faq.a4":
+    "Pour rejoindre : va sur la page Communautés, sélectionne un jeu puis clique sur « Rejoindre ». Pour quitter : rends-toi sur Mon profil, section « Mes communautés », et désélectionne le jeu.",
   "faq.q5": "J'ai oublié mon mot de passe",
-  "faq.a5": "N'hésite pas à me contacter (Louis) sur WhatsApp.",
+  "faq.a5": "N'hésite pas à me contacter (Louis) sur WhatsApp. Tu trouveras mon numéro dans le groupe.",
+  "faq.q6": "Qui contacter en cas de problème ?",
+  "faq.a6": "N'hésite pas à me contacter (Louis) sur WhatsApp. Tu trouveras mon numéro dans le groupe.",
   "cgu.title": "Conditions générales d'utilisation",
   "cgu.p1":
     "Ce site est un outil mis à disposition par le comité du club La Chimère pour faciliter l'organisation des parties, la gestion des clés du local et la vie de la communauté. Son utilisation est entièrement facultative : aucun membre n'est obligé de créer un compte ni de s'en servir pour participer à la vie du club.",

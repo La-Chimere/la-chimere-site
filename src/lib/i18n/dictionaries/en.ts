@@ -330,17 +330,20 @@ const en: Record<string, string> = {
   "faq.title": "FAQ",
   "faq.q1": "How do I become a key holder?",
   "faq.a1":
-    "The committee assigns venue keys based on how many keys are available (shown on the Keys page). If you're interested, mention it to a committee member — they decide who gets one. Feel free to reach out to me (Louis) on WhatsApp, happy to walk you through it!",
+    "The committee assigns venue keys based on how many are available. If you're interested, mention it to a committee member. A key holder can also pass theirs on to you: to do that, they go to the \"The keys\" page by clicking their profile in the top right, and mark that they gave it to you.",
   "faq.q2": "How do I cancel my participation in an event?",
   "faq.a2":
-    "Open the event from the Programme page and tap \"Leave\". If you're the only person signed up, the event can't stay empty — delete it instead, or ask an admin. Feel free to reach out to me (Louis) on WhatsApp, happy to walk you through it!",
-  "faq.q3": "How do I join or leave a community?",
+    "Open the event from the Programme page and tap \"Leave\". If you're the only person signed up, the event can't stay empty — delete it instead, or ask an admin.",
+  "faq.q3": "How do I say I'm available for games?",
   "faq.a3":
-    "To join: go to the Communities page, select a game, then tap \"Join\". To leave: go to My Profile, \"My communities\" section, and deselect the game. Feel free to reach out to me (Louis) on WhatsApp, happy to walk you through it!",
-  "faq.q4": "Who do I contact if there's a problem?",
-  "faq.a4": "Contact me on WhatsApp.",
+    "On the Programme page, tap \"Availabilities\" then \"Indicate my availability\". Members who show availabilities will see yours. You can even make it repeat every week!",
+  "faq.q4": "How do I join or leave a community?",
+  "faq.a4":
+    "To join: go to the Communities page, select a game, then tap \"Join\". To leave: go to My Profile, \"My communities\" section, and deselect the game.",
   "faq.q5": "I forgot my password",
-  "faq.a5": "Feel free to reach out to me (Louis) on WhatsApp.",
+  "faq.a5": "Feel free to reach out to me (Louis) on WhatsApp. You'll find my number in the group.",
+  "faq.q6": "Who do I contact if there's a problem?",
+  "faq.a6": "Feel free to reach out to me (Louis) on WhatsApp. You'll find my number in the group.",
   "cgu.title": "Terms of Use",
   "cgu.p1":
     "This site is a tool made available by the La Chimère club committee to help organize games, manage the venue's keys, and support community life. Using it is entirely optional: no member is required to create an account or use it to take part in club life.",

@@ -2,7 +2,7 @@ import { serverT } from "@/lib/i18n/server";
 import { BackButton } from "@/components/ui/BackButton";
 
 export default async function FaqPage() {
-  const [title, q1, a1, q2, a2, q3, a3, q4, a4, q5, a5] = await Promise.all([
+  const [title, q1, a1, q2, a2, q3, a3, q4, a4, q5, a5, q6, a6] = await Promise.all([
     serverT("faq.title"),
     serverT("faq.q1"),
     serverT("faq.a1"),
@@ -14,6 +14,8 @@ export default async function FaqPage() {
     serverT("faq.a4"),
     serverT("faq.q5"),
     serverT("faq.a5"),
+    serverT("faq.q6"),
+    serverT("faq.a6"),
   ]);
   const entries = [
     { q: q1, a: a1 },
@@ -21,6 +23,7 @@ export default async function FaqPage() {
     { q: q3, a: a3 },
     { q: q4, a: a4 },
     { q: q5, a: a5 },
+    { q: q6, a: a6 },
   ];
   return (
     <div className="page">
