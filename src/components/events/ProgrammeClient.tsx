@@ -9,6 +9,7 @@ import { EventModal } from "@/components/events/EventModal";
 import { EventForm } from "@/components/events/EventForm";
 import { MonthGrid } from "@/components/events/MonthGrid";
 import { AvailabilityMenu } from "@/components/events/AvailabilityMenu";
+import { ProgrammeIcon } from "@/components/ui/icons";
 import { sendKeyAlertClick } from "@/lib/key-alert-actions";
 import type { PickableMember } from "@/components/ui/MemberPicker";
 import type { CommunityOption, EventItem } from "@/lib/events-types";
@@ -181,7 +182,7 @@ export function ProgrammeClient({
                 onClick={() => setCalView((v) => !v)}
                 aria-label={t("programme.calendarView")}
               >
-                📆
+                <ProgrammeIcon />
               </button>
             </div>
             <AvailabilityMenu

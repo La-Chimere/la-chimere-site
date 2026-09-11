@@ -422,6 +422,13 @@ main {
   font-size: 17px;
   color: var(--text-muted);
   flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.view-toggle svg {
+  width: 18px;
+  height: 18px;
 }
 .avail-wrap {
   position: relative;
