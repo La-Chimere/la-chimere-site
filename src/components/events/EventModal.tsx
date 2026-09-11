@@ -6,7 +6,9 @@ import { useRouter } from "next/navigation";
 import type { EventItem } from "@/lib/events-types";
 import { Modal } from "@/components/ui/Modal";
 import { AvatarCircle } from "@/components/ui/AvatarCircle";
+import { MemberPicker, type PickableMember } from "@/components/ui/MemberPicker";
 import {
+  addEventParticipant,
   deleteEvent,
   joinEvent,
   leaveEvent,
@@ -22,12 +24,17 @@ interface EventModalProps {
   currentUserId: string;
   isAdmin: boolean;
   onClose: () => void;
+  /** Membres du club, pour proposer d'en ajouter d'autres comme participants
+   * (créateur/admin uniquement). Omis = pas de picker d'ajout (ex. modale
+   * réutilisée sur la page Communautés, où la liste complète des membres
+   * n'est pas chargée). */
+  members?: PickableMember[];
 }
 
 const RESULT_CLASS = { victoire: "v", egalite: "e", defaite: "d" } as const;
 const RESULT_KEYS = { victoire: "event.result.win", egalite: "event.result.tie", defaite: "event.result.loss" } as const;
 
-export function EventModal({ event, keyStatus, currentUserId, isAdmin, onClose }: EventModalProps) {
+export function EventModal({ event, keyStatus, currentUserId, isAdmin, onClose, members }: EventModalProps) {
   const [pending, startTransition] = useTransition();
   const router = useRouter();
   const { t, locale } = useT();
@@ -68,7 +75,10 @@ export function EventModal({ event, keyStatus, currentUserId, isAdmin, onClose }
   }
 
   function onResultClick(profileId: string, current: EventItem["participants"][number]["result"], value: "victoire" | "egalite" | "defaite") {
-    const canSetThis = profileId === currentUserId || isAdmin;
+    // N'importe quel participant peut renseigner le résultat de n'importe
+    // quel autre participant du même évènement (pas seulement le sien) —
+    // en pratique une seule personne saisit souvent tous les résultats.
+    const canSetThis = isParticipant || isAdmin;
     if (!canSetThis) return;
     const nextResult = current === value ? null : value;
     startTransition(() => {
@@ -148,7 +158,7 @@ export function EventModal({ event, keyStatus, currentUserId, isAdmin, onClose }
                       type="button"
                       className={`ved-btn ${RESULT_CLASS[key]} ${p.result === key ? "active" : ""}`}
                       onClick={() => onResultClick(p.profileId, p.result, key)}
-                      disabled={p.profileId !== currentUserId && !isAdmin}
+                      disabled={!isParticipant && !isAdmin}
                     >
                       {t(RESULT_KEYS[key])}
                     </button>
@@ -160,11 +170,30 @@ export function EventModal({ event, keyStatus, currentUserId, isAdmin, onClose }
         </ul>
       )}
 
+      {canManage && !isAvailability && members && (
+        <MemberPicker
+          members={members}
+          selected={optimisticParticipants.map((p) => ({ id: p.profileId, displayName: p.displayName }))}
+          onChange={(next) => {
+            const added = next.find((m) => !optimisticParticipants.some((p) => p.profileId === m.id));
+            if (added) {
+              startTransition(() => {
+                addEventParticipant(event!.id, added.id);
+              });
+            }
+          }}
+          placeholder={t("event.addParticipant")}
+          hideSelectedChips
+        />
+      )}
+
       <div className="modal-btn-row">
         {isAvailability ? (
-          <button type="button" className="modal-btn primary" onClick={onContact}>
-            {t("event.contact")}
-          </button>
+          event.createdBy !== currentUserId && (
+            <button type="button" className="modal-btn primary" onClick={onContact}>
+              {t("event.contact")}
+            </button>
+          )
         ) : (
           <button
             type="button"

@@ -48,14 +48,15 @@ export function Header({ displayName, photoUrl, hasUnreadNotifications }: Header
         <span className="brand-name">La Chimère</span>
       </button>
 
-      <Link
-        href="/announcements"
+      <button
+        type="button"
         className={`bell-btn ${onAnnouncements ? "active" : ""}`}
         title={t("header.announcements")}
+        onClick={() => (onAnnouncements ? router.back() : router.push("/announcements"))}
       >
         <BellIcon />
         <span className={`bell-dot ${hasUnreadNotifications ? "show" : ""}`} />
-      </Link>
+      </button>
 
       <div className="account-wrap" ref={wrapRef}>
         <button

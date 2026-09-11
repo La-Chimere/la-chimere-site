@@ -62,9 +62,11 @@ export function EventCard({ event, currentUserId, onOpen }: EventCardProps) {
       <div className="bottom">
         <span className="who">{who}</span>
         {isAvailability ? (
-          <button type="button" className="join-btn" onClick={toggleJoin}>
-            {t("event.contact")}
-          </button>
+          event.createdBy !== currentUserId && (
+            <button type="button" className="join-btn" onClick={toggleJoin}>
+              {t("event.contact")}
+            </button>
+          )
         ) : (
           <button
             type="button"

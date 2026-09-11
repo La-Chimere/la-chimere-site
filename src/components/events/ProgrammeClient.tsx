@@ -158,6 +158,15 @@ export function ProgrammeClient({
 
   const allFilteredForModal = [...realEvents, ...availabilities];
   const openEvent = allFilteredForModal.find((e) => e.id === openEventId) ?? null;
+  // Une dispo n'a qu'un seul "participant" (son créateur) et n'entre pas dans
+  // keyStatusByDay (qui n'agrège que les vraies parties) : son statut clé
+  // reflète directement si ce créateur est porteur de clé, pas le jour entier.
+  const openEventKeyStatus =
+    openEvent?.type === "dispo"
+      ? { ok: openEvent.participants.some((p) => p.hasKey), from: openEvent.startTime }
+      : openEvent
+        ? (keyStatusByDay.get(openEvent.eventDate) ?? null)
+        : null;
 
   return (
     <div className="page no-scroll">
@@ -283,10 +292,11 @@ export function ProgrammeClient({
       <Fab onClick={() => setFormOpen(true)} title={t("event.form.fabTitle")} />
       <EventModal
         event={openEvent}
-        keyStatus={openEvent ? (keyStatusByDay.get(openEvent.eventDate) ?? null) : null}
+        keyStatus={openEventKeyStatus}
         currentUserId={currentUser.id}
         isAdmin={isAdmin}
         onClose={() => setOpenEventId(null)}
+        members={members}
       />
       <EventForm
         open={formOpen}

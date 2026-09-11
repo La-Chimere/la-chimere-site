@@ -20,6 +20,14 @@ export async function joinEvent(eventId: string) {
   revalidatePath("/programme");
 }
 
+// Ajouter un autre membre comme participant après coup (créateur ou admin
+// uniquement — la RLS event_participants_insert le vérifie aussi côté DB).
+export async function addEventParticipant(eventId: string, profileId: string) {
+  const { supabase } = await requireUserId();
+  await supabase.from("event_participants").insert({ event_id: eventId, profile_id: profileId });
+  revalidatePath("/programme");
+}
+
 // Quitter un événement — impossible si on est l'unique participant (CDC 12.4).
 export async function leaveEvent(eventId: string) {
   const { supabase, userId } = await requireUserId();
