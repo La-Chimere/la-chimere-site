@@ -10,6 +10,7 @@ import { setAdminRole } from "@/lib/admin-actions";
 import { useT } from "@/components/i18n/LocaleProvider";
 import { LanguageToggle } from "@/components/i18n/LanguageToggle";
 import { BackButton } from "@/components/ui/BackButton";
+import { InstallAppButton } from "@/components/settings/InstallAppButton";
 
 const ACCENTS = ["#3F6EA5", "#2F8F5A", "#B4533F", "#7B5EA7", "#B4862F", "#3F8FA0"];
 
@@ -104,9 +105,7 @@ export function SettingsClient({
 
       <div className="section-subtitle">{t("settings.application")}</div>
       <div className="section-card">
-        <button type="button" className="modal-join" style={{ marginTop: 0, marginBottom: 14 }}>
-          {t("settings.installApp")}
-        </button>
+        <InstallAppButton />
         <div className="form-label">{t("settings.language")}</div>
         <LanguageToggle />
       </div>

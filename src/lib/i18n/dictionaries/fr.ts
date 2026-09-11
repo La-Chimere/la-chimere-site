@@ -320,6 +320,8 @@ const fr: Record<string, string> = {
   "settings.accentColor": "Couleur d'accent",
   "settings.application": "Application",
   "settings.installApp": "Installer l'application (mode web app)",
+  "settings.installApp.ios": "Sur iPhone/iPad : ouvre le menu Partager de Safari puis choisis \"Sur l'écran d'accueil\".",
+  "settings.installApp.unavailable": "Ton navigateur ne propose pas l'installation ici. Essaie depuis Chrome sur Android, ou depuis Safari sur iPhone (menu Partager > Sur l'écran d'accueil).",
   "settings.language": "Langue",
   "settings.account": "Compte",
   "settings.deleteAccount": "Supprimer mon compte",
