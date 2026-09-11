@@ -48,7 +48,9 @@ export function EventCard({ event, currentUserId, onOpen }: EventCardProps) {
     <div className={`event-card ${isAvailability ? "avail-card" : ""}`} onClick={onOpen}>
       <div className="top">
         <div className="top-left">
-          <span className="time">{time}</span>
+          <span className="time">
+            {isAvailability ? `${t("event.availableFrom")} ${time}` : time}
+          </span>
           {event.communities.map((c) => (
             <span className="tag genre" key={c.id}>
               {c.label}

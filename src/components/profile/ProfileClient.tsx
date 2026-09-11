@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { AvatarUpload } from "@/components/profile/AvatarUpload";
 import { ToggleSwitch } from "@/components/ui/ToggleSwitch";
 import { Chip } from "@/components/ui/Chip";
 import { Button } from "@/components/ui/Button";
+import { EyeIcon } from "@/components/ui/icons";
 import { changePassword, updateProfile } from "@/lib/profile-actions";
 import type { CommunityOption } from "@/lib/events-types";
 import { useT } from "@/components/i18n/LocaleProvider";
@@ -102,13 +104,16 @@ export function ProfileClient({ userId, profile, communities, myCommunityIds }: 
         <BackButton />
       </div>
 
-      <div className="section-card">
+      <div className="section-card avatar-section-row">
         <AvatarUpload
           userId={userId}
           currentUrl={avatarUrl}
           displayName={displayName}
           onUploaded={setAvatarUrl}
         />
+        <Link href={`/members/${userId}`} className="modal-btn outline" style={{ flex: "none" }}>
+          {t("profile.viewAsVisitor")}
+        </Link>
       </div>
 
       <div className="section-card">
@@ -121,7 +126,9 @@ export function ProfileClient({ userId, profile, communities, myCommunityIds }: 
           <div className="field-head">
             <label className="form-label">{t("signup.step1.email")}</label>
             <div className="visibility-switch">
-              <span className="txt">{t("signup.step1.visible")}</span>
+              <span className="visibility-eye" title={t("signup.step1.visible")}>
+                <EyeIcon crossed={!emailVisible} />
+              </span>
               <ToggleSwitch on={emailVisible} onChange={setEmailVisible} />
             </div>
           </div>
@@ -132,7 +139,9 @@ export function ProfileClient({ userId, profile, communities, myCommunityIds }: 
           <div className="field-head">
             <label className="form-label">{t("signup.step1.phone")}</label>
             <div className="visibility-switch">
-              <span className="txt">{t("signup.step1.visible")}</span>
+              <span className="visibility-eye" title={t("signup.step1.visible")}>
+                <EyeIcon crossed={!phoneVisible} />
+              </span>
               <ToggleSwitch on={phoneVisible} onChange={setPhoneVisible} />
             </div>
           </div>
@@ -143,7 +152,9 @@ export function ProfileClient({ userId, profile, communities, myCommunityIds }: 
           <div className="field-head">
             <label className="form-label">{t("signup.step1.location")}</label>
             <div className="visibility-switch">
-              <span className="txt">{t("signup.step1.visible")}</span>
+              <span className="visibility-eye" title={t("signup.step1.visible")}>
+                <EyeIcon crossed={!locationVisible} />
+              </span>
               <ToggleSwitch on={locationVisible} onChange={setLocationVisible} />
             </div>
           </div>

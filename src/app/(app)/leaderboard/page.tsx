@@ -12,25 +12,33 @@ function oneOrFirst<T>(value: T | T[] | null): T | null {
 export default async function LeaderboardPage() {
   const supabase = await createClient();
 
-  const [{ data: communitiesData }, { data: participantsData }] = await Promise.all([
-    supabase
-      .from("communities")
-      .select("id, key, label, competitive")
-      .eq("hidden", false)
-      .order("label"),
-    supabase.from("event_participants").select(
-      `profile_id, result,
-      events(id, event_date, event_communities(community_id)),
-      profiles(display_name, avatar_url)`,
-    ),
-  ]);
+  const [{ data: communitiesData }, { data: participantsData }, { data: communityMembershipsData }] =
+    await Promise.all([
+      supabase
+        .from("communities")
+        .select("id, key, label, competitive")
+        .eq("hidden", false)
+        .order("label"),
+      supabase.from("event_participants").select(
+        `profile_id, result,
+        events(id, event_date, event_communities(community_id)),
+        profiles(display_name, avatar_url)`,
+      ),
+      supabase.from("profile_communities").select("community_id"),
+    ]);
 
-  const communities: CommunityOption[] = (communitiesData ?? []).map((c) => ({
-    id: c.id,
-    key: c.key,
-    label: c.label,
-    competitive: c.competitive,
-  }));
+  // Communautés triées par popularité (nombre de membres décroissant) —
+  // à égalité, ordre alphabétique pour rester déterministe.
+  const memberCountByCommunity = new Map<string, number>();
+  for (const row of communityMembershipsData ?? []) {
+    memberCountByCommunity.set(row.community_id, (memberCountByCommunity.get(row.community_id) ?? 0) + 1);
+  }
+  const communities: CommunityOption[] = (communitiesData ?? [])
+    .map((c) => ({ id: c.id, key: c.key, label: c.label, competitive: c.competitive }))
+    .sort((a, b) => {
+      const diff = (memberCountByCommunity.get(b.id) ?? 0) - (memberCountByCommunity.get(a.id) ?? 0);
+      return diff !== 0 ? diff : a.label.localeCompare(b.label);
+    });
 
   const week = daysOfWeek(new Date()).map(isoDate);
   const weekStart = week[0];

@@ -51,6 +51,7 @@ const fr: Record<string, string> = {
   // Évènements (CDC 12.3/12.4)
   "event.genericEvent": "Évènement",
   "event.defaultTitle": "Partie",
+  "event.availableFrom": "Dispo à partir de",
   "event.noParticipant": "Aucun participant",
   "event.participantCount": "{n} participants",
   "event.contact": "Contacter",
@@ -92,7 +93,12 @@ const fr: Record<string, string> = {
   // Communautés (CDC 12.8)
   "communities.title": "Communautés",
   "communities.upcomingEvents": "Évènements à venir",
+  "communities.pastEvents": "Évènements passés",
   "communities.nothingUpcoming": "Aucun évènement à venir dans cette sélection.",
+  "communities.nothingPast": "Aucun évènement passé dans cette sélection.",
+  "communities.showPastEvents": "Afficher les évènements passés",
+  "communities.showUpcomingEvents": "Afficher les évènements à venir",
+  "communities.pageOf": "{current} / {total}",
   "communities.members": "Membres",
   "communities.noMembers": "Aucun membre dans cette sélection.",
   "communities.keyHolder": "Porteur de clé",
@@ -271,6 +277,7 @@ const fr: Record<string, string> = {
   "profile.saveChanges": "Enregistrer les modifications",
   "profile.avatar.uploading": "Envoi…",
   "profile.avatar.change": "Changer la photo",
+  "profile.viewAsVisitor": "Voir mon profil en tant que visiteur",
   "profile.error.cannotVerifyPassword": "Impossible de vérifier le mot de passe actuel.",
   "profile.error.wrongCurrentPassword": "Mot de passe actuel incorrect.",
 
@@ -321,14 +328,27 @@ const fr: Record<string, string> = {
 
   // FAQ / CGU
   "faq.title": "FAQ",
-  "faq.placeholder": "Réponse à venir — ce contenu sera complété par le comité.",
   "faq.q1": "Comment devenir porteur de clé ?",
+  "faq.a1":
+    "C'est le comité qui attribue les clés du local, selon le nombre de clés disponibles (visible sur la page Clés). Si ça t'intéresse, parles-en à un membre du comité — c'est lui qui décide. N'hésite pas à me contacter (Louis) sur WhatsApp, je t'expliquerai ça avec plaisir !",
   "faq.q2": "Comment annuler ma participation à un évènement ?",
+  "faq.a2":
+    "Ouvre l'évènement depuis la page Programme et clique sur « Se désinscrire ». Si tu es la seule personne inscrite, l'évènement ne peut pas rester vide : supprime-le à la place, ou demande à un admin. N'hésite pas à me contacter (Louis) sur WhatsApp, je t'expliquerai ça avec plaisir !",
   "faq.q3": "Comment rejoindre ou quitter une communauté ?",
+  "faq.a3":
+    "Pour rejoindre : va sur la page Communautés, sélectionne un jeu puis clique sur « Rejoindre ». Pour quitter : rends-toi sur Mon profil, section « Mes communautés », et désélectionne le jeu. N'hésite pas à me contacter (Louis) sur WhatsApp, je t'expliquerai ça avec plaisir !",
   "faq.q4": "Qui contacter en cas de problème ?",
+  "faq.a4":
+    "Pour toute question technique, un bug ou un souci avec le site, contacte-moi (Louis) directement sur WhatsApp — je t'expliquerai ça avec plaisir !",
   "cgu.title": "Conditions générales d'utilisation",
-  "cgu.placeholder":
-    "Contenu à venir — le texte complet des conditions générales d'utilisation du site sera ajouté ici avant la mise en production.",
+  "cgu.p1":
+    "Ce site est un outil mis à disposition par le comité du club La Chimère pour faciliter l'organisation des parties, la gestion des clés du local et la vie de la communauté. Son utilisation est entièrement facultative : aucun membre n'est obligé de créer un compte ni de s'en servir pour participer à la vie du club.",
+  "cgu.p2":
+    "Créer un compte ne nécessite qu'un pseudo et un mot de passe — aucune autre donnée personnelle n'est obligatoire. Les informations facultatives que tu choisis de renseigner (email, téléphone, localisation, photo) ne servent qu'à l'usage auquel elles sont destinées dans l'app (par exemple être contacté par d'autres membres) : elles ne sont jamais partagées, revendues, ni utilisées à des fins de suivi ou de publicité. Tu peux les modifier, les masquer ou supprimer ton compte à tout moment depuis Mon profil.",
+  "cgu.p3":
+    "Seuls le comité du club et le développeur du site, Louis-Marie Beaudet, ont accès aux fonctions d'administration.",
+  "cgu.p4":
+    "Ces conditions pourront évoluer ; la version la plus récente est toujours disponible à cette adresse.",
 
   // Fiche membre
   "member.notFound": "Membre introuvable.",

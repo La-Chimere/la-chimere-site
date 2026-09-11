@@ -67,10 +67,16 @@ export default async function MemberProfilePage(props: PageProps<"/members/[id]"
   ]);
 
   const contactLines = [
-    profile.email_visible && profile.email ? { label: emailLabel, value: profile.email } : null,
-    profile.phone_visible && profile.phone ? { label: phoneLabel, value: profile.phone } : null,
-    profile.location_visible && profile.location ? { label: locationLabel, value: profile.location } : null,
-  ].filter((line): line is { label: string; value: string } => !!line);
+    profile.email_visible && profile.email
+      ? { label: emailLabel, value: profile.email, href: `mailto:${profile.email}` }
+      : null,
+    profile.phone_visible && profile.phone
+      ? { label: phoneLabel, value: profile.phone, href: `https://wa.me/${profile.phone.replace(/\D/g, "")}` }
+      : null,
+    profile.location_visible && profile.location
+      ? { label: locationLabel, value: profile.location, href: null }
+      : null,
+  ].filter((line): line is { label: string; value: string; href: string | null } => !!line);
 
   const participatedEvents = (participationsData ?? [])
     .map((p) => oneOrFirst(p.events))
@@ -170,9 +176,21 @@ export default async function MemberProfilePage(props: PageProps<"/members/[id]"
           contactLines.map((line) => (
             <div className="admin-row" key={line.label}>
               <span className="name">{line.label}</span>
-              <span className="field-note" style={{ margin: 0 }}>
-                {line.value}
-              </span>
+              {line.href ? (
+                <a
+                  className="field-note contact-link"
+                  style={{ margin: 0 }}
+                  href={line.href}
+                  target={line.href.startsWith("http") ? "_blank" : undefined}
+                  rel={line.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                >
+                  {line.value}
+                </a>
+              ) : (
+                <span className="field-note" style={{ margin: 0 }}>
+                  {line.value}
+                </span>
+              )}
             </div>
           ))
         ) : (

@@ -38,6 +38,7 @@ export default async function ProgrammePage(props: PageProps<"/programme">) {
     { data: eventsData },
     { data: membersData },
     { data: alertData },
+    { data: communityMembershipsData },
   ] = await Promise.all([
     supabase.from("profiles").select("display_name, is_admin").eq("id", user.id).single(),
     supabase
@@ -61,14 +62,21 @@ export default async function ProgrammePage(props: PageProps<"/programme">) {
       .select("event_date, click_count")
       .gte("event_date", rangeStart)
       .lte("event_date", rangeEnd),
+    supabase.from("profile_communities").select("community_id"),
   ]);
 
-  const communities: CommunityOption[] = (communitiesData ?? []).map((c) => ({
-    id: c.id,
-    key: c.key,
-    label: c.label,
-    competitive: c.competitive,
-  }));
+  // Communautés triées par popularité (nombre de membres décroissant) —
+  // à égalité, ordre alphabétique pour rester déterministe.
+  const memberCountByCommunity = new Map<string, number>();
+  for (const row of communityMembershipsData ?? []) {
+    memberCountByCommunity.set(row.community_id, (memberCountByCommunity.get(row.community_id) ?? 0) + 1);
+  }
+  const communities: CommunityOption[] = (communitiesData ?? [])
+    .map((c) => ({ id: c.id, key: c.key, label: c.label, competitive: c.competitive }))
+    .sort((a, b) => {
+      const diff = (memberCountByCommunity.get(b.id) ?? 0) - (memberCountByCommunity.get(a.id) ?? 0);
+      return diff !== 0 ? diff : a.label.localeCompare(b.label);
+    });
 
   const events: EventItem[] = (eventsData ?? []).map((e) => ({
     id: e.id,

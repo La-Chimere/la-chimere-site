@@ -6,15 +6,6 @@ export interface CommunityMember {
   communityIds: string[];
 }
 
-export interface UpcomingCommunityEvent {
-  id: string;
-  title: string | null;
-  eventDate: string;
-  startTime: string;
-  communityIds: string[];
-  communityLabels: string[];
-}
-
 export interface ParticipationRecord {
   profileId: string;
   eventDate: string;

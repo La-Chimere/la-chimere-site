@@ -51,6 +51,7 @@ const en: Record<string, string> = {
   // Events
   "event.genericEvent": "Event",
   "event.defaultTitle": "Game",
+  "event.availableFrom": "Available from",
   "event.noParticipant": "No participants",
   "event.participantCount": "{n} participants",
   "event.contact": "Contact",
@@ -92,7 +93,12 @@ const en: Record<string, string> = {
   // Communities
   "communities.title": "Communities",
   "communities.upcomingEvents": "Upcoming events",
+  "communities.pastEvents": "Past events",
   "communities.nothingUpcoming": "No upcoming events in this selection.",
+  "communities.nothingPast": "No past events in this selection.",
+  "communities.showPastEvents": "Show past events",
+  "communities.showUpcomingEvents": "Show upcoming events",
+  "communities.pageOf": "{current} / {total}",
   "communities.members": "Members",
   "communities.noMembers": "No members in this selection.",
   "communities.keyHolder": "Key holder",
@@ -271,6 +277,7 @@ const en: Record<string, string> = {
   "profile.saveChanges": "Save changes",
   "profile.avatar.uploading": "Uploading…",
   "profile.avatar.change": "Change photo",
+  "profile.viewAsVisitor": "View my profile as a visitor",
   "profile.error.cannotVerifyPassword": "Could not verify the current password.",
   "profile.error.wrongCurrentPassword": "Current password is incorrect.",
 
@@ -321,13 +328,26 @@ const en: Record<string, string> = {
 
   // FAQ / Terms of Use
   "faq.title": "FAQ",
-  "faq.placeholder": "Answer coming soon — this content will be completed by the committee.",
   "faq.q1": "How do I become a key holder?",
+  "faq.a1":
+    "The committee assigns venue keys based on how many keys are available (shown on the Keys page). If you're interested, mention it to a committee member — they decide who gets one. Feel free to reach out to me (Louis) on WhatsApp, happy to walk you through it!",
   "faq.q2": "How do I cancel my participation in an event?",
+  "faq.a2":
+    "Open the event from the Programme page and tap \"Leave\". If you're the only person signed up, the event can't stay empty — delete it instead, or ask an admin. Feel free to reach out to me (Louis) on WhatsApp, happy to walk you through it!",
   "faq.q3": "How do I join or leave a community?",
+  "faq.a3":
+    "To join: go to the Communities page, select a game, then tap \"Join\". To leave: go to My Profile, \"My communities\" section, and deselect the game. Feel free to reach out to me (Louis) on WhatsApp, happy to walk you through it!",
   "faq.q4": "Who do I contact if there's a problem?",
+  "faq.a4":
+    "For any technical question, bug, or issue with the site, reach out to me (Louis) directly on WhatsApp — happy to help!",
   "cgu.title": "Terms of Use",
-  "cgu.placeholder": "Content coming soon — the site's full Terms of Use will be added here before going live.",
+  "cgu.p1":
+    "This site is a tool made available by the La Chimère club committee to help organize games, manage the venue's keys, and support community life. Using it is entirely optional: no member is required to create an account or use it to take part in club life.",
+  "cgu.p2":
+    "Creating an account only requires a nickname and a password — no other personal data is required. Any optional information you choose to provide (email, phone, location, photo) is only used for its intended purpose within the app (for example, being contacted by other members): it is never shared, sold, or used for tracking or advertising. You can edit it, hide it, or delete your account at any time from My Profile.",
+  "cgu.p3":
+    "Only the club committee and the site's developer, Louis-Marie Beaudet, have access to the app's administration features.",
+  "cgu.p4": "These terms may change over time; the most up-to-date version is always available at this address.",
 
   // Member profile
   "member.notFound": "Member not found.",
