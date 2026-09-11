@@ -12,6 +12,13 @@ export async function createClient() {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      // Next.js instrumente `fetch` pour son Data Cache ; sans ce contournement,
+      // les appels Supabase (auth incluse) peuvent être mis en cache ou subir
+      // des ralentissements/échecs incohérents en dev. Ces appels ne doivent
+      // jamais être mis en cache par Next.
+      global: {
+        fetch: (input, init) => fetch(input, { ...init, cache: "no-store" }),
+      },
       cookies: {
         getAll() {
           return cookieStore.getAll();
