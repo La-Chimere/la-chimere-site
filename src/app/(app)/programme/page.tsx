@@ -92,9 +92,13 @@ export default async function ProgrammePage(props: PageProps<"/programme">) {
       .map((ec) => oneOrFirst(ec.communities))
       .filter((c): c is NonNullable<typeof c> => !!c)
       .map((c) => ({ id: c.id, key: c.key, label: c.label, competitive: c.competitive })),
+    // Trié par nom (ordre alphabétique) et non par l'ordre renvoyé par la
+    // requête (non garanti, et peut changer après une simple mise à jour du
+    // résultat V/E/D d'un participant) — l'ordre affiché doit rester stable.
     participants: (e.event_participants ?? [])
       .map((p) => ({ ...p, profiles: oneOrFirst(p.profiles) }))
       .filter((p) => p.profiles)
+      .sort((a, b) => a.profiles!.display_name.localeCompare(b.profiles!.display_name))
       .map((p) => ({
         profileId: p.profile_id,
         displayName: p.profiles!.display_name,
