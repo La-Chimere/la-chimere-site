@@ -53,35 +53,35 @@ export function AvatarUpload({ userId, currentUrl, displayName, onUploaded, view
   }
 
   return (
-    <div className="avatar-upload-wrap">
-      <button
-        type="button"
-        className={`avatar-upload ${preview ? "has-photo" : ""}`}
-        style={preview ? { backgroundImage: `url(${preview})` } : undefined}
-        onClick={() => inputRef.current?.click()}
-      >
-        {!preview && initials(displayName)}
-      </button>
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/*"
-        hidden
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (file) handleFile(file);
-        }}
-      />
-      <div className="avatar-upload-actions">
+    <div className="avatar-upload-actions">
+      <div className="avatar-upload-wrap">
+        <button
+          type="button"
+          className={`avatar-upload ${preview ? "has-photo" : ""}`}
+          style={preview ? { backgroundImage: `url(${preview})` } : undefined}
+          onClick={() => inputRef.current?.click()}
+        >
+          {!preview && initials(displayName)}
+        </button>
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          hidden
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) handleFile(file);
+          }}
+        />
         <button type="button" className="avatar-upload-label" onClick={() => inputRef.current?.click()}>
           {uploading ? t("profile.avatar.uploading") : t("profile.avatar.change")}
         </button>
-        {viewAsVisitorHref && (
-          <Link href={viewAsVisitorHref} className="avatar-upload-label">
-            {t("profile.viewAsVisitor")}
-          </Link>
-        )}
       </div>
+      {viewAsVisitorHref && (
+        <Link href={viewAsVisitorHref} className="avatar-upload-label">
+          {t("profile.viewAsVisitor")}
+        </Link>
+      )}
       {error && <p className="field-error">{error}</p>}
     </div>
   );

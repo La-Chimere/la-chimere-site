@@ -115,6 +115,7 @@ export function AnnouncementsClient({
       )}
 
       <AnnouncementForm
+        key={editing?.id ?? "new"}
         open={formOpen}
         onClose={() => setFormOpen(false)}
         communities={communities}

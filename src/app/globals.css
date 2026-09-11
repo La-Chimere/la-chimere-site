@@ -1145,9 +1145,8 @@ main {
 }
 .ann-dot {
   position: absolute;
-  top: 50%;
+  top: 12px;
   right: 12px;
-  transform: translateY(-50%);
   width: 22px;
   height: 22px;
   border-radius: 50%;
@@ -1377,9 +1376,8 @@ main {
 }
 .notif-dot {
   position: absolute;
-  top: 50%;
+  top: 10px;
   right: 10px;
-  transform: translateY(-50%);
   width: 22px;
   height: 22px;
   border-radius: 50%;
