@@ -39,7 +39,7 @@ const fr: Record<string, string> = {
   // Programme (CDC 4.2/12.10)
   "programme.calendarView": "Vue calendrier",
   "programme.nothingPlanned": "Rien de prévu.",
-  "programme.keyFromHour": "à partir de {hour}h",
+  "programme.keyFromHour": "à partir de {hour}",
   "programme.noKey": "Pas de clé",
   "programme.sendAlert1": "Envoyer 1er Whatsapp",
   "programme.sendAlert2": "Envoyer 2e Whatsapp",

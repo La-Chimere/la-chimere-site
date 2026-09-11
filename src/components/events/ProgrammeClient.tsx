@@ -244,7 +244,7 @@ export function ProgrammeClient({
                     {keyStatus &&
                       (keyStatus.ok ? (
                         <span className="tag ok">
-                          🔑 {t("programme.keyFromHour", { hour: parseInt(keyStatus.from!, 10) })}
+                          🔑 {t("programme.keyFromHour", { hour: formatHour(keyStatus.from!) })}
                         </span>
                       ) : (
                         <span className="tag warn">⚠ {t("programme.noKey")}</span>

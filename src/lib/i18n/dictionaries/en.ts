@@ -39,7 +39,7 @@ const en: Record<string, string> = {
   // Programme
   "programme.calendarView": "Calendar view",
   "programme.nothingPlanned": "Nothing planned.",
-  "programme.keyFromHour": "From {hour}h",
+  "programme.keyFromHour": "From {hour}",
   "programme.noKey": "No key",
   "programme.sendAlert1": "Send 1st WhatsApp",
   "programme.sendAlert2": "Send 2nd WhatsApp",
