@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useT } from "@/components/i18n/LocaleProvider";
 import { SearchIcon } from "@/components/ui/icons";
+import { normalizeForSearch } from "@/lib/text";
 
 export interface PickableMember {
   id: string;
@@ -41,9 +42,9 @@ export function MemberPicker({
   const results = useMemo(() => {
     if (!query.trim()) return [];
     const selectedIds = new Set(selected.map((m) => m.id));
-    const q = query.trim().toLowerCase();
+    const q = normalizeForSearch(query.trim());
     return members
-      .filter((m) => !selectedIds.has(m.id) && m.displayName.toLowerCase().includes(q))
+      .filter((m) => !selectedIds.has(m.id) && normalizeForSearch(m.displayName).includes(q))
       .slice(0, 6);
   }, [members, selected, query]);
 

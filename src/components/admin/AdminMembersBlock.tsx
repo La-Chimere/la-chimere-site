@@ -8,6 +8,7 @@ import { relativeActivityDays } from "@/lib/dates";
 import { formatActivity } from "@/lib/i18n/format";
 import { useT } from "@/components/i18n/LocaleProvider";
 import { CheckIcon, SearchIcon } from "@/components/ui/icons";
+import { normalizeForSearch } from "@/lib/text";
 import type { AdminMember } from "@/lib/admin-types";
 
 interface AdminMembersBlockProps {
@@ -40,9 +41,9 @@ export function AdminMembersBlock({
   }, [members]);
 
   const filteredMembers = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = normalizeForSearch(query.trim());
     if (!q) return sortedMembers;
-    return sortedMembers.filter((m) => m.displayName.toLowerCase().includes(q));
+    return sortedMembers.filter((m) => normalizeForSearch(m.displayName).includes(q));
   }, [sortedMembers, query]);
 
   return (
