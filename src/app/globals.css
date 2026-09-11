@@ -1799,14 +1799,6 @@ main {
   width: 16px;
   height: 16px;
 }
-.avatar-section-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
 /* ---- Sous-pages (Mon profil, Paramètres, FAQ, CGU, déconnexion) ---- */
 .subpage-head {
   display: flex;
@@ -1919,6 +1911,14 @@ main {
   background: none;
   border: none;
   font-family: inherit;
+  text-decoration: none;
+}
+.avatar-upload-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
 }
 .step-title {
   font-size: 20px;

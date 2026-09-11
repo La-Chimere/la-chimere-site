@@ -338,8 +338,9 @@ const fr: Record<string, string> = {
   "faq.a3":
     "Pour rejoindre : va sur la page Communautés, sélectionne un jeu puis clique sur « Rejoindre ». Pour quitter : rends-toi sur Mon profil, section « Mes communautés », et désélectionne le jeu. N'hésite pas à me contacter (Louis) sur WhatsApp, je t'expliquerai ça avec plaisir !",
   "faq.q4": "Qui contacter en cas de problème ?",
-  "faq.a4":
-    "Pour toute question technique, un bug ou un souci avec le site, contacte-moi (Louis) directement sur WhatsApp — je t'expliquerai ça avec plaisir !",
+  "faq.a4": "Contacte-moi sur WhatsApp.",
+  "faq.q5": "J'ai oublié mon mot de passe",
+  "faq.a5": "N'hésite pas à me contacter (Louis) sur WhatsApp.",
   "cgu.title": "Conditions générales d'utilisation",
   "cgu.p1":
     "Ce site est un outil mis à disposition par le comité du club La Chimère pour faciliter l'organisation des parties, la gestion des clés du local et la vie de la communauté. Son utilisation est entièrement facultative : aucun membre n'est obligé de créer un compte ni de s'en servir pour participer à la vie du club.",

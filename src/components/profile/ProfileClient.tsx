@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import Link from "next/link";
 import { AvatarUpload } from "@/components/profile/AvatarUpload";
 import { ToggleSwitch } from "@/components/ui/ToggleSwitch";
 import { Chip } from "@/components/ui/Chip";
@@ -104,16 +103,14 @@ export function ProfileClient({ userId, profile, communities, myCommunityIds }: 
         <BackButton />
       </div>
 
-      <div className="section-card avatar-section-row">
+      <div className="section-card">
         <AvatarUpload
           userId={userId}
           currentUrl={avatarUrl}
           displayName={displayName}
           onUploaded={setAvatarUrl}
+          viewAsVisitorHref={`/members/${userId}`}
         />
-        <Link href={`/members/${userId}`} className="modal-btn outline" style={{ flex: "none" }}>
-          {t("profile.viewAsVisitor")}
-        </Link>
       </div>
 
       <div className="section-card">

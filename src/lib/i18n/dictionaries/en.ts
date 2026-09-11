@@ -338,8 +338,9 @@ const en: Record<string, string> = {
   "faq.a3":
     "To join: go to the Communities page, select a game, then tap \"Join\". To leave: go to My Profile, \"My communities\" section, and deselect the game. Feel free to reach out to me (Louis) on WhatsApp, happy to walk you through it!",
   "faq.q4": "Who do I contact if there's a problem?",
-  "faq.a4":
-    "For any technical question, bug, or issue with the site, reach out to me (Louis) directly on WhatsApp — happy to help!",
+  "faq.a4": "Contact me on WhatsApp.",
+  "faq.q5": "I forgot my password",
+  "faq.a5": "Feel free to reach out to me (Louis) on WhatsApp.",
   "cgu.title": "Terms of Use",
   "cgu.p1":
     "This site is a tool made available by the La Chimère club committee to help organize games, manage the venue's keys, and support community life. Using it is entirely optional: no member is required to create an account or use it to take part in club life.",

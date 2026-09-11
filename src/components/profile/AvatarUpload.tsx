@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { useT } from "@/components/i18n/LocaleProvider";
 import { resizeImageFile } from "@/lib/image-resize";
@@ -10,6 +11,7 @@ interface AvatarUploadProps {
   currentUrl: string | null;
   displayName: string;
   onUploaded: (url: string) => void;
+  viewAsVisitorHref?: string;
 }
 
 function initials(name: string): string {
@@ -20,7 +22,7 @@ function initials(name: string): string {
 // Sélecteur de photo de profil (CDC 13.4/14.2) : upload direct vers le
 // bucket Supabase Storage "avatars" (RLS : chaque membre n'écrit que dans
 // son propre dossier), puis mise à jour de profiles.avatar_url.
-export function AvatarUpload({ userId, currentUrl, displayName, onUploaded }: AvatarUploadProps) {
+export function AvatarUpload({ userId, currentUrl, displayName, onUploaded, viewAsVisitorHref }: AvatarUploadProps) {
   const { t } = useT();
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -70,9 +72,16 @@ export function AvatarUpload({ userId, currentUrl, displayName, onUploaded }: Av
           if (file) handleFile(file);
         }}
       />
-      <button type="button" className="avatar-upload-label" onClick={() => inputRef.current?.click()}>
-        {uploading ? t("profile.avatar.uploading") : t("profile.avatar.change")}
-      </button>
+      <div className="avatar-upload-actions">
+        <button type="button" className="avatar-upload-label" onClick={() => inputRef.current?.click()}>
+          {uploading ? t("profile.avatar.uploading") : t("profile.avatar.change")}
+        </button>
+        {viewAsVisitorHref && (
+          <Link href={viewAsVisitorHref} className="avatar-upload-label">
+            {t("profile.viewAsVisitor")}
+          </Link>
+        )}
+      </div>
       {error && <p className="field-error">{error}</p>}
     </div>
   );
