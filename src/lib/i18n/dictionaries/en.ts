@@ -61,6 +61,7 @@ const en: Record<string, string> = {
   "event.indicatedBy": "Indicated by",
   "event.member": "Member",
   "event.participants": "Participants",
+  "event.addParticipant": "Add a participant…",
   "event.result.win": "W",
   "event.result.tie": "T",
   "event.result.loss": "L",
@@ -151,6 +152,8 @@ const en: Record<string, string> = {
   "admin.error.maxKeysReached": "Maximum number of keys already reached.",
   "admin.error.totalBelowHolders":
     "The total cannot be lower than the current number of holders ({n}).",
+  "admin.error.passwordTooShort": "The password must be at least 8 characters long.",
+  "admin.error.cannotResetSuperAdmin": "Only the super-admin can change this account.",
 
   // Member picker
   "memberPicker.searchPlaceholder": "Search for a member…",
@@ -177,6 +180,7 @@ const en: Record<string, string> = {
   "auth.error.missingCredentials": "Nickname and password are required.",
   "auth.error.invalidCredentials": "Incorrect credentials.",
   "auth.error.invalidNickname": "Invalid nickname.",
+  "auth.error.passwordTooShort": "The password must be at least 8 characters long.",
   "auth.error.nicknameTaken": "This nickname is already taken.",
   "auth.error.createAccountFailed": "Could not create the account:",
   "auth.error.createAccountRetry": "Could not create the account, please try again.",
@@ -280,6 +284,7 @@ const en: Record<string, string> = {
   "profile.viewAsVisitor": "View my profile as a visitor",
   "profile.error.cannotVerifyPassword": "Could not verify the current password.",
   "profile.error.wrongCurrentPassword": "Current password is incorrect.",
+  "profile.error.invalidAvatarUrl": "Invalid profile picture.",
 
   // Keys
   "keys.buildingCode": "Building entry code.",

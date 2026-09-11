@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { loginEmailFromSlug, slugify } from "@/lib/slug";
 import { notifyAdmins } from "@/lib/notify-admins";
+import { escapeLikePattern } from "@/lib/text";
 import { serverT } from "@/lib/i18n/server";
 
 export async function signOut() {
@@ -33,14 +34,15 @@ export async function login(
   }
 
   const admin = createAdminClient();
+  const pattern = escapeLikePattern(identifier);
   const { data: byName } = await admin
     .from("profiles")
     .select("login_slug")
-    .ilike("display_name", identifier)
+    .ilike("display_name", pattern)
     .maybeSingle();
   const { data: byEmail } = byName
     ? { data: null }
-    : await admin.from("profiles").select("login_slug").ilike("email", identifier).maybeSingle();
+    : await admin.from("profiles").select("login_slug").ilike("email", pattern).maybeSingle();
   const profile = byName ?? byEmail;
 
   if (!profile?.login_slug) {
@@ -84,6 +86,9 @@ export async function completeSignup(input: SignupInput): Promise<AuthActionStat
   if (!displayName || !input.password) {
     return { error: await serverT("auth.error.missingCredentials") };
   }
+  if (input.password.length < 8) {
+    return { error: await serverT("auth.error.passwordTooShort") };
+  }
 
   const admin = createAdminClient();
   const baseSlug = slugify(displayName);
@@ -94,7 +99,7 @@ export async function completeSignup(input: SignupInput): Promise<AuthActionStat
   const { data: existingProfile } = await admin
     .from("profiles")
     .select("id")
-    .ilike("display_name", displayName)
+    .ilike("display_name", escapeLikePattern(displayName))
     .maybeSingle();
   if (existingProfile) {
     return { error: await serverT("auth.error.nicknameTaken") };

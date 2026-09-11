@@ -61,6 +61,7 @@ const fr: Record<string, string> = {
   "event.indicatedBy": "Indiqué par",
   "event.member": "Membre",
   "event.participants": "Participants",
+  "event.addParticipant": "Ajouter un participant…",
   "event.result.win": "V",
   "event.result.tie": "E",
   "event.result.loss": "D",
@@ -151,6 +152,8 @@ const fr: Record<string, string> = {
   "admin.error.maxKeysReached": "Nombre maximal de clés déjà atteint.",
   "admin.error.totalBelowHolders":
     "Le total ne peut pas être inférieur au nombre de porteurs actuels ({n}).",
+  "admin.error.passwordTooShort": "Le mot de passe doit contenir au moins 8 caractères.",
+  "admin.error.cannotResetSuperAdmin": "Seul le super-administrateur peut modifier ce compte.",
 
   // Sélecteur de membre (CDC 12.3/12.9)
   "memberPicker.searchPlaceholder": "Rechercher un membre…",
@@ -177,6 +180,7 @@ const fr: Record<string, string> = {
   "auth.error.missingCredentials": "Pseudo et mot de passe requis.",
   "auth.error.invalidCredentials": "Identifiants incorrects.",
   "auth.error.invalidNickname": "Pseudo invalide.",
+  "auth.error.passwordTooShort": "Le mot de passe doit contenir au moins 8 caractères.",
   "auth.error.nicknameTaken": "Ce pseudo est déjà pris.",
   "auth.error.createAccountFailed": "Impossible de créer le compte :",
   "auth.error.createAccountRetry": "Impossible de créer le compte, réessaie.",
@@ -280,6 +284,7 @@ const fr: Record<string, string> = {
   "profile.viewAsVisitor": "Voir mon profil en tant que visiteur",
   "profile.error.cannotVerifyPassword": "Impossible de vérifier le mot de passe actuel.",
   "profile.error.wrongCurrentPassword": "Mot de passe actuel incorrect.",
+  "profile.error.invalidAvatarUrl": "Photo de profil invalide.",
 
   // Clés
   "keys.buildingCode": "Code d'entrée de l'immeuble.",

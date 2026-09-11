@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { ToggleSwitch } from "@/components/ui/ToggleSwitch";
 import { useT } from "@/components/i18n/LocaleProvider";
 import { CheckIcon } from "@/components/ui/icons";
+import { StrongText } from "@/components/ui/RichText";
 
 interface SignupCommunity {
   id: string;
@@ -259,9 +260,9 @@ export function SignupWizard({ communities }: SignupWizardProps) {
               </div>
               <label className="consent-row">
                 <input type="checkbox" checked={consent1} onChange={(e) => setConsent1(e.target.checked)} />
-                {/* Contenu HTML statique du dictionnaire (pas de saisie utilisateur) : la mise en
-                    gras de deux passages précis nécessite du balisage, cf. CDC 13.3. */}
-                <span className="txt" dangerouslySetInnerHTML={{ __html: t("signup.step1.consent") }} />
+                <span className="txt">
+                  <StrongText text={t("signup.step1.consent")} />
+                </span>
               </label>
             </div>
           )}

@@ -17,8 +17,15 @@ export async function setSignupValidationRequired(value: boolean) {
   revalidatePath("/admin");
 }
 
+// Un admin (non super) ne peut pas supprimer le compte du super-admin —
+// évite qu'un admin ordinaire ne retire le seul compte ayant le rôle
+// super-admin (voir CDC 6.1 : gouvernance du rôle super-admin).
 export async function deleteMember(profileId: string) {
-  const { admin } = await requireAdmin();
+  const { admin, isSuperAdmin } = await requireAdmin();
+  if (!isSuperAdmin) {
+    const { data: target } = await admin.from("profiles").select("is_super_admin").eq("id", profileId).single();
+    if (target?.is_super_admin) return;
+  }
   await admin.auth.admin.deleteUser(profileId);
   revalidatePath("/admin");
 }
@@ -116,7 +123,16 @@ export async function setCommunityCompetitive(id: string, competitive: boolean) 
 }
 
 export async function resetMemberPassword(profileId: string, newPassword: string) {
-  const { admin } = await requireAdmin();
+  const { admin, isSuperAdmin } = await requireAdmin();
+  if (newPassword.length < 8) {
+    return { error: await serverT("admin.error.passwordTooShort") };
+  }
+  if (!isSuperAdmin) {
+    const { data: target } = await admin.from("profiles").select("is_super_admin").eq("id", profileId).single();
+    if (target?.is_super_admin) {
+      return { error: await serverT("admin.error.cannotResetSuperAdmin") };
+    }
+  }
   const { error } = await admin.auth.admin.updateUserById(profileId, { password: newPassword });
   return { error: error?.message ?? null };
 }

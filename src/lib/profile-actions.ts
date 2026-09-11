@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { loginEmailFromSlug } from "@/lib/slug";
+import { escapeLikePattern } from "@/lib/text";
 import { serverT } from "@/lib/i18n/server";
 
 async function requireUser() {
@@ -14,6 +15,16 @@ async function requireUser() {
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Non connecté.");
   return { supabase, userId: user.id };
+}
+
+// avatar_url n'était pas validé côté serveur : un membre pouvait y mettre
+// n'importe quelle URL externe, affichée ensuite à tous — un lien vers un
+// serveur tiers y devient un mouchard (IP/user-agent des autres membres à
+// chaque affichage). On n'accepte que le propre dossier de stockage du
+// membre (celui que l'upload utilise réellement, cf. AvatarUpload.tsx).
+function isOwnAvatarUrl(url: string, userId: string): boolean {
+  const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  return !!base && url.startsWith(`${base}/storage/v1/object/public/avatars/${userId}/`);
 }
 
 export interface ProfileInput {
@@ -32,10 +43,34 @@ export interface ProfileInput {
 export async function updateProfile(input: ProfileInput) {
   const { supabase, userId } = await requireUser();
 
+  const displayName = input.displayName.trim();
+  if (!displayName) {
+    return { error: await serverT("auth.error.missingCredentials") };
+  }
+
+  // Un pseudo est l'identifiant de connexion (CDC 4.1) : deux comptes ne
+  // doivent jamais différer seulement par la casse, sous peine de bloquer
+  // la connexion des deux (la recherche par pseudo est insensible à la
+  // casse). Vérifié ici en plus de la contrainte unique en base (celle-ci
+  // est sensible à la casse).
+  const { data: existingProfile } = await supabase
+    .from("profiles")
+    .select("id")
+    .ilike("display_name", escapeLikePattern(displayName))
+    .neq("id", userId)
+    .maybeSingle();
+  if (existingProfile) {
+    return { error: await serverT("auth.error.nicknameTaken") };
+  }
+
+  if (input.avatarUrl && !isOwnAvatarUrl(input.avatarUrl, userId)) {
+    return { error: await serverT("profile.error.invalidAvatarUrl") };
+  }
+
   const { error } = await supabase
     .from("profiles")
     .update({
-      display_name: input.displayName,
+      display_name: displayName,
       email: input.email || null,
       email_visible: input.emailVisible,
       phone: input.phone || null,
@@ -87,6 +122,10 @@ export async function joinCommunity(communityId: string) {
 export async function changePassword(currentPassword: string, newPassword: string) {
   const { supabase, userId } = await requireUser();
 
+  if (newPassword.length < 8) {
+    return { error: await serverT("auth.error.passwordTooShort") };
+  }
+
   const { data: profile } = await supabase
     .from("profiles")
     .select("login_slug")
@@ -111,6 +150,7 @@ export async function changePassword(currentPassword: string, newPassword: strin
 // cf. CDC 13.3, l'étape 2 du parcours n'a pas encore d'utilisateur Auth).
 export async function setOwnAvatarUrl(avatarUrl: string) {
   const { supabase, userId } = await requireUser();
+  if (!isOwnAvatarUrl(avatarUrl, userId)) return;
   await supabase.from("profiles").update({ avatar_url: avatarUrl }).eq("id", userId);
 }
 
