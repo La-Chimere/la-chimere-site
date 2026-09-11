@@ -319,7 +319,7 @@ const en: Record<string, string> = {
   "settings.dark": "Dark",
   "settings.accentColor": "Accent color",
   "settings.application": "Application",
-  "settings.installApp": "Install the app (web app mode)",
+  "settings.installApp": "Install as an app (Google Chrome only)",
   "settings.installApp.ios": "On iPhone/iPad: open Safari's Share menu, then choose \"Add to Home Screen\".",
   "settings.installApp.unavailable": "Your browser doesn't offer installation here. Try Chrome on Android, or Safari on iPhone (Share menu > Add to Home Screen).",
   "settings.language": "Language",
