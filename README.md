@@ -6,15 +6,16 @@ Ce dépôt est **public** simplement pour rester gratuit à héberger (dépôt p
 
 ## État du projet
 
-Le projet est actuellement en phase de conception. Le cahier des charges et les maquettes interactives (voir `docs/`) documentent l'ensemble des règles de fonctionnement décidées avec le porteur du projet ; le développement du POC (voir section 8 du cahier des charges) n'a pas encore démarré.
+Le POC est développé et fonctionnel (Next.js + Supabase, voir `docs/ARCHITECTURE.md`). Le cahier des charges et les maquettes interactives (voir `docs/`) restent la référence pour les règles de comportement fonctionnelles.
 
 ## Contenu de ce dépôt
 
+- `docs/ARCHITECTURE.md` — documentation technique du fonctionnement interne de l'application, à l'intention d'un·e développeur·se qui reprend ou modifie le code (pas un guide utilisateur).
 - `docs/cahier-des-charges-la-chimere.docx` — cahier des charges complet : contexte, périmètre, rôles, fonctionnalités, architecture technique recommandée, modèle de données, plan de déploiement, budget, et une annexe détaillée de toutes les règles de comportement (UI/UX) définies au fil des itérations de la maquette.
-- `docs/maquette-principale.html` — maquette interactive de l'application (programme, leaderboard, communautés, admin, paramètres...). À ouvrir directement dans un navigateur.
-- `docs/maquette-creation-compte.html` — maquette interactive du parcours d'arrivée et de création de compte. À ouvrir directement dans un navigateur.
+- `docs/maquette-principale.html` — maquette interactive d'origine de l'application (programme, leaderboard, communautés, admin, paramètres...). À ouvrir directement dans un navigateur. Le vrai code vit dans `src/` ; ces maquettes ne sont conservées que comme référence historique des décisions de design.
+- `docs/maquette-creation-compte.html` — maquette interactive d'origine du parcours d'arrivée et de création de compte. Idem, référence historique.
 
-## Stack technique prévue
+## Stack technique
 
 - **Frontend** : Next.js (React), mobile-first
 - **Hébergement** : Vercel
