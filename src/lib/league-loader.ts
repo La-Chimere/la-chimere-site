@@ -32,7 +32,7 @@ export async function loadLeague(leagueId: string): Promise<League | null> {
       .select(
         `id, name, rank, rules,
         league_participants(id, profile_id, army, profiles(display_name, avatar_url)),
-        league_matches(id, player_a_id, player_b_id, score_a, score_b)`,
+        league_matches(id, player_a_id, player_b_id, score_a, score_b, proof_path)`,
       )
       .eq("league_id", leagueId)
       .order("rank"),
@@ -66,6 +66,8 @@ export async function loadLeague(leagueId: string): Promise<League | null> {
       playerBDisplayName: nameByProfileId.get(m.player_b_id) ?? "?",
       scoreA: m.score_a,
       scoreB: m.score_b,
+      proofPath: m.proof_path,
+      proofUrl: null,
     }));
 
     const standingsByProfileId = new Map<string, LeagueStandingRow>();
@@ -123,6 +125,22 @@ export async function loadLeague(leagueId: string): Promise<League | null> {
       standings,
     };
   });
+
+  // URLs signées pour les preuves photo : échoue silencieusement (reste
+  // null) si le visiteur courant n'a pas le droit de lire cet objet côté
+  // Storage (RLS) — c'est exactement le comportement voulu (visible
+  // seulement des deux joueurs et de l'organisateur).
+  const matchesWithProof = divisions.flatMap((d) => d.matches).filter((m) => m.proofPath);
+  if (matchesWithProof.length > 0) {
+    const signed = await Promise.all(
+      matchesWithProof.map((m) =>
+        supabase.storage.from("league-match-proofs").createSignedUrl(m.proofPath!, 3600),
+      ),
+    );
+    signed.forEach((result, i) => {
+      matchesWithProof[i].proofUrl = result.data?.signedUrl ?? null;
+    });
+  }
 
   return {
     id: leagueRow.id,

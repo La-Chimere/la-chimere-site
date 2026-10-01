@@ -74,6 +74,7 @@ export default async function CommunitiesPage() {
     endTime: e.end_time,
     createdBy: e.created_by,
     repeatsWeekly: e.repeats_weekly,
+    leagueMatch: null,
     communities: (e.event_communities ?? [])
       .map((ec) => oneOrFirst(ec.communities))
       .filter((c): c is NonNullable<typeof c> => !!c)

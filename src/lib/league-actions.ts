@@ -195,6 +195,16 @@ export async function setMatchResult(matchId: string, scoreA: number, scoreB: nu
   revalidatePath("/communities");
 }
 
+// Le chemin est déjà vérifié par la policy Storage (seuls les deux joueurs
+// ou l'organisateur peuvent écrire sous "<matchId>/...") ; ici on se contente
+// d'enregistrer le chemin sur la ligne, league_matches_update couvrant déjà
+// le droit d'écrire cette colonne.
+export async function setMatchProofPath(matchId: string, proofPath: string | null) {
+  const { supabase } = await requireUserId();
+  await supabase.from("league_matches").update({ proof_path: proofPath }).eq("id", matchId);
+  revalidatePath("/communities");
+}
+
 export async function clearMatchResult(matchId: string) {
   const { supabase } = await requireUserId();
   await supabase

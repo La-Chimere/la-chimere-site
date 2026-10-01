@@ -18,6 +18,10 @@ export interface LeagueMatch {
   playerBDisplayName: string;
   scoreA: number | null;
   scoreB: number | null;
+  proofPath: string | null;
+  /** URL signée (courte durée), générée côté serveur uniquement si le
+   * visiteur courant a le droit de voir cette preuve (RLS Storage). */
+  proofUrl: string | null;
 }
 
 export interface LeagueStandingRow {

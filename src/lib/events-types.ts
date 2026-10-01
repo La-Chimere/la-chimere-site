@@ -23,6 +23,7 @@ export interface EventItem {
   endTime: string;
   createdBy: string;
   repeatsWeekly: boolean;
+  leagueMatch: LeagueMatchLite | null;
   communities: EventCommunity[];
   participants: EventParticipant[];
 }
@@ -32,4 +33,21 @@ export interface CommunityOption {
   key: string;
   label: string;
   competitive: boolean;
+}
+
+export interface LeagueMatchCandidate {
+  matchId: string;
+  opponentId: string;
+  communityId: string;
+  label: string;
+}
+
+export interface LeagueMatchLite {
+  id: string;
+  scoreA: number | null;
+  scoreB: number | null;
+  playerAId: string;
+  playerBId: string;
+  proofPath: string | null;
+  proofUrl: string | null;
 }

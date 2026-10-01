@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { setMatchResult } from "@/lib/league-actions";
+import { MatchProofUpload } from "@/components/leagues/MatchProofUpload";
 import { useT } from "@/components/i18n/LocaleProvider";
 import type { LeagueMatch } from "@/lib/league-types";
 
@@ -69,6 +70,9 @@ export function MatchResultModal({ match, onClose }: MatchResultModalProps) {
           placeholder={t("league.matchResult.scorePlaceholder")}
         />
       </div>
+
+      <MatchProofUpload matchId={match.id} proofUrl={match.proofUrl} />
+
       <div className="modal-btn-row">
         <button type="button" className="modal-btn gray" onClick={onClose}>
           {t("common.cancel")}

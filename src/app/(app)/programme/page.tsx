@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { daysOfWeek, isoDate, monthGridDays } from "@/lib/dates";
 import { ProgrammeClient } from "@/components/events/ProgrammeClient";
-import type { CommunityOption, EventItem } from "@/lib/events-types";
+import type { CommunityOption, EventItem, LeagueMatchCandidate } from "@/lib/events-types";
 
 // Sans types générés depuis le schéma Supabase, le client ne connait pas la
 // cardinalité réelle d'une relation "vers le parent" (FK) et l'infère comme
@@ -39,6 +39,7 @@ export default async function ProgrammePage(props: PageProps<"/programme">) {
     { data: membersData },
     { data: alertData },
     { data: communityMembershipsData },
+    { data: pendingMatchesData },
   ] = await Promise.all([
     supabase.from("profiles").select("display_name, is_admin").eq("id", user.id).single(),
     supabase
@@ -51,7 +52,8 @@ export default async function ProgrammePage(props: PageProps<"/programme">) {
       .select(
         `id, type, title, description, event_date, start_time, end_time, created_by, repeats_weekly,
         event_communities(communities(id, key, label, competitive)),
-        event_participants(profile_id, result, profiles(display_name, has_key, avatar_url))`,
+        event_participants(profile_id, result, profiles(display_name, has_key, avatar_url)),
+        league_matches(id, player_a_id, player_b_id, score_a, score_b, proof_path)`,
       )
       .gte("event_date", rangeStart)
       .lte("event_date", rangeEnd)
@@ -63,6 +65,17 @@ export default async function ProgrammePage(props: PageProps<"/programme">) {
       .gte("event_date", rangeStart)
       .lte("event_date", rangeEnd),
     supabase.from("profile_communities").select("community_id"),
+    // Mes matchs de ligue pas encore joués ET pas déjà liés à un évènement —
+    // candidats pour le toggle "match de ligue" auto-détecté dans EventForm.
+    supabase
+      .from("league_matches")
+      .select(
+        `id, player_a_id, player_b_id,
+        league_divisions(name, leagues(name, community_id)),
+        events(id)`,
+      )
+      .or(`player_a_id.eq.${user.id},player_b_id.eq.${user.id}`)
+      .is("score_a", null),
   ]);
 
   // Communautés triées par popularité (nombre de membres décroissant) —
@@ -78,7 +91,9 @@ export default async function ProgrammePage(props: PageProps<"/programme">) {
       return diff !== 0 ? diff : a.label.localeCompare(b.label);
     });
 
-  const events: EventItem[] = (eventsData ?? []).map((e) => ({
+  const events: EventItem[] = (eventsData ?? []).map((e) => {
+    const leagueMatchRow = oneOrFirst(e.league_matches);
+    return {
     id: e.id,
     type: e.type as EventItem["type"],
     title: e.title,
@@ -88,6 +103,17 @@ export default async function ProgrammePage(props: PageProps<"/programme">) {
     endTime: e.end_time,
     createdBy: e.created_by,
     repeatsWeekly: e.repeats_weekly,
+    leagueMatch: leagueMatchRow
+      ? {
+          id: leagueMatchRow.id,
+          scoreA: leagueMatchRow.score_a,
+          scoreB: leagueMatchRow.score_b,
+          playerAId: leagueMatchRow.player_a_id,
+          playerBId: leagueMatchRow.player_b_id,
+          proofPath: leagueMatchRow.proof_path,
+          proofUrl: null,
+        }
+      : null,
     communities: (e.event_communities ?? [])
       .map((ec) => oneOrFirst(ec.communities))
       .filter((c): c is NonNullable<typeof c> => !!c)
@@ -106,7 +132,39 @@ export default async function ProgrammePage(props: PageProps<"/programme">) {
         avatarUrl: p.profiles!.avatar_url,
         result: p.result as EventItem["participants"][number]["result"],
       })),
-  }));
+    };
+  });
+
+  // URLs signées pour les preuves de match liées à un évènement affiché
+  // cette semaine/ce mois — même logique que league-loader.ts (échoue
+  // silencieusement si le visiteur n'a pas le droit de lire l'objet).
+  const eventsWithProof = events.filter((e) => e.leagueMatch?.proofPath);
+  if (eventsWithProof.length > 0) {
+    const signed = await Promise.all(
+      eventsWithProof.map((e) =>
+        supabase.storage.from("league-match-proofs").createSignedUrl(e.leagueMatch!.proofPath!, 3600),
+      ),
+    );
+    signed.forEach((result, i) => {
+      eventsWithProof[i].leagueMatch!.proofUrl = result.data?.signedUrl ?? null;
+    });
+  }
+
+  const myPendingLeagueMatches: LeagueMatchCandidate[] = (pendingMatchesData ?? [])
+    .filter((m) => (m.events ?? []).length === 0)
+    .map((m) => {
+      const division = oneOrFirst(m.league_divisions);
+      const league = division ? oneOrFirst(division.leagues) : null;
+      if (!league) return null;
+      const opponentId = m.player_a_id === user.id ? m.player_b_id : m.player_a_id;
+      return {
+        matchId: m.id,
+        opponentId,
+        communityId: league.community_id,
+        label: `${league.name} — ${division!.name}`,
+      };
+    })
+    .filter((x): x is LeagueMatchCandidate => !!x);
 
   const members = (membersData ?? []).map((m) => ({ id: m.id, displayName: m.display_name }));
   const currentUser = { id: user.id, displayName: profile?.display_name ?? "Moi" };
@@ -126,6 +184,7 @@ export default async function ProgrammePage(props: PageProps<"/programme">) {
       currentUser={currentUser}
       isAdmin={profile?.is_admin ?? false}
       alertCounts={alertCounts}
+      myPendingLeagueMatches={myPendingLeagueMatches}
     />
   );
 }

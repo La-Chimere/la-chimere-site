@@ -12,7 +12,7 @@ import { AvailabilityMenu } from "@/components/events/AvailabilityMenu";
 import { ProgrammeIcon } from "@/components/ui/icons";
 import { sendKeyAlertClick } from "@/lib/key-alert-actions";
 import type { PickableMember } from "@/components/ui/MemberPicker";
-import type { CommunityOption, EventItem } from "@/lib/events-types";
+import type { CommunityOption, EventItem, LeagueMatchCandidate } from "@/lib/events-types";
 import {
   dayHeaderLabel,
   formatHour,
@@ -35,6 +35,7 @@ interface ProgrammeClientProps {
   currentUser: PickableMember;
   isAdmin: boolean;
   alertCounts: Record<string, number>;
+  myPendingLeagueMatches: LeagueMatchCandidate[];
 }
 
 export function ProgrammeClient({
@@ -46,6 +47,7 @@ export function ProgrammeClient({
   currentUser,
   isAdmin,
   alertCounts,
+  myPendingLeagueMatches,
 }: ProgrammeClientProps) {
   const router = useRouter();
   const [navPending, startNavTransition] = useTransition();
@@ -305,6 +307,7 @@ export function ProgrammeClient({
         members={members}
         currentUser={currentUser}
         defaultDate={referenceDate}
+        myPendingLeagueMatches={myPendingLeagueMatches}
       />
       <EventForm
         open={availFormOpen}

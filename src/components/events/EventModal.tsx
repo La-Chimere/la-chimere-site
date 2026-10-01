@@ -1,12 +1,14 @@
 "use client";
 
-import { useOptimistic, useTransition } from "react";
+import { useOptimistic, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { EventItem } from "@/lib/events-types";
+import type { LeagueMatch } from "@/lib/league-types";
 import { Modal } from "@/components/ui/Modal";
 import { AvatarCircle } from "@/components/ui/AvatarCircle";
 import { MemberPicker, type PickableMember } from "@/components/ui/MemberPicker";
+import { MatchResultModal } from "@/components/leagues/MatchResultModal";
 import {
   addEventParticipant,
   deleteEvent,
@@ -36,6 +38,7 @@ const RESULT_KEYS = { victoire: "event.result.win", egalite: "event.result.tie",
 
 export function EventModal({ event, keyStatus, currentUserId, isAdmin, onClose, members }: EventModalProps) {
   const [pending, startTransition] = useTransition();
+  const [leagueMatchModalOpen, setLeagueMatchModalOpen] = useState(false);
   const router = useRouter();
   const { t, locale } = useT();
   const [optimisticParticipants, applyOptimistic] = useOptimistic(
@@ -61,6 +64,27 @@ export function EventModal({ event, keyStatus, currentUserId, isAdmin, onClose, 
   const canManage = event.createdBy === currentUserId || isAdmin;
   const competitive = event.communities.some((c) => c.competitive);
   const creator = optimisticParticipants.find((p) => p.profileId === event.createdBy);
+
+  // Objet "LeagueMatch" reconstitué pour MatchResultModal — divisionId n'est
+  // pas utilisé par ce composant, playerA/BDisplayName se résolvent depuis
+  // les participants de CET évènement (qui sont justement les deux joueurs
+  // du match, l'évènement n'ayant été lié qu'à ça).
+  const leagueMatchForModal: LeagueMatch | null = event.leagueMatch
+    ? {
+        id: event.leagueMatch.id,
+        divisionId: "",
+        playerAId: event.leagueMatch.playerAId,
+        playerBId: event.leagueMatch.playerBId,
+        playerADisplayName:
+          optimisticParticipants.find((p) => p.profileId === event.leagueMatch!.playerAId)?.displayName ?? "?",
+        playerBDisplayName:
+          optimisticParticipants.find((p) => p.profileId === event.leagueMatch!.playerBId)?.displayName ?? "?",
+        scoreA: event.leagueMatch.scoreA,
+        scoreB: event.leagueMatch.scoreB,
+        proofPath: event.leagueMatch.proofPath,
+        proofUrl: event.leagueMatch.proofUrl,
+      }
+    : null;
 
   function toggleJoin() {
     if (isParticipant) {
@@ -170,6 +194,29 @@ export function EventModal({ event, keyStatus, currentUserId, isAdmin, onClose, 
         </ul>
       )}
 
+      {leagueMatchForModal && (
+        <div className="section-card" style={{ marginTop: 10 }}>
+          <div className="admin-row">
+            <span className="name">
+              {t("event.leagueMatch.title")}
+              {leagueMatchForModal.scoreA !== null && (
+                <span className="sub">
+                  {leagueMatchForModal.scoreA} – {leagueMatchForModal.scoreB}
+                </span>
+              )}
+            </span>
+            <button
+              type="button"
+              className="join-btn small"
+              disabled={!isParticipant && !isAdmin}
+              onClick={() => setLeagueMatchModalOpen(true)}
+            >
+              {leagueMatchForModal.scoreA === null ? t("league.reportResult") : t("common.edit")}
+            </button>
+          </div>
+        </div>
+      )}
+
       {canManage && !isAvailability && members && (
         <MemberPicker
           members={members}
@@ -215,6 +262,10 @@ export function EventModal({ event, keyStatus, currentUserId, isAdmin, onClose, 
           {t("event.transformToEvent")}
         </button>
       )}
+      <MatchResultModal
+        match={leagueMatchModalOpen ? leagueMatchForModal : null}
+        onClose={() => setLeagueMatchModalOpen(false)}
+      />
     </Modal>
   );
 }

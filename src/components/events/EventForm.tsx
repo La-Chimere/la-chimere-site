@@ -6,7 +6,7 @@ import { Chip } from "@/components/ui/Chip";
 import { MemberPicker, type PickableMember } from "@/components/ui/MemberPicker";
 import { createEvent } from "@/lib/events-actions";
 import { isoDate } from "@/lib/dates";
-import type { CommunityOption } from "@/lib/events-types";
+import type { CommunityOption, LeagueMatchCandidate } from "@/lib/events-types";
 import { useT } from "@/components/i18n/LocaleProvider";
 
 interface EventFormProps {
@@ -17,6 +17,10 @@ interface EventFormProps {
   currentUser: PickableMember;
   defaultDate: Date;
   isAvailability?: boolean;
+  /** Mes matchs de ligue pas encore joués, pour auto-détecter un lien
+   * possible une fois l'adversaire + la communauté sélectionnés. Omis pour
+   * le formulaire de dispo, qui n'a pas de notion de match de ligue. */
+  myPendingLeagueMatches?: LeagueMatchCandidate[];
 }
 
 // Formulaire de création d'une partie spontanée, ou d'une disponibilité en
@@ -31,6 +35,7 @@ export function EventForm({
   currentUser,
   defaultDate,
   isAvailability = false,
+  myPendingLeagueMatches = [],
 }: EventFormProps) {
   const { t } = useT();
   const [pending, startTransition] = useTransition();
@@ -41,7 +46,19 @@ export function EventForm({
   const [description, setDescription] = useState("");
   const [participants, setParticipants] = useState<PickableMember[]>([currentUser]);
   const [repeatsWeekly, setRepeatsWeekly] = useState(false);
+  const [linkLeagueMatch, setLinkLeagueMatch] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Auto-détecté : exactement un adversaire choisi, qui a justement un
+  // match de ligue en attente contre moi dans une des communautés
+  // sélectionnées (CDC league : pas besoin de chercher le match soi-même).
+  const otherParticipants = participants.filter((p) => p.id !== currentUser.id);
+  const candidateMatch =
+    !isAvailability && otherParticipants.length === 1
+      ? myPendingLeagueMatches.find(
+          (m) => m.opponentId === otherParticipants[0].id && tagIds.includes(m.communityId),
+        )
+      : undefined;
 
   function toggleTag(id: string) {
     setTagIds((prev) => (prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]));
@@ -60,6 +77,7 @@ export function EventForm({
     setDescription("");
     setParticipants([currentUser]);
     setRepeatsWeekly(false);
+    setLinkLeagueMatch(true);
     setError(null);
   }
 
@@ -76,6 +94,7 @@ export function EventForm({
           : participants.filter((p) => p.id !== currentUser.id).map((p) => p.id),
         isAvailability,
         repeatsWeekly,
+        leagueMatchId: candidateMatch && linkLeagueMatch ? candidateMatch.matchId : null,
       });
       if (result.error) {
         setError(result.error);
@@ -176,6 +195,17 @@ export function EventForm({
             currentUserId={currentUser.id}
           />
         </div>
+      )}
+
+      {candidateMatch && (
+        <label className="ce-repeat-row">
+          <input
+            type="checkbox"
+            checked={linkLeagueMatch}
+            onChange={(e) => setLinkLeagueMatch(e.target.checked)}
+          />
+          {t("event.form.linkLeagueMatch", { label: candidateMatch.label })}
+        </label>
       )}
 
       <div className="form-field">

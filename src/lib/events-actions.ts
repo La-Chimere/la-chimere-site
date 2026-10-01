@@ -78,6 +78,9 @@ export interface CreateEventInput {
   participantIds: string[];
   isAvailability?: boolean;
   repeatsWeekly?: boolean;
+  /** Lie cet évènement à un match de ligue existant (facilité de
+   * planification — league_matches reste la source de vérité du résultat). */
+  leagueMatchId?: string | null;
 }
 
 // Création d'une partie spontanée, ou d'une disponibilité (CDC 4.2/12.3/12.12).
@@ -101,6 +104,7 @@ export async function createEvent(input: CreateEventInput) {
       end_time: endTime,
       repeats_weekly: input.isAvailability ? !!input.repeatsWeekly : false,
       created_by: userId,
+      league_match_id: input.isAvailability ? null : (input.leagueMatchId ?? null),
     })
     .select("id")
     .single();
