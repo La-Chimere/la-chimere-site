@@ -87,38 +87,40 @@ export function LeagueCreateForm({ communityId, communityLabel }: LeagueCreateFo
           </p>
         </div>
 
-        <div className="form-field">
-          <label className="form-label">{t("league.create.pointsLabel")}</label>
-          <div className="form-row-2">
-            <div className="form-field">
-              <label className="form-label">{t("league.admin.pointsWin")}</label>
-              <input
-                type="number"
-                className="form-input"
-                value={pointsWin}
-                onChange={(e) => setPointsWin(Number(e.target.value))}
-              />
-            </div>
-            <div className="form-field">
-              <label className="form-label">{t("league.admin.pointsTie")}</label>
-              <input
-                type="number"
-                className="form-input"
-                value={pointsTie}
-                onChange={(e) => setPointsTie(Number(e.target.value))}
-              />
-            </div>
-            <div className="form-field">
-              <label className="form-label">{t("league.admin.pointsLoss")}</label>
-              <input
-                type="number"
-                className="form-input"
-                value={pointsLoss}
-                onChange={(e) => setPointsLoss(Number(e.target.value))}
-              />
+        {(format === "poule" || format === "libre") && (
+          <div className="form-field">
+            <label className="form-label">{t("league.create.pointsLabel")}</label>
+            <div className="form-row-2">
+              <div className="form-field">
+                <label className="form-label">{t("league.admin.pointsWin")}</label>
+                <input
+                  type="number"
+                  className="form-input"
+                  value={pointsWin}
+                  onChange={(e) => setPointsWin(Number(e.target.value))}
+                />
+              </div>
+              <div className="form-field">
+                <label className="form-label">{t("league.admin.pointsTie")}</label>
+                <input
+                  type="number"
+                  className="form-input"
+                  value={pointsTie}
+                  onChange={(e) => setPointsTie(Number(e.target.value))}
+                />
+              </div>
+              <div className="form-field">
+                <label className="form-label">{t("league.admin.pointsLoss")}</label>
+                <input
+                  type="number"
+                  className="form-input"
+                  value={pointsLoss}
+                  onChange={(e) => setPointsLoss(Number(e.target.value))}
+                />
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {error && <p className="field-error">{error}</p>}
 

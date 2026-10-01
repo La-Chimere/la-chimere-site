@@ -55,14 +55,14 @@ export async function loadLeague(leagueId: string): Promise<League | null> {
     supabase
       .from("leagues")
       .select(
-        "id, community_id, name, format, status, points_win, points_tie, points_loss, created_by, communities(label)",
+        "id, community_id, name, format, status, points_win, points_tie, points_loss, description, created_by, communities(label)",
       )
       .eq("id", leagueId)
       .single(),
     supabase
       .from("league_divisions")
       .select(
-        `id, name, rank, rules,
+        `id, name, rank,
         league_participants(id, profile_id, army, profiles(display_name, avatar_url)),
         league_matches(id, player_a_id, player_b_id, score_a, score_b, proof_path, round)`,
       )
@@ -159,7 +159,6 @@ export async function loadLeague(leagueId: string): Promise<League | null> {
       id: d.id,
       name: d.name,
       rank: d.rank,
-      rules: d.rules,
       participants,
       matches,
       standings,
@@ -192,6 +191,7 @@ export async function loadLeague(leagueId: string): Promise<League | null> {
     pointsWin: leagueRow.points_win,
     pointsTie: leagueRow.points_tie,
     pointsLoss: leagueRow.points_loss,
+    description: leagueRow.description,
     createdBy: leagueRow.created_by,
     divisions,
     organizerIds: (organizersData ?? []).map((o) => o.profile_id),

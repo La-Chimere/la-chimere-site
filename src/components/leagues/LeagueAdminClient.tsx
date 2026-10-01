@@ -19,7 +19,7 @@ import {
   generateRoundRobin,
   removeParticipant,
   setLeagueStatus,
-  updateDivisionRules,
+  updateLeagueDescription,
   updateLeaguePoints,
 } from "@/lib/league-actions";
 import { useT } from "@/components/i18n/LocaleProvider";
@@ -65,11 +65,13 @@ export function LeagueAdminClient({ league, communityId, communityMembers }: Lea
   const completionPct =
     allMatches.length === 0 ? 0 : Math.round(((allMatches.length - pendingMatches.length) / allMatches.length) * 100);
 
-  const assignedProfileIds = useMemo(
-    () => new Set(sortedDivisions.flatMap((d) => d.participants.map((p) => p.profileId))),
+  const totalParticipants = useMemo(
+    () => new Set(sortedDivisions.flatMap((d) => d.participants.map((p) => p.profileId))).size,
     [sortedDivisions],
   );
-  const availableMembers = communityMembers.filter((m) => !assignedProfileIds.has(m.id));
+
+  const [description, setDescription] = useState(league.description ?? "");
+  const showPointsScheme = league.format === "poule" || league.format === "libre";
 
   function savePoints() {
     startTransition(() => updateLeaguePoints(league.id, points));
@@ -116,67 +118,32 @@ export function LeagueAdminClient({ league, communityId, communityMembers }: Lea
         </div>
       </div>
 
-      <h1 className="page-title">{t("league.admin.upcomingMatches")}</h1>
-      <div className="section-card">
-        {pendingMatches.length === 0 ? (
-          <p className="empty-hint">{t("league.admin.noMatchesLeft")}</p>
-        ) : (
-          pendingMatches.map((m) => (
-            <div className="admin-row" key={m.id}>
-              <span className="name">
-                {m.playerADisplayName} vs {m.playerBDisplayName}
-                <span className="sub">{m.divisionName}</span>
-              </span>
-              <button type="button" className="join-btn small" onClick={() => setOpenMatch(m)}>
-                {t("league.reportResult")}
-              </button>
-            </div>
-          ))
-        )}
-      </div>
-
-      <h1 className="page-title">{t("league.admin.pointsScheme")}</h1>
-      <div className="section-card">
-        <div className="form-row-2">
-          <div className="form-field">
-            <label className="form-label">{t("league.admin.pointsWin")}</label>
-            <input
-              type="number"
-              className="form-input"
-              value={points.pointsWin}
-              onChange={(e) => setPoints((p) => ({ ...p, pointsWin: Number(e.target.value) }))}
-              onBlur={savePoints}
-            />
+      {totalParticipants > 0 && (
+        <>
+          <h1 className="page-title">{t("league.admin.upcomingMatches")}</h1>
+          <div className="section-card">
+            {allMatches.length === 0 ? (
+              <p className="empty-hint">{t("league.admin.noMatchesYet")}</p>
+            ) : pendingMatches.length === 0 ? (
+              <p className="empty-hint">{t("league.admin.noMatchesLeft")}</p>
+            ) : (
+              <div className="admin-scroll-list">
+                {pendingMatches.map((m) => (
+                  <div className="admin-row" key={m.id}>
+                    <span className="name">
+                      {m.playerADisplayName} vs {m.playerBDisplayName}
+                      <span className="sub">{m.divisionName}</span>
+                    </span>
+                    <button type="button" className="join-btn small" onClick={() => setOpenMatch(m)}>
+                      {t("league.reportResult")}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-          <div className="form-field">
-            <label className="form-label">{t("league.admin.pointsTie")}</label>
-            <input
-              type="number"
-              className="form-input"
-              value={points.pointsTie}
-              onChange={(e) => setPoints((p) => ({ ...p, pointsTie: Number(e.target.value) }))}
-              onBlur={savePoints}
-            />
-          </div>
-          <div className="form-field">
-            <label className="form-label">{t("league.admin.pointsLoss")}</label>
-            <input
-              type="number"
-              className="form-input"
-              value={points.pointsLoss}
-              onChange={(e) => setPoints((p) => ({ ...p, pointsLoss: Number(e.target.value) }))}
-              onBlur={savePoints}
-            />
-          </div>
-        </div>
-      </div>
-
-      <h1 className="page-title">{t("league.admin.announce")}</h1>
-      <div className="section-card">
-        <button type="button" className="modal-btn primary modal-btn-full" onClick={() => setAnnouncementOpen(true)}>
-          {t("league.admin.announceButton")}
-        </button>
-      </div>
+        </>
+      )}
 
       <h1 className="page-title">{t("league.admin.divisions")}</h1>
       {sortedDivisions.map((division) => {
@@ -184,6 +151,8 @@ export function LeagueAdminClient({ league, communityId, communityMembers }: Lea
           id: p.profileId,
           displayName: p.displayName,
         }));
+        const divisionParticipantIds = new Set(division.participants.map((p) => p.profileId));
+        const availableMembers = communityMembers.filter((m) => !divisionParticipantIds.has(m.id));
         return (
           <div className="section-card" key={division.id}>
             <div className="an-section-head">
@@ -194,16 +163,6 @@ export function LeagueAdminClient({ league, communityId, communityMembers }: Lea
               >
                 {t("common.delete")}
               </DangerConfirmButton>
-            </div>
-
-            <div className="form-field">
-              <label className="form-label">{t("league.admin.rules")}</label>
-              <textarea
-                className="form-input form-textarea"
-                defaultValue={division.rules ?? ""}
-                onBlur={(e) => startTransition(() => updateDivisionRules(division.id, e.target.value))}
-                placeholder={t("league.admin.rulesPlaceholder")}
-              />
             </div>
 
             <div className="modal-section-label">{t("league.admin.roster")}</div>
@@ -316,6 +275,64 @@ export function LeagueAdminClient({ league, communityId, communityMembers }: Lea
         <button type="button" className="modal-btn outline modal-btn-full" onClick={addDivision}>
           {t("league.admin.addDivision")}
         </button>
+      </div>
+
+      {showPointsScheme && (
+        <>
+          <h1 className="page-title">{t("league.admin.pointsScheme")}</h1>
+          <div className="section-card">
+            <div className="form-row-2">
+              <div className="form-field">
+                <label className="form-label">{t("league.admin.pointsWin")}</label>
+                <input
+                  type="number"
+                  className="form-input"
+                  value={points.pointsWin}
+                  onChange={(e) => setPoints((p) => ({ ...p, pointsWin: Number(e.target.value) }))}
+                  onBlur={savePoints}
+                />
+              </div>
+              <div className="form-field">
+                <label className="form-label">{t("league.admin.pointsTie")}</label>
+                <input
+                  type="number"
+                  className="form-input"
+                  value={points.pointsTie}
+                  onChange={(e) => setPoints((p) => ({ ...p, pointsTie: Number(e.target.value) }))}
+                  onBlur={savePoints}
+                />
+              </div>
+              <div className="form-field">
+                <label className="form-label">{t("league.admin.pointsLoss")}</label>
+                <input
+                  type="number"
+                  className="form-input"
+                  value={points.pointsLoss}
+                  onChange={(e) => setPoints((p) => ({ ...p, pointsLoss: Number(e.target.value) }))}
+                  onBlur={savePoints}
+                />
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      <h1 className="page-title">{t("league.admin.announce")}</h1>
+      <div className="section-card">
+        <button type="button" className="modal-btn primary modal-btn-full" onClick={() => setAnnouncementOpen(true)}>
+          {t("league.admin.announceButton")}
+        </button>
+      </div>
+
+      <h1 className="page-title">{t("league.admin.description")}</h1>
+      <div className="section-card">
+        <textarea
+          className="form-input form-textarea"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          onBlur={() => startTransition(() => updateLeagueDescription(league.id, description))}
+          placeholder={t("league.admin.descriptionPlaceholder")}
+        />
       </div>
 
       <h1 className="page-title">{t("settings.account")}</h1>

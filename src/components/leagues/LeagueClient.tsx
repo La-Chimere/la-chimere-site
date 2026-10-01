@@ -75,6 +75,12 @@ export function LeagueClient({ league, communityId, currentUserId, isOrganizer }
         </div>
       )}
 
+      {league.description && (
+        <div className="section-card">
+          <p className="info-box-text">{league.description}</p>
+        </div>
+      )}
+
       {myDivision && (
         <>
           <h1 className="page-title">{t("league.myMatches")}</h1>
@@ -148,7 +154,6 @@ export function LeagueClient({ league, communityId, currentUserId, isOrganizer }
                 pointsLabel={league.format === "championnat" ? t("league.standings.roundsSurvived") : undefined}
               />
             )}
-            {division.rules && <p className="field-note" style={{ marginTop: 12 }}>{division.rules}</p>}
             {division.participants.some((p) => p.army) && (
               <div className="member-communities" style={{ marginTop: 10 }}>
                 {division.participants

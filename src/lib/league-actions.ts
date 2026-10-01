@@ -103,9 +103,11 @@ export async function createDivision(leagueId: string, name: string, rank: numbe
   return { error: error?.message ?? null, id: data?.id as string | undefined };
 }
 
-export async function updateDivisionRules(divisionId: string, rules: string) {
+// Règlement en texte libre, un seul par ligue (pas par division) — lecture
+// seule pour les participants, modifiable à tout moment par l'organisateur.
+export async function updateLeagueDescription(leagueId: string, description: string) {
   const { supabase } = await requireUserId();
-  await supabase.from("league_divisions").update({ rules: rules || null }).eq("id", divisionId);
+  await supabase.from("leagues").update({ description: description || null }).eq("id", leagueId);
   revalidatePath("/communities");
 }
 

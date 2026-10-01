@@ -41,7 +41,6 @@ export interface LeagueDivision {
   id: string;
   name: string;
   rank: number;
-  rules: string | null;
   participants: LeagueParticipant[];
   matches: LeagueMatch[];
   standings: LeagueStandingRow[];
@@ -57,6 +56,9 @@ export interface League {
   pointsWin: number;
   pointsTie: number;
   pointsLoss: number;
+  /** Règlement en texte libre, un seul par ligue (pas par division) —
+   * modifiable par l'organisateur, lecture seule pour les participants. */
+  description: string | null;
   createdBy: string;
   divisions: LeagueDivision[];
   organizerIds: string[];
