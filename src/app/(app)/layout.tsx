@@ -5,6 +5,12 @@ import { BottomNav } from "@/components/ui/BottomNav";
 import { AlertBanner } from "@/components/ui/AlertBanner";
 import { signOut } from "@/lib/auth-actions";
 import { serverT } from "@/lib/i18n/server";
+import { isAnnouncementVisibleTo } from "@/lib/announcements-visibility";
+
+function oneOrFirst<T>(value: T | T[] | null): T | null {
+  if (Array.isArray(value)) return value[0] ?? null;
+  return value;
+}
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -21,6 +27,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     { count: unreadCount },
     { data: announcements },
     { data: myReads },
+    { data: myLeagueParticipations },
   ] = await Promise.all([
     supabase
       .from("profiles")
@@ -32,8 +39,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       .select("id", { count: "exact", head: true })
       .eq("profile_id", user.id)
       .eq("read", false),
-    supabase.from("announcements").select("id, target_community_id, banner, banner_text"),
+    supabase.from("announcements").select("id, target_community_id, target_league_id, banner, banner_text"),
     supabase.from("announcement_reads").select("announcement_id").eq("profile_id", user.id),
+    supabase.from("league_participants").select("league_divisions(league_id)").eq("profile_id", user.id),
   ]);
 
   if (profile?.status === "pending") {
@@ -58,14 +66,19 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   const defaultMemberName = await serverT("appLayout.defaultMemberName");
 
+  const isAdmin = profile?.is_admin ?? false;
   const myCommunityIds = new Set((profile?.profile_communities ?? []).map((c) => c.community_id));
+  const myLeagueIds = new Set(
+    (myLeagueParticipations ?? [])
+      .map((p) => oneOrFirst(p.league_divisions)?.league_id)
+      .filter((id): id is string => !!id),
+  );
   const readIds = new Set((myReads ?? []).map((r) => r.announcement_id));
-  const unseenAnnouncements = (announcements ?? []).filter(
-    (a) =>
-      (!a.target_community_id || myCommunityIds.has(a.target_community_id)) &&
-      !readIds.has(a.id),
-  ).length;
-  const bannerText = (announcements ?? []).find((a) => a.banner)?.banner_text;
+  const visibleAnnouncements = (announcements ?? []).filter((a) =>
+    isAnnouncementVisibleTo(a.target_community_id, a.target_league_id, isAdmin, myCommunityIds, myLeagueIds),
+  );
+  const unseenAnnouncements = visibleAnnouncements.filter((a) => !readIds.has(a.id)).length;
+  const bannerText = visibleAnnouncements.find((a) => a.banner)?.banner_text;
 
   return (
     <div className="app-shell">
@@ -76,7 +89,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       />
       {bannerText && <AlertBanner text={bannerText} />}
       <main>{children}</main>
-      <BottomNav isAdmin={profile?.is_admin ?? false} />
+      <BottomNav isAdmin={isAdmin} />
     </div>
   );
 }

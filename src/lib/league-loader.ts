@@ -55,7 +55,7 @@ export async function loadLeague(leagueId: string): Promise<League | null> {
     supabase
       .from("leagues")
       .select(
-        "id, community_id, name, format, status, points_win, points_tie, points_loss, description, created_by, communities(label)",
+        "id, community_id, name, format, status, points_win, points_tie, points_loss, description, results_deadline, created_by, communities(label)",
       )
       .eq("id", leagueId)
       .single(),
@@ -192,13 +192,14 @@ export async function loadLeague(leagueId: string): Promise<League | null> {
     pointsTie: leagueRow.points_tie,
     pointsLoss: leagueRow.points_loss,
     description: leagueRow.description,
+    resultsDeadline: leagueRow.results_deadline,
     createdBy: leagueRow.created_by,
     divisions,
     organizerIds: (organizersData ?? []).map((o) => o.profile_id),
   };
 }
 
-// Résumé par communauté pour l'encart de la page Communautés — une seule
+// Résumé par communauté pour l'encart de la page Leaderboard — une seule
 // ligue non-fermée prise en compte par communauté (la plus récente), ne
 // recalcule pas le classement complet (pas nécessaire ici).
 export async function loadCommunityLeagueSummaries(
@@ -211,7 +212,7 @@ export async function loadCommunityLeagueSummaries(
     supabase
       .from("leagues")
       .select(
-        `id, community_id, name, created_at,
+        `id, community_id, name, results_deadline, created_at,
         league_divisions(league_participants(profile_id),
           league_matches(player_a_id, player_b_id, score_a, score_b))`,
       )
@@ -256,6 +257,7 @@ export async function loadCommunityLeagueSummaries(
     result[league.community_id] = {
       leagueId: league.id,
       leagueName: league.name,
+      resultsDeadline: league.results_deadline,
       isParticipant,
       isOrganizer: isAdmin || myOrganizerLeagueIds.has(league.id),
       myPendingMatches,

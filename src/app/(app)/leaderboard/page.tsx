@@ -1,6 +1,8 @@
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { daysOfWeek, isoDate } from "@/lib/dates";
 import { LeaderboardClient } from "@/components/leaderboard/LeaderboardClient";
+import { loadCommunityLeagueSummaries } from "@/lib/league-loader";
 import type { CommunityOption } from "@/lib/events-types";
 import type { LeaderboardData, LeaderboardRow } from "@/lib/leaderboard-types";
 
@@ -11,21 +13,33 @@ function oneOrFirst<T>(value: T | T[] | null): T | null {
 
 export default async function LeaderboardPage() {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
 
-  const [{ data: communitiesData }, { data: participantsData }, { data: communityMembershipsData }] =
-    await Promise.all([
-      supabase
-        .from("communities")
-        .select("id, key, label, competitive")
-        .eq("hidden", false)
-        .order("label"),
-      supabase.from("event_participants").select(
-        `profile_id, result,
-        events(id, event_date, event_communities(community_id)),
-        profiles(display_name, avatar_url)`,
-      ),
-      supabase.from("profile_communities").select("community_id"),
-    ]);
+  const [
+    { data: communitiesData },
+    { data: participantsData },
+    { data: communityMembershipsData },
+    { data: myProfile },
+  ] = await Promise.all([
+    supabase
+      .from("communities")
+      .select("id, key, label, competitive")
+      .eq("hidden", false)
+      .order("label"),
+    supabase.from("event_participants").select(
+      `profile_id, result,
+      events(id, event_date, event_communities(community_id)),
+      profiles(display_name, avatar_url)`,
+    ),
+    supabase.from("profile_communities").select("community_id"),
+    supabase.from("profiles").select("is_admin, can_create_leagues").eq("id", user.id).single(),
+  ]);
+
+  const isAdmin = myProfile?.is_admin ?? false;
+  const leagueSummaries = await loadCommunityLeagueSummaries(user.id, isAdmin);
 
   // Communautés triées par popularité (nombre de membres décroissant) —
   // à égalité, ordre alphabétique pour rester déterministe.
@@ -105,5 +119,12 @@ export default async function LeaderboardPage() {
     dataByFilter[c.id] = computeFor(c.id);
   }
 
-  return <LeaderboardClient communities={communities} dataByFilter={dataByFilter} />;
+  return (
+    <LeaderboardClient
+      communities={communities}
+      dataByFilter={dataByFilter}
+      leagueSummaries={leagueSummaries}
+      canCreateLeagues={isAdmin || (myProfile?.can_create_leagues ?? false)}
+    />
+  );
 }

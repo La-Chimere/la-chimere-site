@@ -112,6 +112,13 @@ export function isoDate(date: Date): string {
   return format(date, "yyyy-MM-dd");
 }
 
+// Date courte "12/12/2026", toujours jour/mois/année quelle que soit la
+// langue (convention suisse/CDC 6.1) — contrairement à formatHour, pas de
+// variation par locale ici.
+export function shortDate(isoDateString: string): string {
+  return format(new Date(isoDateString), "dd/MM/yyyy");
+}
+
 // "Dernière partie aujourd'hui / hier / il y a X jours" (CDC 12.8/12.11).
 export function relativeActivityDays(isoDateString: string | null): number | null {
   if (!isoDateString) return null;

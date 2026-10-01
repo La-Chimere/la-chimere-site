@@ -2,28 +2,23 @@
 
 import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { BackButton } from "@/components/ui/BackButton";
 import { Chip } from "@/components/ui/Chip";
 import { DangerConfirmButton } from "@/components/ui/DangerConfirmButton";
-import { MemberPicker, type PickableMember } from "@/components/ui/MemberPicker";
+import type { PickableMember } from "@/components/ui/MemberPicker";
 import { MatchResultModal } from "@/components/leagues/MatchResultModal";
+import { DivisionAdminCard } from "@/components/leagues/DivisionAdminCard";
 import { AnnouncementForm } from "@/components/announcements/AnnouncementForm";
 import {
-  addManualMatch,
-  assignParticipant,
   createDivision,
-  deleteDivision,
   deleteLeague,
-  deleteMatch,
-  generateNextRound,
-  generateRoundRobin,
-  removeParticipant,
   setLeagueStatus,
+  updateLeagueDeadline,
   updateLeagueDescription,
   updateLeaguePoints,
 } from "@/lib/league-actions";
 import { useT } from "@/components/i18n/LocaleProvider";
-import { useRouter } from "next/navigation";
 import type { League, LeagueMatch, LeagueStatus } from "@/lib/league-types";
 
 interface LeagueAdminClientProps {
@@ -45,33 +40,26 @@ export function LeagueAdminClient({ league, communityId, communityMembers }: Lea
   const [, startTransition] = useTransition();
   const [openMatch, setOpenMatch] = useState<LeagueMatch | null>(null);
   const [announcementOpen, setAnnouncementOpen] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [newDivisionName, setNewDivisionName] = useState("");
   const [points, setPoints] = useState({
     pointsWin: league.pointsWin,
     pointsTie: league.pointsTie,
     pointsLoss: league.pointsLoss,
   });
+  const [description, setDescription] = useState(league.description ?? "");
+  const [deadline, setDeadline] = useState(league.resultsDeadline ?? "");
+  const showPointsScheme = league.format === "poule" || league.format === "libre";
 
   const sortedDivisions = useMemo(
     () => [...league.divisions].sort((a, b) => a.rank - b.rank),
     [league.divisions],
   );
 
-  const allMatches = useMemo(
-    () => sortedDivisions.flatMap((d) => d.matches.map((m) => ({ ...m, divisionName: d.name }))),
-    [sortedDivisions],
-  );
-  const pendingMatches = allMatches.filter((m) => m.scoreA === null);
+  const allMatches = useMemo(() => sortedDivisions.flatMap((d) => d.matches), [sortedDivisions]);
+  const pendingCount = allMatches.filter((m) => m.scoreA === null).length;
   const completionPct =
-    allMatches.length === 0 ? 0 : Math.round(((allMatches.length - pendingMatches.length) / allMatches.length) * 100);
-
-  const totalParticipants = useMemo(
-    () => new Set(sortedDivisions.flatMap((d) => d.participants.map((p) => p.profileId))).size,
-    [sortedDivisions],
-  );
-
-  const [description, setDescription] = useState(league.description ?? "");
-  const showPointsScheme = league.format === "poule" || league.format === "libre";
+    allMatches.length === 0 ? 0 : Math.round(((allMatches.length - pendingCount) / allMatches.length) * 100);
 
   function savePoints() {
     startTransition(() => updateLeaguePoints(league.id, points));
@@ -118,150 +106,16 @@ export function LeagueAdminClient({ league, communityId, communityMembers }: Lea
         </div>
       </div>
 
-      {totalParticipants > 0 && (
-        <>
-          <h1 className="page-title">{t("league.admin.upcomingMatches")}</h1>
-          <div className="section-card">
-            {allMatches.length === 0 ? (
-              <p className="empty-hint">{t("league.admin.noMatchesYet")}</p>
-            ) : pendingMatches.length === 0 ? (
-              <p className="empty-hint">{t("league.admin.noMatchesLeft")}</p>
-            ) : (
-              <div className="admin-scroll-list">
-                {pendingMatches.map((m) => (
-                  <div className="admin-row" key={m.id}>
-                    <span className="name">
-                      {m.playerADisplayName} vs {m.playerBDisplayName}
-                      <span className="sub">{m.divisionName}</span>
-                    </span>
-                    <button type="button" className="join-btn small" onClick={() => setOpenMatch(m)}>
-                      {t("league.reportResult")}
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </>
-      )}
-
       <h1 className="page-title">{t("league.admin.divisions")}</h1>
-      {sortedDivisions.map((division) => {
-        const divisionMembers: PickableMember[] = division.participants.map((p) => ({
-          id: p.profileId,
-          displayName: p.displayName,
-        }));
-        const divisionParticipantIds = new Set(division.participants.map((p) => p.profileId));
-        const availableMembers = communityMembers.filter((m) => !divisionParticipantIds.has(m.id));
-        return (
-          <div className="section-card" key={division.id}>
-            <div className="an-section-head">
-              <h2 className="section-subtitle" style={{ margin: 0 }}>{division.name}</h2>
-              <DangerConfirmButton
-                className="join-btn danger small"
-                onConfirm={() => startTransition(() => deleteDivision(division.id))}
-              >
-                {t("common.delete")}
-              </DangerConfirmButton>
-            </div>
-
-            <div className="modal-section-label">{t("league.admin.roster")}</div>
-            {division.participants.map((p) => (
-              <div className="admin-row" key={p.id}>
-                <span className="name">
-                  {p.displayName}
-                  {p.army && <span className="sub">{p.army}</span>}
-                </span>
-                <button
-                  type="button"
-                  className="join-btn gray small"
-                  onClick={() => startTransition(() => removeParticipant(p.id))}
-                >
-                  {t("common.remove")}
-                </button>
-              </div>
-            ))}
-            <MemberPicker
-              members={availableMembers}
-              selected={[]}
-              onChange={(next) => {
-                const added = next[0];
-                if (added) startTransition(() => assignParticipant(division.id, added.id));
-              }}
-              placeholder={t("league.admin.addParticipant")}
-              hideSelectedChips
-            />
-            {(league.format === "suisse" || league.format === "championnat") &&
-              division.participants.length % 2 === 1 && (
-                <p className="field-note">{t("league.admin.oddParticipantsWarning")}</p>
-              )}
-
-            <div className="modal-section-label" style={{ marginTop: 14 }}>
-              {t("league.admin.matches")}
-            </div>
-            {league.format === "poule" && division.matches.length === 0 && (
-              <button
-                type="button"
-                className="af-add-option"
-                onClick={() =>
-                  startTransition(() => {
-                    generateRoundRobin(division.id);
-                  })
-                }
-              >
-                + {t("league.admin.generateRoundRobin")}
-              </button>
-            )}
-            {league.format === "libre" && (
-              <ManualMatchForm divisionId={division.id} members={divisionMembers} />
-            )}
-            {(league.format === "suisse" || league.format === "championnat") &&
-              (() => {
-                const currentRound = division.matches.reduce((max, m) => Math.max(max, m.round ?? 0), 0);
-                const roundComplete =
-                  currentRound === 0 ||
-                  division.matches
-                    .filter((m) => (m.round ?? 0) === currentRound)
-                    .every((m) => m.scoreA !== null);
-                return (
-                  <button
-                    type="button"
-                    className="af-add-option"
-                    disabled={!roundComplete}
-                    onClick={() => startTransition(() => { generateNextRound(division.id); })}
-                  >
-                    + {t("league.admin.generateNextRound", { n: currentRound + 1 })}
-                  </button>
-                );
-              })()}
-            {division.matches.map((m) => (
-              <div className="admin-row" key={m.id}>
-                <span className="name">
-                  {m.playerADisplayName} vs {m.playerBDisplayName}
-                  {m.round !== null && <span className="sub">{t("league.admin.roundLabel", { n: m.round })}</span>}
-                  {m.scoreA !== null && (
-                    <span className="sub">
-                      {m.scoreA} – {m.scoreB}
-                    </span>
-                  )}
-                </span>
-                <span className="admin-row-actions">
-                  <button type="button" className="join-btn small" onClick={() => setOpenMatch(m)}>
-                    {m.scoreA === null ? t("league.reportResult") : t("common.edit")}
-                  </button>
-                  <button
-                    type="button"
-                    className="join-btn gray small"
-                    onClick={() => startTransition(() => deleteMatch(m.id))}
-                  >
-                    {t("common.delete")}
-                  </button>
-                </span>
-              </div>
-            ))}
-          </div>
-        );
-      })}
+      {sortedDivisions.map((division) => (
+        <DivisionAdminCard
+          key={division.id}
+          league={league}
+          division={division}
+          communityMembers={communityMembers}
+          onOpenMatch={setOpenMatch}
+        />
+      ))}
 
       <div className="section-card">
         <div className="form-field">
@@ -326,6 +180,16 @@ export function LeagueAdminClient({ league, communityId, communityMembers }: Lea
 
       <h1 className="page-title">{t("league.admin.description")}</h1>
       <div className="section-card">
+        <div className="form-field">
+          <label className="form-label">{t("league.admin.deadline")}</label>
+          <input
+            type="date"
+            className="form-input"
+            value={deadline}
+            onChange={(e) => setDeadline(e.target.value)}
+            onBlur={() => startTransition(() => updateLeagueDeadline(league.id, deadline))}
+          />
+        </div>
         <textarea
           className="form-input form-textarea"
           value={description}
@@ -340,12 +204,19 @@ export function LeagueAdminClient({ league, communityId, communityMembers }: Lea
         <DangerConfirmButton
           className="modal-btn danger modal-btn-full"
           onConfirm={() => {
-            startTransition(() => deleteLeague(league.id));
-            router.push(`/communities`);
+            startTransition(async () => {
+              const result = await deleteLeague(league.id);
+              if (result.error) {
+                setDeleteError(result.error);
+                return;
+              }
+              router.push(`/communities`);
+            });
           }}
         >
           {t("league.admin.deleteLeague")}
         </DangerConfirmButton>
+        {deleteError && <p className="field-error">{deleteError}</p>}
       </div>
 
       <MatchResultModal match={openMatch} onClose={() => setOpenMatch(null)} />
@@ -356,51 +227,6 @@ export function LeagueAdminClient({ league, communityId, communityMembers }: Lea
         editing={null}
         fixedLeagueTarget={{ id: league.id, label: league.name }}
       />
-    </div>
-  );
-}
-
-function ManualMatchForm({ divisionId, members }: { divisionId: string; members: PickableMember[] }) {
-  const { t } = useT();
-  const [, startTransition] = useTransition();
-  const [playerA, setPlayerA] = useState("");
-  const [playerB, setPlayerB] = useState("");
-
-  function create() {
-    if (!playerA || !playerB || playerA === playerB) return;
-    startTransition(() => {
-      addManualMatch(divisionId, playerA, playerB);
-    });
-    setPlayerA("");
-    setPlayerB("");
-  }
-
-  return (
-    <div className="admin-add-key-row">
-      <select className="form-input" value={playerA} onChange={(e) => setPlayerA(e.target.value)}>
-        <option value="">{t("league.admin.selectPlayer")}</option>
-        {members.map((m) => (
-          <option key={m.id} value={m.id}>
-            {m.displayName}
-          </option>
-        ))}
-      </select>
-      <select className="form-input" value={playerB} onChange={(e) => setPlayerB(e.target.value)}>
-        <option value="">{t("league.admin.selectPlayer")}</option>
-        {members.map((m) => (
-          <option key={m.id} value={m.id}>
-            {m.displayName}
-          </option>
-        ))}
-      </select>
-      <button
-        type="button"
-        className="join-btn small"
-        disabled={!playerA || !playerB || playerA === playerB}
-        onClick={create}
-      >
-        {t("league.admin.createMatch")}
-      </button>
     </div>
   );
 }

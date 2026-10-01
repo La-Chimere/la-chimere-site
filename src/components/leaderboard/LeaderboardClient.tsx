@@ -1,15 +1,21 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { Chip } from "@/components/ui/Chip";
+import { Button } from "@/components/ui/Button";
 import { AvatarCircle } from "@/components/ui/AvatarCircle";
 import { useT } from "@/components/i18n/LocaleProvider";
+import { shortDate } from "@/lib/dates";
 import type { CommunityOption } from "@/lib/events-types";
 import type { LeaderboardData } from "@/lib/leaderboard-types";
+import type { CommunityLeagueSummary } from "@/lib/league-types";
 
 interface LeaderboardClientProps {
   communities: CommunityOption[];
   dataByFilter: Record<string, LeaderboardData>;
+  leagueSummaries: Record<string, CommunityLeagueSummary>;
+  canCreateLeagues: boolean;
 }
 
 type SortKey = "games" | "wdl";
@@ -23,7 +29,12 @@ function dash(n: number): string {
 // Classement (CDC 4.4/12.7) : filtre par communauté, deux colonnes triables,
 // colonnes V/E/D masquées si la communauté sélectionnée n'est pas
 // compétitive, liste plafonnée à 10 membres.
-export function LeaderboardClient({ communities, dataByFilter }: LeaderboardClientProps) {
+export function LeaderboardClient({
+  communities,
+  dataByFilter,
+  leagueSummaries,
+  canCreateLeagues,
+}: LeaderboardClientProps) {
   const { t } = useT();
   const [filter, setFilter] = useState<string>("tous");
   const [sortKey, setSortKey] = useState<SortKey>("games");
@@ -58,6 +69,59 @@ export function LeaderboardClient({ communities, dataByFilter }: LeaderboardClie
           </Chip>
         ))}
       </div>
+
+      {filter !== "tous" && leagueSummaries[filter] && (
+        <div className="section-card">
+          {(() => {
+            const summary = leagueSummaries[filter];
+            return (
+              <>
+                <h2 className="section-subtitle">{summary.leagueName}</h2>
+                {summary.resultsDeadline && (
+                  <p className="field-note">
+                    {t("league.widget.deadline", { date: shortDate(summary.resultsDeadline) })}
+                  </p>
+                )}
+                {summary.isOrganizer ? (
+                  <>
+                    <div className="form-label">{t("league.admin.completion", { pct: summary.completionPct })}</div>
+                    <div className="league-progress-track">
+                      <div className="league-progress-fill" style={{ width: `${summary.completionPct}%` }} />
+                    </div>
+                  </>
+                ) : summary.isParticipant ? (
+                  <>
+                    <p className="field-note">{t("league.widget.myMatchesToPlay", { n: summary.myPendingMatches })}</p>
+                    {summary.myRecord && (
+                      <div className="lb-wdl" style={{ margin: "6px 0" }}>
+                        <span className="w">{summary.myRecord.wins}</span>
+                        <span className="sep">/</span>
+                        <span className="d">{summary.myRecord.ties}</span>
+                        <span className="sep">/</span>
+                        <span className="lo">{summary.myRecord.losses}</span>
+                      </div>
+                    )}
+                  </>
+                ) : null}
+                <Link href={`/communities/${filter}/leagues/${summary.leagueId}${summary.isOrganizer ? "/admin" : ""}`}>
+                  <Button variant="outline" full style={{ marginTop: 10 }}>
+                    {summary.isOrganizer ? t("league.manageButton") : t("league.viewButton")}
+                  </Button>
+                </Link>
+              </>
+            );
+          })()}
+        </div>
+      )}
+      {filter !== "tous" && !leagueSummaries[filter] && canCreateLeagues && (
+        <div className="section-card">
+          <Link href={`/communities/${filter}/leagues/new`}>
+            <Button variant="outline" full>
+              {t("league.createButton")}
+            </Button>
+          </Link>
+        </div>
+      )}
 
       <div className="admin-stats">
         <div className="section-card admin-stat">

@@ -59,6 +59,10 @@ export interface League {
   /** Règlement en texte libre, un seul par ligue (pas par division) —
    * modifiable par l'organisateur, lecture seule pour les participants. */
   description: string | null;
+  /** Date limite purement informative (ISO yyyy-MM-dd), aucun impact
+   * fonctionnel — juste modifiable par l'organisateur et affichée aux
+   * participants. */
+  resultsDeadline: string | null;
   createdBy: string;
   divisions: LeagueDivision[];
   organizerIds: string[];
@@ -76,6 +80,7 @@ export interface LeagueSummary {
 export interface CommunityLeagueSummary {
   leagueId: string;
   leagueName: string;
+  resultsDeadline: string | null;
   isParticipant: boolean;
   isOrganizer: boolean;
   myPendingMatches: number;

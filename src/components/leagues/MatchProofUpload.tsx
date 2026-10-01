@@ -24,6 +24,10 @@ export function MatchProofUpload({ matchId, proofUrl }: MatchProofUploadProps) {
   const [error, setError] = useState<string | null>(null);
 
   async function handleFile(file: File) {
+    if (file.type !== "image/jpeg" && file.type !== "image/png") {
+      setError(t("league.matchResult.proofInvalidType"));
+      return;
+    }
     setUploading(true);
     setError(null);
     try {
@@ -61,7 +65,7 @@ export function MatchProofUpload({ matchId, proofUrl }: MatchProofUploadProps) {
       <input
         ref={inputRef}
         type="file"
-        accept="image/*"
+        accept="image/jpeg,image/png"
         hidden
         onChange={(e) => {
           const file = e.target.files?.[0];

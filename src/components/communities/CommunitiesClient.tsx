@@ -142,45 +142,17 @@ export function CommunitiesClient({
         ))}
       </div>
 
+      {/* Aperçu détaillé (matchs à jouer, % de complétion...) déplacé sur la
+          page Leaderboard, plus logique thématiquement — ici juste un lien. */}
       {singleSelectedId && leagueSummaries[singleSelectedId] && (
         <div className="section-card">
-          {(() => {
-            const summary = leagueSummaries[singleSelectedId];
-            return (
-              <>
-                <h2 className="section-subtitle">{summary.leagueName}</h2>
-                {summary.isOrganizer ? (
-                  <>
-                    <div className="form-label">{t("league.admin.completion", { pct: summary.completionPct })}</div>
-                    <div className="league-progress-track">
-                      <div className="league-progress-fill" style={{ width: `${summary.completionPct}%` }} />
-                    </div>
-                    <p className="field-note" style={{ marginTop: 8 }}>
-                      {t("league.widget.matchesToPlay", { n: summary.pendingMatches })}
-                    </p>
-                  </>
-                ) : summary.isParticipant ? (
-                  <>
-                    <p className="field-note">{t("league.widget.myMatchesToPlay", { n: summary.myPendingMatches })}</p>
-                    {summary.myRecord && (
-                      <div className="lb-wdl" style={{ margin: "6px 0" }}>
-                        <span className="w">{summary.myRecord.wins}</span>
-                        <span className="sep">/</span>
-                        <span className="d">{summary.myRecord.ties}</span>
-                        <span className="sep">/</span>
-                        <span className="lo">{summary.myRecord.losses}</span>
-                      </div>
-                    )}
-                  </>
-                ) : null}
-                <Link href={`/communities/${singleSelectedId}/leagues/${summary.leagueId}${summary.isOrganizer ? "/admin" : ""}`}>
-                  <Button variant="outline" full style={{ marginTop: 10 }}>
-                    {summary.isOrganizer ? t("league.manageButton") : t("league.viewButton")}
-                  </Button>
-                </Link>
-              </>
-            );
-          })()}
+          <Link
+            href={`/communities/${singleSelectedId}/leagues/${leagueSummaries[singleSelectedId].leagueId}`}
+          >
+            <Button variant="outline" full>
+              {t("league.viewCurrentButton")}
+            </Button>
+          </Link>
         </div>
       )}
 

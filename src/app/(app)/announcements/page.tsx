@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { AnnouncementsClient } from "@/components/announcements/AnnouncementsClient";
+import { isAnnouncementVisibleTo } from "@/lib/announcements-visibility";
 import type { Announcement, NotificationItem, Poll } from "@/lib/announcements-types";
 import type { CommunityOption } from "@/lib/events-types";
 
@@ -108,12 +109,9 @@ export default async function AnnouncementsPage() {
     };
   });
 
-  const visibleAnnouncements = isAdmin
-    ? allAnnouncements
-    : allAnnouncements.filter((a) => {
-        if (a.targetLeagueId) return myLeagueIds.has(a.targetLeagueId);
-        return !a.targetCommunityId || myCommunityIds.has(a.targetCommunityId);
-      });
+  const visibleAnnouncements = allAnnouncements.filter((a) =>
+    isAnnouncementVisibleTo(a.targetCommunityId, a.targetLeagueId, isAdmin, myCommunityIds, myLeagueIds),
+  );
 
   const notifications: NotificationItem[] = (notificationsData ?? []).map((n) => ({
     id: n.id,

@@ -86,10 +86,19 @@ export async function updateLeaguePoints(
   revalidatePath("/communities");
 }
 
+// Date purement informative (CDC league) : aucun impact fonctionnel, juste
+// affichée aux participants (aperçu Leaderboard, page ligue).
+export async function updateLeagueDeadline(leagueId: string, deadline: string) {
+  const { supabase } = await requireUserId();
+  await supabase.from("leagues").update({ results_deadline: deadline || null }).eq("id", leagueId);
+  revalidatePath("/communities");
+}
+
 export async function deleteLeague(leagueId: string) {
   const { supabase } = await requireUserId();
-  await supabase.from("leagues").delete().eq("id", leagueId);
+  const { error } = await supabase.from("leagues").delete().eq("id", leagueId);
   revalidatePath("/communities");
+  return { error: error?.message ?? null };
 }
 
 export async function createDivision(leagueId: string, name: string, rank: number) {
@@ -271,12 +280,25 @@ export async function generateNextRound(divisionId: string) {
   return { error: null };
 }
 
-// Format "libre" : l'organisateur crée les matchs un par un, à tout moment.
+// Création manuelle d'un match (poule : ajout ponctuel après la génération
+// initiale ; libre : fonctionnement normal). Les deux joueurs peuvent être
+// n'importe quel membre de la communauté, pas seulement déjà inscrits dans
+// la division — ils y sont alors automatiquement ajoutés (CDC league :
+// "permet de rajouter des gens en cours de route").
 export async function addManualMatch(divisionId: string, playerAId: string, playerBId: string) {
   const { supabase } = await requireUserId();
   if (playerAId === playerBId) {
     return { error: await serverT("league.error.samePlayerTwice") };
   }
+  await supabase
+    .from("league_participants")
+    .upsert(
+      [
+        { division_id: divisionId, profile_id: playerAId },
+        { division_id: divisionId, profile_id: playerBId },
+      ],
+      { onConflict: "division_id,profile_id", ignoreDuplicates: true },
+    );
   const { error } = await supabase
     .from("league_matches")
     .insert({ division_id: divisionId, player_a_id: playerAId, player_b_id: playerBId });
