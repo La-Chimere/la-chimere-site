@@ -471,7 +471,10 @@ const fr: Record<string, string> = {
   "league.admin.addDivision": "+ Ajouter une division",
   "league.admin.deleteLeague": "Supprimer la ligue",
 
-  "admin.members.canCreateLeagues": "Organisateur de ligue",
+  "admin.leagues.title": "Ligues",
+  "admin.leagues.grant": "Rendre organisateur",
+  "admin.leagues.current": "Organisateurs actuels",
+  "admin.leagues.none": "Aucun organisateur de ligue pour l'instant.",
 };
 
 export default fr;

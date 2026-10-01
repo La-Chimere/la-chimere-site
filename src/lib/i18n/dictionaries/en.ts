@@ -469,7 +469,10 @@ const en: Record<string, string> = {
   "league.admin.addDivision": "+ Add division",
   "league.admin.deleteLeague": "Delete league",
 
-  "admin.members.canCreateLeagues": "League organizer",
+  "admin.leagues.title": "Leagues",
+  "admin.leagues.grant": "Make organizer",
+  "admin.leagues.current": "Current organizers",
+  "admin.leagues.none": "No league organizer yet.",
 };
 
 export default en;

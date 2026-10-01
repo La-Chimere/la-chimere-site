@@ -66,10 +66,18 @@ export default async function AdminPage() {
     status: p.status as AdminMember["status"],
     hasKey: p.has_key,
     hasExitKey: p.has_exit_key,
-    canCreateLeagues: p.can_create_leagues,
     lastActivity: lastActivityByProfile.get(p.id) ?? null,
   }));
   const membersExcludingSelf = allMembers.filter((m) => m.profileId !== user.id);
+
+  // Même pattern que settings/page.tsx pour is_admin : recherche de membre +
+  // liste des organisateurs actuels (droit profiles.can_create_leagues).
+  const leagueOrganizers = (profilesData ?? [])
+    .filter((p) => p.can_create_leagues)
+    .map((p) => ({ id: p.id, displayName: p.display_name }));
+  const nonLeagueOrganizers = (profilesData ?? [])
+    .filter((p) => !p.can_create_leagues)
+    .map((p) => ({ id: p.id, displayName: p.display_name }));
 
   const communities: AdminCommunity[] = (communitiesData ?? []).map((c) => ({
     id: c.id,
@@ -94,6 +102,8 @@ export default async function AdminPage() {
       settings={settings}
       activeMembersThisMonth={activeThisMonth.size}
       totalMembers={allMembers.length}
+      leagueOrganizers={leagueOrganizers}
+      nonLeagueOrganizers={nonLeagueOrganizers}
     />
   );
 }
