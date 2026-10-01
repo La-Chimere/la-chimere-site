@@ -461,6 +461,7 @@ const fr: Record<string, string> = {
   "league.admin.divisions": "Divisions",
   "league.admin.description": "Description",
   "league.admin.descriptionPlaceholder": "Règlement de la ligue (clock, peinture, déroulement...) — visible par les participants.",
+  "league.admin.deadline": "Date limite pour saisir les résultats",
   "league.admin.noMatchesYet": "Aucun match généré pour l'instant.",
   "league.admin.roster": "Joueurs",
   "league.admin.addParticipant": "Ajouter un joueur…",
