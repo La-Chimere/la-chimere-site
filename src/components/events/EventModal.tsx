@@ -81,6 +81,7 @@ export function EventModal({ event, keyStatus, currentUserId, isAdmin, onClose, 
           optimisticParticipants.find((p) => p.profileId === event.leagueMatch!.playerBId)?.displayName ?? "?",
         scoreA: event.leagueMatch.scoreA,
         scoreB: event.leagueMatch.scoreB,
+        round: null,
         proofPath: event.leagueMatch.proofPath,
         proofUrl: event.leagueMatch.proofUrl,
       }

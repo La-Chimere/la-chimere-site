@@ -13,10 +13,12 @@ interface LeagueCreateFormProps {
   communityLabel: string;
 }
 
-const FORMATS: CreateLeagueInput["format"][] = ["poule", "libre"];
+const FORMATS: CreateLeagueInput["format"][] = ["poule", "libre", "suisse", "championnat"];
 const FORMAT_KEYS: Record<CreateLeagueInput["format"], string> = {
   poule: "league.format.poule",
   libre: "league.format.libre",
+  suisse: "league.format.suisse",
+  championnat: "league.format.championnat",
 };
 
 export function LeagueCreateForm({ communityId, communityLabel }: LeagueCreateFormProps) {

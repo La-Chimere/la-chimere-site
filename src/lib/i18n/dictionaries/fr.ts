@@ -396,10 +396,16 @@ const fr: Record<string, string> = {
   "league.status.closed": "Terminée",
   "league.format.poule": "Poule",
   "league.format.libre": "Libre",
+  "league.format.suisse": "Ronde suisse",
+  "league.format.championnat": "Championnat",
   "league.format.poule.description":
     "Chaque joueur affronte une fois chacun des autres joueurs de sa division — tous les matchs sont générés d'un coup.",
   "league.format.libre.description":
     "L'organisateur crée les matchs un par un, à tout moment, sans génération automatique.",
+  "league.format.suisse.description":
+    "Par rounds : le 1er round est aléatoire, les suivants apparient les joueurs de score proche en évitant les rematches. Classement à points, comme la poule.",
+  "league.format.championnat.description":
+    "Élimination directe par rounds : seuls les vainqueurs sont réappariés. Classement par stade d'élimination (podium), pas par points.",
   "league.manageButton": "Gérer la ligue",
   "league.viewButton": "Voir la ligue",
   "league.createButton": "Créer une ligue",
@@ -412,6 +418,7 @@ const fr: Record<string, string> = {
   "league.myArmy": "Mon armée",
   "league.armyPlaceholder": "Ex : Space Marines",
   "league.noParticipants": "Aucun participant pour l'instant.",
+  "league.standings.roundsSurvived": "tours",
   "league.matchResult.title": "Résultat du match",
   "league.matchResult.scorePlaceholder": "Score sur 100",
   "league.matchResult.proofLabel": "Capture de l'appli Warhammer 40,000 (preuve du score)",
@@ -425,6 +432,9 @@ const fr: Record<string, string> = {
   "league.error.matchesAlreadyGenerated": "Les matchs de cette division ont déjà été générés.",
   "league.error.notEnoughParticipants": "Il faut au moins deux participants dans la division.",
   "league.error.samePlayerTwice": "Les deux joueurs doivent être différents.",
+  "league.error.notRoundBased": "Ce format ne fonctionne pas par rounds.",
+  "league.error.roundIncomplete": "Le round en cours n'est pas terminé (un score manque).",
+  "league.error.championshipOver": "Il ne reste qu'un finaliste, impossible de générer un round supplémentaire.",
   "league.notif.assigned": "Tu as été inscrit en {division} ({league}).",
 
   "league.create.title": "Créer une ligue — {community}",
@@ -450,6 +460,10 @@ const fr: Record<string, string> = {
   "league.admin.addParticipant": "Ajouter un joueur…",
   "league.admin.matches": "Matchs",
   "league.admin.generateRoundRobin": "Générer les matchs (poule)",
+  "league.admin.generateNextRound": "Générer le round {n}",
+  "league.admin.roundLabel": "Round {n}",
+  "league.admin.oddParticipantsWarning":
+    "Nombre impair de joueurs : l'un d'eux ne jouera pas à chaque round.",
   "league.admin.selectPlayer": "Choisir un joueur",
   "league.admin.createMatch": "Créer le match",
   "league.admin.newDivisionPlaceholder": "Nom de la division (ex : Ligue 2)",

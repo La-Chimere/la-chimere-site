@@ -4,6 +4,21 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { notifyLeagueAssignment } from "@/lib/notify-league";
 import { serverT } from "@/lib/i18n/server";
+import type { LeagueFormat } from "@/lib/league-types";
+
+function oneOrFirst<T>(value: T | T[] | null): T | null {
+  if (Array.isArray(value)) return value[0] ?? null;
+  return value;
+}
+
+function shuffle<T>(items: T[]): T[] {
+  const result = [...items];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
 
 async function requireUserId() {
   const supabase = await createClient();
@@ -17,7 +32,7 @@ async function requireUserId() {
 export interface CreateLeagueInput {
   communityId: string;
   name: string;
-  format: "poule" | "libre";
+  format: LeagueFormat;
   pointsWin: number;
   pointsTie: number;
   pointsLoss: number;
@@ -159,6 +174,96 @@ export async function generateRoundRobin(divisionId: string) {
     }
   }
   await supabase.from("league_matches").insert(pairs);
+
+  revalidatePath("/communities");
+  return { error: null };
+}
+
+// Génère le round suivant pour les formats "suisse"/"championnat" — refuse
+// si le round en cours a encore un score manquant. Suisse : tout le monde
+// reste éligible à chaque round, apparié par score actuel en évitant les
+// rematches (replie sur un rematch si inévitable, improbable à cette
+// échelle) ; impair = un joueur ne joue pas ce round (pas de points perdus
+// ni gagnés). Championnat : seuls les vainqueurs (+ ceux qui ont eu un bye)
+// du round précédent sont réappariés ; impair = bye qualificatif direct.
+export async function generateNextRound(divisionId: string) {
+  const { supabase } = await requireUserId();
+
+  const [{ data: division }, { data: participantsData }, { data: matchesData }] = await Promise.all([
+    supabase.from("league_divisions").select("leagues(format)").eq("id", divisionId).single(),
+    supabase.from("league_participants").select("profile_id").eq("division_id", divisionId),
+    supabase
+      .from("league_matches")
+      .select("player_a_id, player_b_id, score_a, score_b, round")
+      .eq("division_id", divisionId),
+  ]);
+
+  const format = division ? oneOrFirst(division.leagues)?.format : null;
+  if (format !== "suisse" && format !== "championnat") {
+    return { error: await serverT("league.error.notRoundBased") };
+  }
+
+  const matches = matchesData ?? [];
+  const ids = (participantsData ?? []).map((p) => p.profile_id);
+  const currentRound = matches.reduce((max, m) => Math.max(max, m.round ?? 0), 0);
+  const currentRoundMatches = matches.filter((m) => (m.round ?? 0) === currentRound);
+  if (currentRound > 0 && currentRoundMatches.some((m) => m.score_a === null)) {
+    return { error: await serverT("league.error.roundIncomplete") };
+  }
+
+  let pool: string[];
+  if (format === "championnat" && currentRound > 0) {
+    const losers = new Set<string>();
+    for (const m of matches) {
+      if (m.score_a === null || m.score_b === null || m.score_a === m.score_b) continue;
+      losers.add(m.score_a > m.score_b ? m.player_b_id : m.player_a_id);
+    }
+    pool = ids.filter((id) => !losers.has(id));
+    if (pool.length <= 1) {
+      return { error: await serverT("league.error.championshipOver") };
+    }
+  } else {
+    pool = ids;
+  }
+
+  let order: string[];
+  if (currentRound === 0 || format === "championnat") {
+    order = shuffle(pool);
+  } else {
+    const points = new Map<string, number>(ids.map((id) => [id, 0]));
+    for (const m of matches) {
+      if (m.score_a === null || m.score_b === null) continue;
+      if (m.score_a > m.score_b) points.set(m.player_a_id, (points.get(m.player_a_id) ?? 0) + 1);
+      else if (m.score_b > m.score_a) points.set(m.player_b_id, (points.get(m.player_b_id) ?? 0) + 1);
+    }
+    order = [...pool].sort((a, b) => (points.get(b) ?? 0) - (points.get(a) ?? 0));
+  }
+
+  const playedPairs = new Set(matches.map((m) => [m.player_a_id, m.player_b_id].sort().join("|")));
+  const remaining = [...order];
+  const pairs: { player_a_id: string; player_b_id: string }[] = [];
+  while (remaining.length > 1) {
+    const a = remaining.shift()!;
+    let opponentIndex = remaining.findIndex((b) => !playedPairs.has([a, b].sort().join("|")));
+    if (opponentIndex === -1) opponentIndex = 0;
+    const b = remaining.splice(opponentIndex, 1)[0];
+    pairs.push({ player_a_id: a, player_b_id: b });
+  }
+  // Un éventuel dernier joueur seul dans `remaining` ne joue pas ce round
+  // (suisse) ou avance directement (championnat) — aucun match créé pour lui.
+
+  if (pairs.length === 0) {
+    return { error: await serverT("league.error.notEnoughParticipants") };
+  }
+
+  await supabase.from("league_matches").insert(
+    pairs.map((p) => ({
+      division_id: divisionId,
+      player_a_id: p.player_a_id,
+      player_b_id: p.player_b_id,
+      round: currentRound + 1,
+    })),
+  );
 
   revalidatePath("/communities");
   return { error: null };

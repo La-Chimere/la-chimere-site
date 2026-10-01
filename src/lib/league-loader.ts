@@ -13,6 +13,38 @@ function oneOrFirst<T>(value: T | T[] | null): T | null {
   return value;
 }
 
+// Classement "championnat" (élimination directe) : pas de points cumulés —
+// un joueur est éliminé au round où il perd son premier match ; plus il
+// tient longtemps (jamais éliminé = encore en lice), mieux il est classé.
+// Réutilise le "points" de LeagueStandingRow comme simple clé de tri (round
+// d'élimination, ou maxRound+1 si jamais éliminé = encore en lice/vainqueur),
+// wins/losses/scoreDiff restent ceux déjà calculés normalement.
+function computeBracketStandings(
+  participants: { profileId: string }[],
+  matches: LeagueMatch[],
+  standingsByProfileId: Map<string, LeagueStandingRow>,
+): LeagueStandingRow[] {
+  const maxRound = matches.reduce((max, m) => Math.max(max, m.round ?? 0), 0);
+  const eliminatedRound = new Map<string, number>();
+  for (const m of matches) {
+    if (m.scoreA === null || m.scoreB === null || m.scoreA === m.scoreB) continue;
+    const loserId = m.scoreA > m.scoreB ? m.playerBId : m.playerAId;
+    const round = m.round ?? 0;
+    const existing = eliminatedRound.get(loserId);
+    if (existing === undefined || round > existing) eliminatedRound.set(loserId, round);
+  }
+
+  for (const p of participants) {
+    const row = standingsByProfileId.get(p.profileId);
+    if (!row) continue;
+    row.points = eliminatedRound.get(p.profileId) ?? maxRound + 1;
+  }
+
+  return Array.from(standingsByProfileId.values()).sort(
+    (a, b) => b.points - a.points || b.scoreDiff - a.scoreDiff,
+  );
+}
+
 // Charge une ligue complète (divisions, participants, matchs, classement
 // calculé à la volée) — réutilisé par la vue publique/joueur et la vue
 // organisateur, qui ont toutes les deux besoin exactement des mêmes données.
@@ -32,7 +64,7 @@ export async function loadLeague(leagueId: string): Promise<League | null> {
       .select(
         `id, name, rank, rules,
         league_participants(id, profile_id, army, profiles(display_name, avatar_url)),
-        league_matches(id, player_a_id, player_b_id, score_a, score_b, proof_path)`,
+        league_matches(id, player_a_id, player_b_id, score_a, score_b, proof_path, round)`,
       )
       .eq("league_id", leagueId)
       .order("rank"),
@@ -68,6 +100,7 @@ export async function loadLeague(leagueId: string): Promise<League | null> {
       scoreB: m.score_b,
       proofPath: m.proof_path,
       proofUrl: null,
+      round: m.round,
     }));
 
     const standingsByProfileId = new Map<string, LeagueStandingRow>();
@@ -111,9 +144,16 @@ export async function loadLeague(leagueId: string): Promise<League | null> {
       }
     }
 
-    const standings = Array.from(standingsByProfileId.values()).sort(
-      (a, b) => b.points - a.points || b.scoreDiff - a.scoreDiff,
-    );
+    // Championnat (élimination directe) : le classement n'a rien à voir avec
+    // des points cumulés — un joueur est éliminé au round où il perd son
+    // premier match, et "tient" d'autant plus longtemps qu'il est placé
+    // haut (podium de bracket demandé explicitement, pas un barème à points).
+    const standings =
+      leagueRow.format === "championnat"
+        ? computeBracketStandings(participants, matches, standingsByProfileId)
+        : Array.from(standingsByProfileId.values()).sort(
+            (a, b) => b.points - a.points || b.scoreDiff - a.scoreDiff,
+          );
 
     return {
       id: d.id,

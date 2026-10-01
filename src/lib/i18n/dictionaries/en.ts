@@ -394,10 +394,16 @@ const en: Record<string, string> = {
   "league.status.closed": "Closed",
   "league.format.poule": "Round-robin",
   "league.format.libre": "Freeform",
+  "league.format.suisse": "Swiss",
+  "league.format.championnat": "Championship",
   "league.format.poule.description":
     "Every player faces each other player in their division once — all matches are generated at once.",
   "league.format.libre.description":
     "The organizer creates matches one by one, at any time, with no automatic generation.",
+  "league.format.suisse.description":
+    "By rounds: round 1 is random, later rounds pair players with similar scores while avoiding rematches. Points-based standings, like round-robin.",
+  "league.format.championnat.description":
+    "Single elimination by rounds: only winners get paired again. Standings by elimination stage (podium), not points.",
   "league.manageButton": "Manage league",
   "league.viewButton": "View league",
   "league.createButton": "Create a league",
@@ -410,6 +416,7 @@ const en: Record<string, string> = {
   "league.myArmy": "My army",
   "league.armyPlaceholder": "E.g. Space Marines",
   "league.noParticipants": "No participants yet.",
+  "league.standings.roundsSurvived": "rounds",
   "league.matchResult.title": "Match result",
   "league.matchResult.scorePlaceholder": "Score out of 100",
   "league.matchResult.proofLabel": "Warhammer 40,000 app screenshot (proof of score)",
@@ -423,6 +430,9 @@ const en: Record<string, string> = {
   "league.error.matchesAlreadyGenerated": "Matches for this division have already been generated.",
   "league.error.notEnoughParticipants": "The division needs at least two participants.",
   "league.error.samePlayerTwice": "The two players must be different.",
+  "league.error.notRoundBased": "This format doesn't work by rounds.",
+  "league.error.roundIncomplete": "The current round isn't finished yet (a score is missing).",
+  "league.error.championshipOver": "Only one finalist remains, no further round can be generated.",
   "league.notif.assigned": "You've been assigned to {division} ({league}).",
 
   "league.create.title": "Create a league — {community}",
@@ -448,6 +458,10 @@ const en: Record<string, string> = {
   "league.admin.addParticipant": "Add a player…",
   "league.admin.matches": "Matches",
   "league.admin.generateRoundRobin": "Generate matches (round-robin)",
+  "league.admin.generateNextRound": "Generate round {n}",
+  "league.admin.roundLabel": "Round {n}",
+  "league.admin.oddParticipantsWarning":
+    "Odd number of players: one of them will sit out each round.",
   "league.admin.selectPlayer": "Select a player",
   "league.admin.createMatch": "Create match",
   "league.admin.newDivisionPlaceholder": "Division name (e.g. League 2)",

@@ -142,7 +142,11 @@ export function LeagueClient({ league, communityId, currentUserId, isOrganizer }
             {division.standings.length === 0 ? (
               <p className="empty-hint">{t("league.noParticipants")}</p>
             ) : (
-              <LeagueStandingsTable rows={division.standings} highlightProfileId={currentUserId} />
+              <LeagueStandingsTable
+                rows={division.standings}
+                highlightProfileId={currentUserId}
+                pointsLabel={league.format === "championnat" ? t("league.standings.roundsSurvived") : undefined}
+              />
             )}
             {division.rules && <p className="field-note" style={{ marginTop: 12 }}>{division.rules}</p>}
             {division.participants.some((p) => p.army) && (

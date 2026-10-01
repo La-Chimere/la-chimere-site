@@ -15,6 +15,7 @@ import {
   deleteDivision,
   deleteLeague,
   deleteMatch,
+  generateNextRound,
   generateRoundRobin,
   removeParticipant,
   setLeagueStatus,
@@ -231,31 +232,54 @@ export function LeagueAdminClient({ league, communityId, communityMembers }: Lea
               placeholder={t("league.admin.addParticipant")}
               hideSelectedChips
             />
+            {(league.format === "suisse" || league.format === "championnat") &&
+              division.participants.length % 2 === 1 && (
+                <p className="field-note">{t("league.admin.oddParticipantsWarning")}</p>
+              )}
 
             <div className="modal-section-label" style={{ marginTop: 14 }}>
               {t("league.admin.matches")}
             </div>
-            {league.format === "poule" ? (
-              division.matches.length === 0 ? (
-                <button
-                  type="button"
-                  className="af-add-option"
-                  onClick={() =>
-                    startTransition(() => {
-                      generateRoundRobin(division.id);
-                    })
-                  }
-                >
-                  + {t("league.admin.generateRoundRobin")}
-                </button>
-              ) : null
-            ) : (
+            {league.format === "poule" && division.matches.length === 0 && (
+              <button
+                type="button"
+                className="af-add-option"
+                onClick={() =>
+                  startTransition(() => {
+                    generateRoundRobin(division.id);
+                  })
+                }
+              >
+                + {t("league.admin.generateRoundRobin")}
+              </button>
+            )}
+            {league.format === "libre" && (
               <ManualMatchForm divisionId={division.id} members={divisionMembers} />
             )}
+            {(league.format === "suisse" || league.format === "championnat") &&
+              (() => {
+                const currentRound = division.matches.reduce((max, m) => Math.max(max, m.round ?? 0), 0);
+                const roundComplete =
+                  currentRound === 0 ||
+                  division.matches
+                    .filter((m) => (m.round ?? 0) === currentRound)
+                    .every((m) => m.scoreA !== null);
+                return (
+                  <button
+                    type="button"
+                    className="af-add-option"
+                    disabled={!roundComplete}
+                    onClick={() => startTransition(() => { generateNextRound(division.id); })}
+                  >
+                    + {t("league.admin.generateNextRound", { n: currentRound + 1 })}
+                  </button>
+                );
+              })()}
             {division.matches.map((m) => (
               <div className="admin-row" key={m.id}>
                 <span className="name">
                   {m.playerADisplayName} vs {m.playerBDisplayName}
+                  {m.round !== null && <span className="sub">{t("league.admin.roundLabel", { n: m.round })}</span>}
                   {m.scoreA !== null && (
                     <span className="sub">
                       {m.scoreA} – {m.scoreB}
