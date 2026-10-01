@@ -26,6 +26,41 @@ export async function requireAdmin() {
   };
 }
 
+// Admin OU organisateur désigné de cette ligue précise (table
+// league_organizers) — un responsable de ligue n'est pas nécessairement
+// admin. Utilisé uniquement là où une action doit passer par le client
+// service_role (ex. publier une annonce, cf. announcements-actions.ts) ;
+// la plupart des actions de ligue s'appuient directement sur les policies
+// RLS (voir league-actions.ts et migration 0013).
+export async function requireLeagueOrganizer(leagueId: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non connecté.");
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("is_admin")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile?.is_admin) {
+    const { data: organizer } = await supabase
+      .from("league_organizers")
+      .select("profile_id")
+      .eq("league_id", leagueId)
+      .eq("profile_id", user.id)
+      .maybeSingle();
+    if (!organizer) throw new Error("Réservé à l'organisateur de cette ligue.");
+  }
+
+  return {
+    userId: user.id,
+    admin: createAdminClient(),
+  };
+}
+
 // Indépendant de requireAdmin() : le super-administrateur garde ce rôle même
 // quand is_admin est désactivé sur son propre compte (utile pour tester
 // l'expérience "membre normal" tout en gardant la capacité de repasser admin).

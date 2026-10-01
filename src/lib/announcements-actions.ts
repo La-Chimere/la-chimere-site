@@ -2,9 +2,17 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { requireAdmin } from "@/lib/admin-guard";
+import { requireAdmin, requireLeagueOrganizer } from "@/lib/admin-guard";
 import type { createAdminClient } from "@/lib/supabase/admin";
 import { serverT } from "@/lib/i18n/server";
+
+// Publier une annonce ciblée sur une ligue est ouvert à son organisateur (pas
+// forcément admin) ; sans ciblage de ligue, on reste sur la règle habituelle
+// réservée aux admins.
+async function requireAnnouncementPublisher(targetLeagueId: string | null) {
+  if (targetLeagueId) return requireLeagueOrganizer(targetLeagueId);
+  return requireAdmin();
+}
 
 async function requireUser() {
   const supabase = await createClient();
@@ -19,6 +27,7 @@ export interface AnnouncementInput {
   title: string;
   description: string;
   targetCommunityId: string | null;
+  targetLeagueId: string | null;
   announcementDate: string;
   banner: boolean;
   bannerText: string;
@@ -59,14 +68,15 @@ async function replacePoll(admin: ReturnType<typeof createAdminClient>, announce
 }
 
 export async function createAnnouncement(input: AnnouncementInput) {
-  const { admin, userId } = await requireAdmin();
+  const { admin, userId } = await requireAnnouncementPublisher(input.targetLeagueId);
 
   const { data: announcement, error } = await admin
     .from("announcements")
     .insert({
       title: input.title,
       description: input.description,
-      target_community_id: input.targetCommunityId,
+      target_community_id: input.targetLeagueId ? null : input.targetCommunityId,
+      target_league_id: input.targetLeagueId,
       announcement_date: input.announcementDate,
       banner: input.banner,
       banner_text: input.banner ? input.bannerText : null,
@@ -91,14 +101,15 @@ export async function createAnnouncement(input: AnnouncementInput) {
 }
 
 export async function updateAnnouncement(id: string, input: AnnouncementInput) {
-  const { admin } = await requireAdmin();
+  const { admin } = await requireAnnouncementPublisher(input.targetLeagueId);
 
   const { error } = await admin
     .from("announcements")
     .update({
       title: input.title,
       description: input.description,
-      target_community_id: input.targetCommunityId,
+      target_community_id: input.targetLeagueId ? null : input.targetCommunityId,
+      target_league_id: input.targetLeagueId,
       announcement_date: input.announcementDate,
       banner: input.banner,
       banner_text: input.banner ? input.bannerText : null,
@@ -119,7 +130,13 @@ export async function updateAnnouncement(id: string, input: AnnouncementInput) {
 }
 
 export async function deleteAnnouncement(id: string) {
-  const { admin } = await requireAdmin();
+  const { supabase } = await requireUser();
+  const { data: existing } = await supabase
+    .from("announcements")
+    .select("target_league_id")
+    .eq("id", id)
+    .single();
+  const { admin } = await requireAnnouncementPublisher(existing?.target_league_id ?? null);
   await admin.from("announcements").delete().eq("id", id);
   revalidatePath("/announcements");
 }

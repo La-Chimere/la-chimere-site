@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { CommunitiesClient } from "@/components/communities/CommunitiesClient";
+import { loadCommunityLeagueSummaries } from "@/lib/league-loader";
 import type { CommunityOption, EventItem } from "@/lib/events-types";
 import type { CommunityMember, ParticipationRecord } from "@/lib/community-types";
 
@@ -22,7 +23,7 @@ export default async function CommunitiesPage() {
     { data: profilesData },
     { data: eventsData },
   ] = await Promise.all([
-    supabase.from("profiles").select("is_admin").eq("id", user.id).single(),
+    supabase.from("profiles").select("is_admin, can_create_leagues").eq("id", user.id).single(),
     supabase.from("communities").select("id, key, label, competitive").eq("hidden", false).order("label"),
     supabase
       .from("profiles")
@@ -97,6 +98,9 @@ export default async function CommunitiesPage() {
     })),
   );
 
+  const isAdmin = myProfile?.is_admin ?? false;
+  const leagueSummaries = await loadCommunityLeagueSummaries(user.id, isAdmin);
+
   return (
     <CommunitiesClient
       communities={communities}
@@ -104,7 +108,9 @@ export default async function CommunitiesPage() {
       events={events}
       participations={participations}
       currentUserId={user.id}
-      isAdmin={myProfile?.is_admin ?? false}
+      isAdmin={isAdmin}
+      canCreateLeagues={isAdmin || (myProfile?.can_create_leagues ?? false)}
+      leagueSummaries={leagueSummaries}
     />
   );
 }

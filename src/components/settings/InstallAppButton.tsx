@@ -24,6 +24,9 @@ export function InstallAppButton() {
     const standalone =
       window.matchMedia("(display-mode: standalone)").matches ||
       (window.navigator as unknown as { standalone?: boolean }).standalone === true;
+    // Lecture d'API navigateur au montage, pas disponible côté serveur — ne
+    // peut pas être fait dans un initialiseur de useState (SSR).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setInstalled(standalone);
     setIsIos(/iphone|ipad|ipod/i.test(window.navigator.userAgent));
 

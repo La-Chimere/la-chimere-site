@@ -18,6 +18,7 @@ export default async function AnnouncementsPage() {
   const [
     { data: profile },
     { data: myCommunities },
+    { data: myLeagueParticipations },
     { data: communitiesData },
     { data: announcementsData },
     { data: readsData },
@@ -25,12 +26,14 @@ export default async function AnnouncementsPage() {
   ] = await Promise.all([
     supabase.from("profiles").select("is_admin").eq("id", user.id).single(),
     supabase.from("profile_communities").select("community_id").eq("profile_id", user.id),
+    supabase.from("league_participants").select("league_divisions(league_id)").eq("profile_id", user.id),
     supabase.from("communities").select("id, key, label, competitive").eq("hidden", false).order("label"),
     supabase
       .from("announcements")
       .select(
-        `id, title, description, target_community_id, announcement_date, banner, banner_text, created_by,
+        `id, title, description, target_community_id, target_league_id, announcement_date, banner, banner_text, created_by,
         communities(label),
+        leagues(name),
         polls(id, question, type,
           poll_options(id, label),
           poll_votes(profile_id, option_id, rating))`,
@@ -46,6 +49,11 @@ export default async function AnnouncementsPage() {
 
   const isAdmin = profile?.is_admin ?? false;
   const myCommunityIds = new Set((myCommunities ?? []).map((c) => c.community_id));
+  const myLeagueIds = new Set(
+    (myLeagueParticipations ?? [])
+      .map((p) => oneOrFirst(p.league_divisions)?.league_id)
+      .filter((id): id is string => !!id),
+  );
   const seenIds = new Set((readsData ?? []).map((r) => r.announcement_id));
 
   const communities: CommunityOption[] = (communitiesData ?? []).map((c) => ({
@@ -57,6 +65,7 @@ export default async function AnnouncementsPage() {
 
   const allAnnouncements: Announcement[] = (announcementsData ?? []).map((a) => {
     const communityLink = oneOrFirst(a.communities);
+    const leagueLink = oneOrFirst(a.leagues);
     const pollRow = oneOrFirst(a.polls);
 
     let poll: Poll | null = null;
@@ -88,6 +97,8 @@ export default async function AnnouncementsPage() {
       description: a.description,
       targetCommunityId: a.target_community_id,
       targetCommunityLabel: communityLink?.label ?? null,
+      targetLeagueId: a.target_league_id,
+      targetLeagueLabel: leagueLink?.name ?? null,
       announcementDate: a.announcement_date,
       banner: a.banner,
       bannerText: a.banner_text,
@@ -99,9 +110,10 @@ export default async function AnnouncementsPage() {
 
   const visibleAnnouncements = isAdmin
     ? allAnnouncements
-    : allAnnouncements.filter(
-        (a) => !a.targetCommunityId || myCommunityIds.has(a.targetCommunityId),
-      );
+    : allAnnouncements.filter((a) => {
+        if (a.targetLeagueId) return myLeagueIds.has(a.targetLeagueId);
+        return !a.targetCommunityId || myCommunityIds.has(a.targetCommunityId);
+      });
 
   const notifications: NotificationItem[] = (notificationsData ?? []).map((n) => ({
     id: n.id,

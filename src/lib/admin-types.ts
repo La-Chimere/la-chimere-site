@@ -5,6 +5,7 @@ export interface AdminMember {
   status: "pending" | "active";
   hasKey: boolean;
   hasExitKey: boolean;
+  canCreateLeagues: boolean;
   lastActivity: string | null;
 }
 

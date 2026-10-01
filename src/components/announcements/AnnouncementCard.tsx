@@ -30,7 +30,11 @@ export function AnnouncementCard({ announcement: a, isAdmin, onEdit }: Announcem
         <div className="t">
           {a.banner && <span className="ann-alert-icon">🔊</span>}
           {a.title}
-          {a.targetCommunityLabel && <span className="audience-badge">{a.targetCommunityLabel}</span>}
+          {a.targetLeagueLabel ? (
+            <span className="audience-badge">{a.targetLeagueLabel}</span>
+          ) : (
+            a.targetCommunityLabel && <span className="audience-badge">{a.targetCommunityLabel}</span>
+          )}
         </div>
         <div className="d2">{a.description}</div>
         {a.poll && (

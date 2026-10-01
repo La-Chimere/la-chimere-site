@@ -120,6 +120,11 @@ export function AnnouncementsClient({
         onClose={() => setFormOpen(false)}
         communities={communities}
         editing={editing}
+        fixedLeagueTarget={
+          editing?.targetLeagueId && editing.targetLeagueLabel
+            ? { id: editing.targetLeagueId, label: editing.targetLeagueLabel }
+            : undefined
+        }
       />
     </div>
   );

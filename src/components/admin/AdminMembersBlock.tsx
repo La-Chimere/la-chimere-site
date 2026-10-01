@@ -3,7 +3,7 @@
 import { useMemo, useState, useTransition } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { ToggleSwitch } from "@/components/ui/ToggleSwitch";
-import { deleteMember, setSignupValidationRequired, validateMember } from "@/lib/admin-actions";
+import { deleteMember, setLeagueCreatorRole, setSignupValidationRequired, validateMember } from "@/lib/admin-actions";
 import { relativeActivityDays } from "@/lib/dates";
 import { formatActivity } from "@/lib/i18n/format";
 import { useT } from "@/components/i18n/LocaleProvider";
@@ -107,6 +107,11 @@ export function AdminMembersBlock({
                       <CheckIcon />
                     </button>
                   )}
+                  <ToggleSwitch
+                    on={m.canCreateLeagues}
+                    onChange={(value) => startTransition(() => setLeagueCreatorRole(m.profileId, value))}
+                    label={t("admin.members.canCreateLeagues")}
+                  />
                   <button type="button" className="join-btn danger small" onClick={() => setToDelete(m)}>
                     {t("common.delete")}
                   </button>

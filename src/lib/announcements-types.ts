@@ -23,6 +23,8 @@ export interface Announcement {
   description: string;
   targetCommunityId: string | null;
   targetCommunityLabel: string | null;
+  targetLeagueId: string | null;
+  targetLeagueLabel: string | null;
   announcementDate: string;
   banner: boolean;
   bannerText: string | null;

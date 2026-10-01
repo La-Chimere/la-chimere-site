@@ -12,6 +12,7 @@ import { joinCommunity } from "@/lib/profile-actions";
 import { useT } from "@/components/i18n/LocaleProvider";
 import type { CommunityOption, EventItem } from "@/lib/events-types";
 import type { CommunityMember, ParticipationRecord } from "@/lib/community-types";
+import type { CommunityLeagueSummary } from "@/lib/league-types";
 
 interface CommunitiesClientProps {
   communities: CommunityOption[];
@@ -20,6 +21,8 @@ interface CommunitiesClientProps {
   participations: ParticipationRecord[];
   currentUserId: string;
   isAdmin: boolean;
+  canCreateLeagues: boolean;
+  leagueSummaries: Record<string, CommunityLeagueSummary>;
 }
 
 const PAGE_SIZE = 10;
@@ -35,6 +38,8 @@ export function CommunitiesClient({
   participations,
   currentUserId,
   isAdmin,
+  canCreateLeagues,
+  leagueSummaries,
 }: CommunitiesClientProps) {
   const { t, locale } = useT();
   const [selected, setSelected] = useState<string[]>([]);
@@ -68,6 +73,8 @@ export function CommunitiesClient({
   }, [realEvents, selected, showPast, today]);
 
   useEffect(() => {
+    // Réinitialise la pagination à chaque changement de filtre.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage(0);
   }, [selected, showPast]);
 
@@ -134,6 +141,58 @@ export function CommunitiesClient({
           </Chip>
         ))}
       </div>
+
+      {singleSelectedId && leagueSummaries[singleSelectedId] && (
+        <div className="section-card">
+          {(() => {
+            const summary = leagueSummaries[singleSelectedId];
+            return (
+              <>
+                <h2 className="section-subtitle">{summary.leagueName}</h2>
+                {summary.isOrganizer ? (
+                  <>
+                    <div className="form-label">{t("league.admin.completion", { pct: summary.completionPct })}</div>
+                    <div className="league-progress-track">
+                      <div className="league-progress-fill" style={{ width: `${summary.completionPct}%` }} />
+                    </div>
+                    <p className="field-note" style={{ marginTop: 8 }}>
+                      {t("league.widget.matchesToPlay", { n: summary.pendingMatches })}
+                    </p>
+                  </>
+                ) : summary.isParticipant ? (
+                  <>
+                    <p className="field-note">{t("league.widget.myMatchesToPlay", { n: summary.myPendingMatches })}</p>
+                    {summary.myRecord && (
+                      <div className="lb-wdl" style={{ margin: "6px 0" }}>
+                        <span className="w">{summary.myRecord.wins}</span>
+                        <span className="sep">/</span>
+                        <span className="d">{summary.myRecord.ties}</span>
+                        <span className="sep">/</span>
+                        <span className="lo">{summary.myRecord.losses}</span>
+                      </div>
+                    )}
+                  </>
+                ) : null}
+                <Link href={`/communities/${singleSelectedId}/leagues/${summary.leagueId}${summary.isOrganizer ? "/admin" : ""}`}>
+                  <Button variant="outline" full style={{ marginTop: 10 }}>
+                    {summary.isOrganizer ? t("league.manageButton") : t("league.viewButton")}
+                  </Button>
+                </Link>
+              </>
+            );
+          })()}
+        </div>
+      )}
+
+      {singleSelectedId && !leagueSummaries[singleSelectedId] && canCreateLeagues && (
+        <div className="section-card">
+          <Link href={`/communities/${singleSelectedId}/leagues/new`}>
+            <Button variant="outline" full>
+              {t("league.createButton")}
+            </Button>
+          </Link>
+        </div>
+      )}
 
       <div className="section-card">
         <h2 className="section-subtitle">

@@ -144,3 +144,13 @@ export async function setAdminRole(profileId: string, isAdmin: boolean) {
   revalidatePath("/admin");
   revalidatePath("/settings");
 }
+
+// Grant/revoke le droit de créer des ligues — un admin simple suffit (droit
+// moins sensible que is_admin, un responsable de ligue n'est pas forcément
+// du comité). Le membre devient ensuite automatiquement organisateur de
+// toute ligue qu'il crée (voir league-actions.ts).
+export async function setLeagueCreatorRole(profileId: string, canCreateLeagues: boolean) {
+  const { admin } = await requireAdmin();
+  await admin.from("profiles").update({ can_create_leagues: canCreateLeagues }).eq("id", profileId);
+  revalidatePath("/admin");
+}

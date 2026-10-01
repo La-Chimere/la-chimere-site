@@ -20,6 +20,9 @@ interface AnnouncementFormProps {
   onClose: () => void;
   communities: CommunityOption[];
   editing: Announcement | null;
+  /** Ciblage fixe et non modifiable (ex. depuis la page d'une ligue) : le
+   * sélecteur "Pour" (communauté) est remplacé par un badge en lecture seule. */
+  fixedLeagueTarget?: { id: string; label: string };
 }
 
 const POLL_TYPE_KEYS: Record<PollType, string> = {
@@ -28,7 +31,13 @@ const POLL_TYPE_KEYS: Record<PollType, string> = {
   rating: "announcementForm.pollType.rating",
 };
 
-export function AnnouncementForm({ open, onClose, communities, editing }: AnnouncementFormProps) {
+export function AnnouncementForm({
+  open,
+  onClose,
+  communities,
+  editing,
+  fixedLeagueTarget,
+}: AnnouncementFormProps) {
   const { t } = useT();
   const [pending, startTransition] = useTransition();
   const [title, setTitle] = useState(editing?.title ?? "");
@@ -67,6 +76,7 @@ export function AnnouncementForm({ open, onClose, communities, editing }: Announ
       title: title.trim(),
       description: description.trim(),
       targetCommunityId,
+      targetLeagueId: fixedLeagueTarget?.id ?? null,
       announcementDate: date,
       banner,
       bannerText: bannerText.trim(),
@@ -121,20 +131,24 @@ export function AnnouncementForm({ open, onClose, communities, editing }: Announ
 
       <div className="form-field">
         <label className="form-label">{t("announcementForm.for")}</label>
-        <div className="filters h-scroll">
-          <Chip active={!targetCommunityId} onClick={() => setTargetCommunityId(null)}>
-            {t("common.all")}
-          </Chip>
-          {communities.map((c) => (
-            <Chip
-              key={c.id}
-              active={targetCommunityId === c.id}
-              onClick={() => setTargetCommunityId(c.id)}
-            >
-              {c.label}
+        {fixedLeagueTarget ? (
+          <span className="audience-badge">{fixedLeagueTarget.label}</span>
+        ) : (
+          <div className="filters h-scroll">
+            <Chip active={!targetCommunityId} onClick={() => setTargetCommunityId(null)}>
+              {t("common.all")}
             </Chip>
-          ))}
-        </div>
+            {communities.map((c) => (
+              <Chip
+                key={c.id}
+                active={targetCommunityId === c.id}
+                onClick={() => setTargetCommunityId(c.id)}
+              >
+                {c.label}
+              </Chip>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="form-field">

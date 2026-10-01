@@ -41,7 +41,7 @@ export default async function AdminPage() {
     // lui-même, seul le bloc Membres l'exclut de sa propre liste (CDC 12.9).
     supabase
       .from("profiles")
-      .select("id, display_name, avatar_url, status, has_key, has_exit_key")
+      .select("id, display_name, avatar_url, status, has_key, has_exit_key, can_create_leagues")
       .order("display_name"),
     supabase.from("communities").select("id, key, label, hidden, competitive").order("label"),
     supabase.from("event_participants").select("profile_id, events(event_date)"),
@@ -66,6 +66,7 @@ export default async function AdminPage() {
     status: p.status as AdminMember["status"],
     hasKey: p.has_key,
     hasExitKey: p.has_exit_key,
+    canCreateLeagues: p.can_create_leagues,
     lastActivity: lastActivityByProfile.get(p.id) ?? null,
   }));
   const membersExcludingSelf = allMembers.filter((m) => m.profileId !== user.id);
